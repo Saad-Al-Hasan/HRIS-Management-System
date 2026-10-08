@@ -30,6 +30,14 @@ class AuthController extends Controller
 
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
+        $csrfToken = $_POST['csrf_token'] ?? '';
+
+        if (!Auth::verifyCsrfToken($csrfToken)) {
+            $this->view('auth/login', [
+                'error' => 'Invalid security token. Please try again.'
+            ]);
+            return;
+        }
 
         if ($username === '' || $password === '') {
             $this->view('auth/login', [
@@ -68,12 +76,21 @@ class AuthController extends Controller
 
     public function dashboard(): void
     {
-        Auth::startSession();
+        Middleware::requireLogin();
 
-        if (!Auth::check()) {
-            $this->redirect('/HRIS-Management-System/public/index.php');
+        $roleId = Auth::roleId();
+
+        if ($roleId === 1) {
+            $this->view('admin/dashboard');
+            return;
         }
 
-        $this->view('admin/dashboard');
+        if ($roleId === 2) {
+            $this->view('employee/dashboard');
+            return;
+        }
+
+        http_response_code(403);
+        die('403 - Access Denied');
     }
 }

@@ -1,5 +1,10 @@
+<?php
+require_once __DIR__ . '/../../core/Auth.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -71,43 +76,36 @@
 
 <body>
 
-<div class="login-container">
+    <div class="login-container">
 
-    <h1>HRIS Management System</h1>
+        <h1>HRIS Management System</h1>
 
-    <?php if (!empty($error)): ?>
-        <div class="error">
-            <?= htmlspecialchars($error) ?>
-        </div>
-    <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div class="error">
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-    <form method="POST" action="index.php?action=login">
+        <form method="POST" action="index.php?action=login">
 
-        <label for="username">Username</label>
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
 
-        <input
-            type="text"
-            id="username"
-            name="username"
-            required
-        >
+            <label for="username">Username</label>
 
-        <label for="password">Password</label>
+            <input type="text" id="username" name="username" required>
 
-        <input
-            type="password"
-            id="password"
-            name="password"
-            required
-        >
+            <label for="password">Password</label>
 
-        <button type="submit">
-            Login
-        </button>
+            <input type="password" id="password" name="password" required>
 
-    </form>
+            <button type="submit">
+                Login
+            </button>
 
-</div>
+        </form>
+
+    </div>
 
 </body>
+
 </html>
