@@ -10,11 +10,13 @@ require_once __DIR__ . '/../app/core/Middleware.php';
 
 require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/AdminController.php';
 
 
 $action = $_GET['action'] ?? 'login';
 
 $authController = new AuthController();
+$adminController = new AdminController();
 
 
 switch ($action) {
@@ -48,6 +50,61 @@ switch ($action) {
 
         break;
 
+
+
+    /*
+|--------------------------------------------------------------------------
+| Administrator Account & Profile
+|--------------------------------------------------------------------------
+*/
+
+    case 'administrators':
+
+        $adminController->index();
+
+        break;
+
+
+    case 'administrator-create':
+
+        $adminController->create();
+
+        break;
+
+
+    case 'administrator-store':
+
+        $adminController->store();
+
+        break;
+
+
+    case 'administrator-edit':
+
+        $adminController->edit();
+
+        break;
+
+
+    case 'administrator-update':
+
+        $adminController->update();
+
+        break;
+
+
+    case 'profile':
+
+        $adminController->profile();
+
+        break;
+
+
+    case 'profile-update':
+
+        $adminController->updateProfile();
+
+        break;
 
     default:
 
