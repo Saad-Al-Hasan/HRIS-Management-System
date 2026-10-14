@@ -1,43 +1,55 @@
+
 <?php
 
 require_once __DIR__ . '/../../core/Auth.php';
 
 Auth::startSession();
 
+$pageTitle = 'Employee Dashboard';
+
+require_once __DIR__ . '/../admin/layouts/header.php';
+require_once __DIR__ . '/layouts/sidebar.php';
+
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<div class="admin-main">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php require_once __DIR__ . '/../admin/layouts/navbar.php'; ?>
 
-    <title>Employee Dashboard - HRIS</title>
-</head>
+    <main class="admin-content">
 
-<body>
+        <div class="content-header">
+            <div>
+                <h1>
+                    Welcome back,
+                    <?= htmlspecialchars(Auth::fullName() ?? 'Employee') ?>!
+                </h1>
 
-    <h1>HRIS Management System</h1>
+                <p>
+                    Welcome to your MYOL HRIS employee dashboard.
+                </p>
+            </div>
+        </div>
 
-    <h2>Employee Dashboard</h2>
+        <div class="content-card">
 
-    <p>
-        Welcome,
-        <strong>
-            <?= htmlspecialchars($_SESSION['full_name'] ?? 'Employee') ?>
-        </strong>
-    </p>
+            <div class="card-header">
+                <div>
+                    <h2>Employee Dashboard</h2>
+                    <p>
+                        Access your personal information and HR-related details.
+                    </p>
+                </div>
+            </div>
 
-    <p>
-        Username:
-        <?= htmlspecialchars($_SESSION['username'] ?? '') ?>
-    </p>
+        </div>
 
-    <a href="index.php?action=logout">
-        Logout
-    </a>
+    </main>
 
-</body>
+</div>
 
-</html>
+<?php
+
+require_once __DIR__ . '/../admin/layouts/footer.php';
+
+?>
