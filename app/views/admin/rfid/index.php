@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
 
-        <section class="content-card">
+        <section class="content-card rfid-registration-card">
 
             <div class="card-header">
                 <div>
@@ -61,7 +61,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <?= htmlspecialchars(
                                     ($employee['employee_code'] ?? '') .
                                     ' - ' .
-                                    ($employee['full_name'] ?? 'Employee')
+                                    ($employee['username'] ?? 'Employee')
                                 ) ?>
                             </option>
                         <?php endforeach; ?>

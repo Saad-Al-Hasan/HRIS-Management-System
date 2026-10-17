@@ -305,17 +305,14 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
                 <div class="rfid-status">
 
-                    <div class="rfid-status-indicator">
-                    </div>
+                    <div class="rfid-status-indicator" id="rfid-status-indicator"></div>
 
                     <div>
 
-                        <strong>
-                            Not Connected
-                        </strong>
+                        <strong id="rfid-connection-text">Checking connection...</strong>
 
-                        <p>
-                            RFID reader status will appear here.
+                        <p id="rfid-connection-description">
+                            Checking JT308 USB reader status.
                         </p>
 
                     </div>
