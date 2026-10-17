@@ -2668,3 +2668,41 @@ table {
         animation: none;
     }
 }
+
+
+/* =========================================
+   RFID REGISTRATION — CARD SPACING
+   ========================================= */
+
+.rfid-registration-card {
+    padding: 0 22px 22px;
+}
+
+.rfid-registration-card > .card-header {
+    margin: 0 -22px 22px;
+}
+
+.rfid-registration-card .form-group {
+    margin-bottom: 22px;
+}
+
+.rfid-registration-card .form-actions {
+    margin: 24px -22px 0;
+    padding: 20px 22px 0;
+}
+
+
+/* Live RFID reader connection status */
+.rfid-status-indicator {
+    background: var(--myol-red);
+    transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rfid-status-indicator.connected {
+    background: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+}
+
+.rfid-status:has(.rfid-status-indicator.connected) strong {
+    color: #4ade80;
+}

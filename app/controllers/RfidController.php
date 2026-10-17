@@ -26,7 +26,7 @@ class RfidController extends Controller
         Middleware::requireAdmin();
 
         $this->view('admin/rfid/index', [
-            'employees' => $this->employeeModel->getAll(),
+            'employees' => $this->getEmployeesSortedByCode(),
             'error' => $_SESSION['rfid_error'] ?? null,
             'success' => $_SESSION['rfid_success'] ?? null,
         ]);
@@ -97,5 +97,19 @@ class RfidController extends Controller
         $this->redirect(
             '/HRIS-Management-System/public/index.php?action=rfid'
         );
+    }
+
+    private function getEmployeesSortedByCode(): array
+    {
+        $employees = $this->employeeModel->getAll();
+
+        usort($employees, function (array $a, array $b): int {
+            return strnatcasecmp(
+                $a['employee_code'] ?? '',
+                $b['employee_code'] ?? ''
+            );
+        });
+
+        return $employees;
     }
 }
