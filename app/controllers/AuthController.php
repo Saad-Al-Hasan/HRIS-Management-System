@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Employee.php';
 
 class AuthController extends Controller
 {
@@ -81,12 +82,28 @@ class AuthController extends Controller
         $roleId = Auth::roleId();
 
         if ($roleId === 1) {
-            $this->view('admin/dashboard');
+            $employeeModel = new Employee();
+            $totalEmployees = count($employeeModel->getAll());
+
+            $this->view('admin/dashboard', [
+                'totalEmployees' => $totalEmployees,
+            ]);
+
             return;
         }
 
         if ($roleId === 2) {
-            $this->view('employee/dashboard');
+            $userId = Auth::userId();
+
+            $employeeModel = new Employee();
+            $employee = $userId !== null
+                ? $employeeModel->findByUserId($userId)
+                : null;
+
+            $this->view('employee/dashboard', [
+                'employee' => $employee,
+            ]);
+
             return;
         }
 
