@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HRIS — RFID Hardware Test</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 720px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f4f6f9;
+            color: #222;
+        }
+
+        .panel {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 24px;
+        }
+
+        input {
+            box-sizing: border-box;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            font-size: 18px;
+        }
+
+        #status {
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        li {
+            padding: 6px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="panel">
+        <h1>RFID Hardware Test</h1>
+        <p>Connect the JT308 reader and scan an EM4100 card.</p>
+
+        <label for="rfid-input">Scan RFID card</label>
+        <input
+            type="text"
+            id="rfid-input"
+            autocomplete="off"
+            autofocus
+            placeholder="Click here, then scan"
+        >
+
+        <p id="status" role="status" aria-live="polite">
+            Waiting for a scan.
+        </p>
+
+        <h2>Scan History</h2>
+        <ol id="history">
+            <li>No scans yet.</li>
+        </ol>
+    </div>
+
+    <script src="assets/js/rfid-input-adapter.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('rfid-input');
+            const status = document.getElementById('status');
+            const history = document.getElementById('history');
+            let scanCount = 0;
+
+            if (typeof RfidInputAdapter === 'undefined') {
+                status.textContent = 'ERROR: RFID Adapter failed to load.';
+                return;
+            }
+
+            const adapter = new RfidInputAdapter(input, function (identifier) {
+                scanCount++;
+
+                if (scanCount === 1) {
+                    history.innerHTML = '';
+                }
+
+                const item = document.createElement('li');
+                item.textContent = identifier;
+                history.prepend(item);
+
+                status.textContent =
+                    'Scan ' + scanCount + ' received: ' + identifier;
+
+                input.focus();
+            });
+
+            adapter.connect();
+            input.focus();
+        });
+    </script>
+</body>
+</html>

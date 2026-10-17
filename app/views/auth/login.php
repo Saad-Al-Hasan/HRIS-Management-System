@@ -14,6 +14,14 @@ require_once __DIR__ . '/../../core/Auth.php';
     <title>Login - MYOL HRIS</title>
 
     <style>
+        @font-face {
+            font-family: 'Andika';
+            src: url('/HRIS-Management-System/public/assets/fonts/Andika-Regular.ttf') format('truetype');
+            font-weight: 400;
+            font-style: normal;
+            font-display: swap;
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -26,7 +34,7 @@ require_once __DIR__ . '/../../core/Auth.php';
 
         body {
             min-height: 100vh;
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: 'Andika', sans-serif;
             background:
                 radial-gradient(circle at 15% 20%,
                     rgba(224, 0, 0, 0.12),
@@ -712,6 +720,60 @@ require_once __DIR__ . '/../../core/Auth.php';
                 0 0 18px rgba(224, 0, 0, 0.08);
         }
 
+        /* Password field with visibility toggle */
+        .password-input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .password-input-wrapper input {
+            width: 100%;
+            padding-right: 46px;
+        }
+
+        .password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 12px;
+            transform: translateY(-50%);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            width: 26px;
+            height: 26px;
+            padding: 3px;
+
+            border: none;
+            border-radius: 5px;
+            background: transparent;
+            color: #858c92;
+
+            cursor: pointer;
+            transition: color 0.2s ease, background 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #ff4040;
+            background: rgba(224, 0, 0, 0.1);
+        }
+
+        .password-toggle:focus-visible {
+            outline: 1px solid #ff3030;
+            outline-offset: 2px;
+        }
+
+        .password-toggle svg {
+            width: 19px;
+            height: 19px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
 
         /* =====================================================
            LOGIN BUTTON
@@ -874,6 +936,163 @@ require_once __DIR__ . '/../../core/Auth.php';
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Apply Andika throughout the login page */
+        * {
+            font-family: 'Andika', sans-serif;
+        }
+
+        /* =========================================
+   ANIMATED TRAVELING BORDER — LOGIN CARD
+   ========================================= */
+
+        @property --border-angle {
+            syntax: "<angle>";
+            initial-value: 0deg;
+            inherits: false;
+        }
+
+        .login-wrapper {
+            isolation: isolate;
+        }
+
+        /* The moving light along the outer edge */
+        .login-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            padding: 1.5px;
+            border-radius: inherit;
+
+            background: conic-gradient(from var(--border-angle),
+                    transparent 0deg,
+                    transparent 280deg,
+                    rgba(224, 0, 0, 0.10) 300deg,
+                    rgba(255, 32, 32, 0.65) 320deg,
+                    #ffaaaa 332deg,
+                    #ff2020 344deg,
+                    rgba(255, 32, 32, 0.65) 352deg,
+                    transparent 360deg);
+
+            -webkit-mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+
+            mask:
+                linear-gradient(#fff 0 0) content-box,
+                linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+
+            pointer-events: none;
+            z-index: 10;
+
+            animation: borderLightTravel 5s linear infinite;
+        }
+
+        @keyframes borderLightTravel {
+            from {
+                --border-angle: 0deg;
+            }
+
+            to {
+                --border-angle: 360deg;
+            }
+        }
+
+        /* Respect users who prefer reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            .login-wrapper::before {
+                animation: none;
+            }
+        }
+
+
+        /* =========================================
+   SUBTLE PLASMA — LOGIN DIVIDER
+   Permanent line + soft independent flares
+   ========================================= */
+
+        .login-section {
+            position: relative;
+            /* Keep the existing layout and overflow unchanged. */
+        }
+
+        /* Permanent full-height divider */
+        .login-section::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+
+            background: linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0.08),
+                    rgba(224, 0, 0, 0.55) 35%,
+                    rgba(255, 65, 65, 0.7) 55%,
+                    rgba(224, 0, 0, 0.35) 78%,
+                    rgba(255, 255, 255, 0.08));
+
+            box-shadow: 0 0 5px rgba(224, 0, 0, 0.16);
+        }
+
+        /* Soft plasma glow along the divider */
+        .login-section::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: -5px;
+            width: 11px;
+            pointer-events: none;
+            z-index: 5;
+
+            background: linear-gradient(to right,
+                    transparent,
+                    rgba(224, 0, 0, 0.12),
+                    rgba(255, 40, 40, 0.2),
+                    rgba(224, 0, 0, 0.12),
+                    transparent);
+
+            opacity: 0.6;
+            filter: blur(2px);
+            animation: subtlePlasmaPulse 3s ease-in-out infinite;
+        }
+
+
+
+        /* Gentle breathing plasma effect */
+        @keyframes subtlePlasmaPulse {
+            0% {
+                opacity: 0;
+                filter: blur(3px);
+                transform: scaleX(0.7);
+            }
+
+            50% {
+                opacity: 0.8;
+                filter: blur(1px);
+                transform: scaleX(1.15);
+            }
+
+            100% {
+                opacity: 0;
+                filter: blur(3px);
+                transform: scaleX(0.7);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .login-section::after {
+                animation: none;
+                opacity: 0.25;
+                filter: none;
+                transform: none;
             }
         }
     </style>
@@ -1051,8 +1270,18 @@ require_once __DIR__ . '/../../core/Auth.php';
                             Password
                         </label>
 
-                        <input type="password" id="password" name="password" placeholder="Enter your password"
-                            autocomplete="current-password" required>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password" name="password" placeholder="Enter your password"
+                                autocomplete="current-password" required>
+
+                            <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password"
+                                aria-pressed="false" title="Show password">
+                                <svg id="eyeIcon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
 
                     </div>
 
@@ -1081,6 +1310,44 @@ require_once __DIR__ . '/../../core/Auth.php';
         </section>
 
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('passwordToggle');
+            const eyeIcon = document.getElementById('eyeIcon');
+
+            if (!passwordInput || !passwordToggle || !eyeIcon) return;
+
+            const eyeOpen = `
+        <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/>
+        <circle cx="12" cy="12" r="3"/>
+    `;
+
+            const eyeClosed = `
+        <path d="M3 3l18 18"/>
+        <path d="M10.6 5.1A10.8 10.8 0 0 1 12 5c6.4 0 10 7 10 7a16 16 0 0 1-3.1 3.8"/>
+        <path d="M6.2 6.2C3.5 8 2 12 2 12s3.6 7 10 7a10.4 10.4 0 0 0 4-.8"/>
+        <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>
+    `;
+
+            passwordToggle.addEventListener('click', function () {
+                const showPassword = passwordInput.type === 'password';
+
+                passwordInput.type = showPassword ? 'text' : 'password';
+                eyeIcon.innerHTML = showPassword ? eyeClosed : eyeOpen;
+
+                passwordToggle.setAttribute('aria-pressed', String(showPassword));
+                passwordToggle.setAttribute(
+                    'aria-label',
+                    showPassword ? 'Hide password' : 'Show password'
+                );
+                passwordToggle.title = showPassword ? 'Hide password' : 'Show password';
+
+                passwordInput.focus();
+            });
+        });
+    </script>
 
 </body>
 
