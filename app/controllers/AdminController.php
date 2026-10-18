@@ -625,6 +625,93 @@ class AdminController extends Controller
          * Keep the current username and status.
          */
 
+        /*
+         * Optional profile picture upload.
+         */
+        $profilePicture = $_FILES['profile_picture'] ?? null;
+
+        if (
+            $profilePicture !== null &&
+            $profilePicture['error'] !== UPLOAD_ERR_NO_FILE
+        ) {
+            if ($profilePicture['error'] !== UPLOAD_ERR_OK) {
+                $this->view('admin/administrators/profile', [
+                    'error' => 'The profile picture upload failed. Please try again.',
+                    'admin' => $admin
+                ]);
+                return;
+            }
+
+            // Maximum upload size: 5 MB.
+            if ($profilePicture['size'] > 5 * 1024 * 1024) {
+                $this->view('admin/administrators/profile', [
+                    'error' => 'The profile picture must be 5 MB or smaller.',
+                    'admin' => $admin
+                ]);
+                return;
+            }
+
+            // Verify the actual image type, not just the filename.
+            $imageInfo = @getimagesize($profilePicture['tmp_name']);
+
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($profilePicture['tmp_name']);
+
+            $allowedTypes = [
+                'image/png' => 'png',
+                'image/jpeg' => 'jpg'
+            ];
+
+            if (
+                $imageInfo === false ||
+                !isset($allowedTypes[$mimeType]) ||
+                $imageInfo['mime'] !== $mimeType
+            ) {
+                $this->view('admin/administrators/profile', [
+                    'error' => 'Please upload a valid PNG, JPG, or JPEG image.',
+                    'admin' => $admin
+                ]);
+                return;
+            }
+
+            $extension = $allowedTypes[$mimeType];
+
+            // Store files under public/uploads/profile_pictures.
+            $uploadDirectory = dirname(__DIR__, 2)
+                . '/public/uploads/profile_pictures';
+
+            if (
+                !is_dir($uploadDirectory) &&
+                !mkdir($uploadDirectory, 0755, true) &&
+                !is_dir($uploadDirectory)
+            ) {
+                $this->view('admin/administrators/profile', [
+                    'error' => 'Unable to prepare the profile picture directory.',
+                    'admin' => $admin
+                ]);
+                return;
+            }
+
+            // The filename is unique to the logged-in user.
+            $fileName = 'userid_' . $adminId . '.' . $extension;
+            $destination = $uploadDirectory . '/' . $fileName;
+
+            if (!move_uploaded_file($profilePicture['tmp_name'], $destination)) {
+                $this->view('admin/administrators/profile', [
+                    'error' => 'Unable to save the profile picture.',
+                    'admin' => $admin
+                ]);
+                return;
+            }
+
+            // Remove an older image for this same user if its extension changed.
+            foreach (glob($uploadDirectory . '/userid_' . $adminId . '.*') ?: [] as $oldFile) {
+                if ($oldFile !== $destination && is_file($oldFile)) {
+                    unlink($oldFile);
+                }
+            }
+        }
+
         try {
 
             $this->adminModel->update(
