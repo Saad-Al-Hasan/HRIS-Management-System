@@ -13,6 +13,7 @@ require_once __DIR__ . '/../app/controllers/AuthController.php';
 require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
 require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+require_once __DIR__ . '/../app/controllers/RfidController.php';
 
 
 $action = $_GET['action'] ?? 'login';
@@ -21,6 +22,7 @@ $authController = new AuthController();
 $adminController = new AdminController();
 $adminEmployeeController = new AdminEmployeeController();
 $employeeController = new EmployeeController();
+$rfidController = new RfidController();
 
 
 switch ($action) {
@@ -180,6 +182,14 @@ switch ($action) {
 
         $adminEmployeeController->toggleStatus();
 
+        break;
+
+    case 'rfid':
+        $rfidController->index();
+        break;
+
+    case 'rfid-store':
+        $rfidController->store();
         break;
 
     default:

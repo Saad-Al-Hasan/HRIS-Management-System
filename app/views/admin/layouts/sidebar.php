@@ -86,7 +86,8 @@
 
             <!-- RFID -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=rfid"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'rfid' ? 'active' : '' ?>">
 
                 <span class="sidebar-link-icon">
 
