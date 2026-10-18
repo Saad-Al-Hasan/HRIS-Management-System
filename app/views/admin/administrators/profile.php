@@ -58,9 +58,93 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             </div>
 
-            <form method="POST" action="/HRIS-Management-System/public/index.php?action=profile-update">
+            <form method="POST" action="/HRIS-Management-System/public/index.php?action=profile-update"
+                enctype="multipart/form-data">
 
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
+
+                <?php
+                $adminUserId = Auth::userId();
+
+                $profilePictureDirectory = dirname(__DIR__, 4)
+                    . '/public/uploads/profile_pictures';
+
+                $profilePictureUrl = '/HRIS-Management-System/public/assets/images/admin-avatar.png';
+
+                if ($adminUserId !== null) {
+                    foreach (['png', 'jpg'] as $extension) {
+                        $fileName = 'userid_' . $adminUserId . '.' . $extension;
+
+                        if (is_file($profilePictureDirectory . '/' . $fileName)) {
+                            $profilePictureUrl =
+                                '/HRIS-Management-System/public/uploads/profile_pictures/'
+                                . $fileName;
+                            break;
+                        }
+                    }
+                }
+                ?>
+
+                <!-- Admin Profile Picture -->
+                <div style="text-align: center; margin: 10px 0 28px;">
+                    <img src="<?= htmlspecialchars($profilePictureUrl) ?>" alt="Admin Profile Picture" style="
+            width: 130px;
+            height: 130px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            display: block;
+            margin: 0 auto 15px;
+        ">
+
+                    <label for="profile_picture" style="
+        display: inline-block;
+        margin-bottom: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text-primary);
+    ">
+                        Choose a Profile Picture
+                    </label>
+
+                    <div style="margin-bottom: 12px; text-align: center;">
+
+                        <label for="profile_picture" style="
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border: 2px dashed var(--myol-red-light);
+            border-radius: 10px;
+            background: var(--bg-card);
+            color: var(--text-primary);
+            cursor: pointer;
+            min-width: 260px;
+            max-width: 380px;
+        ">
+                            <span style="color: var(--myol-red-light); font-size: 20px;">↑</span>
+                            <span id="profile-picture-filename">Choose a Profile Picture</span>
+                        </label>
+
+                        <input type="file" id="profile_picture" name="profile_picture"
+                            accept=".png,.jpg,.jpeg,image/png,image/jpeg" style="display: none;">
+
+                        <div style="margin-top: 8px; color: var(--text-muted); font-size: 11px;">
+                            PNG, JPG or JPEG · Maximum 5 MB
+                        </div>
+
+                    </div>
+
+                    <script>
+                        document.getElementById('profile_picture')?.addEventListener('change', function () {
+                            const filename = this.files?.[0]?.name || 'Choose a Profile Picture';
+                            document.getElementById('profile-picture-filename').textContent = filename;
+                        });
+                    </script>
+
+                    <!-- Close the centered profile-picture section -->
+                </div>
 
                 <div class="form-group">
 
