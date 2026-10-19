@@ -8,8 +8,8 @@ require_once __DIR__ . '/../core/Auth.php';
 /**
  * Design Pattern: Protection Proxy
  *
- * Checks administrator authorization before allowing
- * an RFID registration request to reach the real service.
+ * Checks administrator authorization before forwarding
+ * an RFID registration request to the real service.
  */
 class RfidRegistrationProxy implements RfidRegistrationServiceInterface
 {
@@ -23,7 +23,8 @@ class RfidRegistrationProxy implements RfidRegistrationServiceInterface
 
     public function register(
         int $employeeId,
-        string $rfidIdentifier
+        string $rfidIdentifier,
+        ?int $userId = null
     ): array {
         Auth::startSession();
 
@@ -33,9 +34,15 @@ class RfidRegistrationProxy implements RfidRegistrationServiceInterface
             );
         }
 
-        if ($employeeId <= 0) {
+        if ($userId !== null && $employeeId > 0) {
             throw new InvalidArgumentException(
-                'Please select a valid employee.'
+                'Select either an employee or an administrator, not both.'
+            );
+        }
+
+        if ($userId === null && $employeeId <= 0) {
+            throw new InvalidArgumentException(
+                'Please select an employee or administrator.'
             );
         }
 
@@ -45,10 +52,10 @@ class RfidRegistrationProxy implements RfidRegistrationServiceInterface
             );
         }
 
-        // Forward the request only after the checks pass.
         return $this->realService->register(
             $employeeId,
-            $rfidIdentifier
+            $rfidIdentifier,
+            $userId
         );
     }
 }

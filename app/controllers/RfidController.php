@@ -6,6 +6,7 @@ require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Middleware.php';
 require_once __DIR__ . '/../models/Employee.php';
+require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/RfidCard.php';
 require_once __DIR__ . '/../services/RfidRegistrationService.php';
 require_once __DIR__ . '/../services/RfidRegistrationProxy.php';
@@ -13,11 +14,13 @@ require_once __DIR__ . '/../services/RfidRegistrationProxy.php';
 class RfidController extends Controller
 {
     private Employee $employeeModel;
+    private User $userModel;
     private RfidCard $rfidCardModel;
 
     public function __construct()
     {
         $this->employeeModel = new Employee();
+        $this->userModel = new User();
         $this->rfidCardModel = new RfidCard();
     }
 
@@ -40,12 +43,14 @@ class RfidController extends Controller
     /**
      * Separate RFID assignment page.
      */
+
     public function assignPage(): void
     {
         Middleware::requireAdmin();
 
         $this->view('admin/rfid/assign', [
             'employees' => $this->getEmployeesSortedByCode(),
+            'admins' => $this->userModel->getAllAdministrators(),
             'error' => $_SESSION['rfid_error'] ?? null,
             'success' => $_SESSION['rfid_success'] ?? null,
         ]);
@@ -53,9 +58,11 @@ class RfidController extends Controller
         unset($_SESSION['rfid_error'], $_SESSION['rfid_success']);
     }
 
+
     /**
      * Process RFID registration.
      */
+
     public function store(): void
     {
         Middleware::requireAdmin();
@@ -81,6 +88,23 @@ class RfidController extends Controller
             FILTER_VALIDATE_INT
         );
 
+        $userId = filter_var(
+            $_POST['user_id'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        $employeeId = (
+            $employeeId === false ||
+            $employeeId === null ||
+            $employeeId === ''
+        ) ? 0 : (int) $employeeId;
+
+        $userId = (
+            $userId === false ||
+            $userId === null ||
+            $userId === ''
+        ) ? null : (int) $userId;
+
         $identifier = $_POST['rfid_identifier'] ?? '';
 
         if (!is_string($identifier)) {
@@ -92,16 +116,21 @@ class RfidController extends Controller
             $proxy = new RfidRegistrationProxy($service);
 
             $result = $proxy->register(
-                $employeeId === false || $employeeId === null
-                    ? 0
-                    : $employeeId,
-                $identifier
+                $employeeId,
+                $identifier,
+                $userId
             );
 
             $_SESSION['rfid_success'] = $result['message'];
+
         } catch (PDOException $exception) {
+            error_log(
+                'RFID registration failed: ' . $exception->getMessage()
+            );
+
             $_SESSION['rfid_error'] =
-                'This RFID card or employee may already have an assignment.';
+                'This RFID card or account may already have an assignment.';
+
         } catch (InvalidArgumentException | RuntimeException $exception) {
             $_SESSION['rfid_error'] = $exception->getMessage();
         }
@@ -110,6 +139,7 @@ class RfidController extends Controller
             '/HRIS-Management-System/public/index.php?action=rfid-assign'
         );
     }
+
 
     /**
      * Unassign an RFID card from an employee.

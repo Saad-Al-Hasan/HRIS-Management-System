@@ -160,6 +160,28 @@ switch ($action) {
         break;
 
     /*
+    |--------------------------------------------------------------------------
+    | RFID Employee Identification (US-03)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'rfid':
+        $rfidController->index();
+        break;
+
+    case 'rfid-assign':
+        $rfidController->assignPage();
+        break;
+
+    case 'rfid-store':
+        $rfidController->store();
+        break;
+
+    case 'rfid-unassign':
+        $rfidController->unassign();
+        break;
+
+    /*
 |--------------------------------------------------------------------------
 | Employee Account & Profile
 |--------------------------------------------------------------------------
@@ -178,18 +200,16 @@ switch ($action) {
 
         break;
 
+    case 'employee-profile-picture-update':
+
+        $employeeController->updateProfilePicture();
+
+        break;
+
     case 'employee-toggle-status':
 
         $adminEmployeeController->toggleStatus();
 
-        break;
-
-    case 'rfid':
-        $rfidController->index();
-        break;
-
-    case 'rfid-store':
-        $rfidController->store();
         break;
 
     default:
@@ -199,3 +219,5 @@ switch ($action) {
 
         break;
 }
+
+
