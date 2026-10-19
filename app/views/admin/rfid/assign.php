@@ -20,7 +20,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="content-header">
             <div>
                 <h1>Assign RFID Card</h1>
-                <p>Select an employee using their unique Employee Code and scan their RFID card.</p>
+                <p>Select an employee or administrator, then scan their RFID card.</p>
             </div>
             <a href="/HRIS-Management-System/public/index.php?action=rfid" class="btn btn-secondary">
                 Back to RFID Management
@@ -32,7 +32,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-header">
                 <div>
                     <h2>Assign RFID Card</h2>
-                    <p>Connect an RFID card to one employee.</p>
+                    <p>Connect an RFID card to one employee or administrator.</p>
                 </div>
             </div>
 
@@ -53,10 +53,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(Auth::csrfToken()) ?>">
 
+
                 <div class="form-group">
                     <label for="employee_id">Select Employee</label>
 
-                    <select id="employee_id" name="employee_id" required>
+                    <select id="employee_id" name="employee_id">
                         <option value="">-- Select an employee --</option>
 
                         <?php foreach ($employees as $employee): ?>
@@ -68,9 +69,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 ) ?>
                             </option>
                         <?php endforeach; ?>
-
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label for="user_id">Select Admin</label>
+
+                    <select id="user_id" name="user_id">
+                        <option value="">-- Select an administrator --</option>
+
+                        <?php foreach ($admins as $admin): ?>
+                            <option value="<?= (int) $admin['id'] ?>">
+                                <?= htmlspecialchars(
+                                    ($admin['full_name'] ?? $admin['username']) .
+                                    ' (' . $admin['username'] . ')'
+                                ) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
 
                 <div class="form-group">
                     <label for="rfid_identifier">RFID Identifier</label>
@@ -102,6 +120,38 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <script src="/HRIS-Management-System/public/assets/js/rfid-input-adapter.js"></script>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('rfid-registration-form');
+        const employeeSelect = document.getElementById('employee_id');
+        const adminSelect = document.getElementById('user_id');
+
+        employeeSelect.addEventListener('change', function () {
+            if (this.value !== '') {
+                adminSelect.value = '';
+            }
+        });
+
+        adminSelect.addEventListener('change', function () {
+            if (this.value !== '') {
+                employeeSelect.value = '';
+            }
+        });
+
+        form.addEventListener('submit', function (event) {
+            const employeeSelected = employeeSelect.value !== '';
+            const adminSelected = adminSelect.value !== '';
+
+            if (employeeSelected === adminSelected) {
+                event.preventDefault();
+                alert('Please select either an employee or an administrator.');
+            }
+        });
+    });
+</script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {

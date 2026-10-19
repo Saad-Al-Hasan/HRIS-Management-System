@@ -22,7 +22,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="content-header">
             <div>
                 <h1>RFID Management</h1>
-                <p>Manage employee RFID card assignments.</p>
+                <p>Manage employee and administrator RFID card assignments.</p>
             </div>
 
             <a href="/HRIS-Management-System/public/index.php?action=rfid-assign" class="btn btn-primary">
@@ -48,7 +48,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div>
                     <h2>Registered RFID Cards</h2>
                     <p>
-                        Employees who currently have an RFID card assigned.
+                        Employees and administrators who currently have an RFID card assigned.
                     </p>
                 </div>
             </div>
@@ -58,8 +58,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="empty-state">
                     <h3>No RFID cards registered yet</h3>
                     <p>
-                        Assign an RFID card to an employee to see the
-                        assignment listed here.
+                        Assign an RFID card to an employee or administrator
+                        to see the assignment listed here.
                     </p>
                 </div>
 
@@ -69,6 +69,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <table class="data-table">
                         <thead>
                             <tr>
+                                <th>Account Type</th>
                                 <th>Employee Code</th>
                                 <th>Username</th>
                                 <th>Full Name</th>
@@ -85,7 +86,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <tr>
                                     <td>
                                         <?= htmlspecialchars(
-                                            $card['employee_code'] ?? '',
+                                            $card['account_type'] ?? 'Employee',
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars(
+                                            $card['employee_code'] ?? '—',
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>
@@ -140,9 +149,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     </td>
 
                                     <td>
+
                                         <form method="POST"
                                             action="/HRIS-Management-System/public/index.php?action=rfid-unassign"
-                                            onsubmit="return confirm('Unassign the RFID card from employee <?= htmlspecialchars($card['employee_code'] ?? '', ENT_QUOTES, 'UTF-8') ?>? The card will become available for reuse.');">
+                                            onsubmit="return confirm('Unassign this RFID card from <?= htmlspecialchars(($card['account_type'] ?? 'Employee') . ': ' . ($card['full_name'] ?? $card['username'] ?? 'account'), ENT_QUOTES, 'UTF-8') ?>? The card will become available for reuse.');">
+
                                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(
                                                 Auth::csrfToken(),
                                                 ENT_QUOTES,
@@ -155,6 +166,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                 Unassign Card
                                             </button>
                                         </form>
+
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

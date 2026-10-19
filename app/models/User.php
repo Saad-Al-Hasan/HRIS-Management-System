@@ -49,4 +49,27 @@ class User extends Model
 
         return $user ?: null;
     }
+
+    
+    public function getAllAdministrators(): array
+    {
+        $sql = "
+            SELECT
+                id,
+                username,
+                full_name,
+                email,
+                status,
+                role_id
+            FROM users
+            WHERE role_id = 1
+            ORDER BY full_name ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll();
+    }
+
 }
