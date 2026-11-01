@@ -151,9 +151,21 @@
             </a>
 
 
+<<<<<<< Updated upstream
+=======
+            
+>>>>>>> Stashed changes
             <!-- Work Schedules -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=work-schedules" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
+                'work-schedules',
+                'work-schedules-create',
+                'work-schedules-store',
+                'work-schedules-edit',
+                'work-schedules-update',
+                'work-schedule-assignments',
+                'work-schedule-assign'
+            ], true) ? 'active' : '' ?>">
 
                 <span class="sidebar-link-icon">
 
@@ -171,6 +183,7 @@
                 </span>
 
             </a>
+
 
 
             <!-- Salary -->

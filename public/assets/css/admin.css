@@ -2697,4 +2697,427 @@ table {
 
 .rfid-status:has(.rfid-status-indicator.connected) strong {
     color: #4ade80;
+<<<<<<< Updated upstream
+=======
+}
+
+
+
+/* Work Schedule Management: white secondary buttons */
+.work-schedule-page .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
+}
+
+.work-schedule-page .btn-secondary:hover {
+    background: #e8e8e8;
+    border-color: #e8e8e8;
+    color: #202124;
+}
+
+
+
+/* Work Schedule Management action buttons */
+.work-schedule-page .schedule-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.work-schedule-page .schedule-actions form {
+    margin: 0;
+}
+
+.work-schedule-page .schedule-actions .btn {
+    white-space: nowrap;
+}
+
+.work-schedule-page .schedule-actions .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Red Delete button */
+.work-schedule-page .schedule-actions .btn-danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
+}
+
+.work-schedule-page .schedule-actions .btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #ffffff;
+}
+
+
+
+
+/* Work Schedule: Employee Assignment Count Badges */
+.work-schedule-page .employee-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.work-schedule-page .employee-count-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.work-schedule-page .employee-count-zero {
+    background: rgba(148, 163, 184, 0.12);
+    color: #a1a1aa;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+
+/* Center employee count badges in the column */
+.work-schedule-page .employee-count-cell {
+    text-align: center;
+    vertical-align: middle;
+}
+
+
+
+/* Center the Create/Edit Work Schedule form */
+.work-schedule-form-page .admin-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.work-schedule-form-page .content-header {
+    width: 100%;
+}
+
+.work-schedule-form-page .content-card {
+    width: 100%;
+    max-width: 760px;
+    margin: 24px auto 0;
+    align-self: center;
+    box-sizing: border-box;
+}
+
+/* Keep the form fields comfortable inside the centered card */
+.work-schedule-form-page .content-card form {
+    padding: 24px;
+}
+
+.work-schedule-form-page .content-card .form-group {
+    max-width: 100%;
+}
+
+.work-schedule-form-page .content-card .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Keep the form responsive on smaller screens */
+@media (max-width: 600px) {
+    .work-schedule-form-page .content-card {
+        max-width: 100%;
+        margin-top: 16px;
+    }
+
+    .work-schedule-form-page .content-card form {
+        padding: 16px;
+    }
+}
+
+
+
+/* Bulk shift assignment controls */
+.work-schedule-page .work-schedule-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.work-schedule-page .work-schedule-header-actions {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.work-schedule-page .bulk-shift-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.work-schedule-page .bulk-shift-form label.sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.work-schedule-page .bulk-shift-select {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    min-width: 235px;
+    padding: 0 12px;
+    border: 1px solid #d97706;
+    border-radius: 6px;
+    background-color: #f59e0b;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.work-schedule-page .bulk-shift-select:focus {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    align-self: center;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    white-space: nowrap;
+    background-color: #16a34a;
+    border: 1px solid #15803d;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.work-schedule-page .bulk-shift-confirm:hover {
+    background-color: #15803d;
+    border-color: #166534;
+}
+
+.work-schedule-page .bulk-shift-confirm:focus-visible {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
+}
+
+.work-schedule-page .work-schedule-header-actions>a.btn {
+    align-self: center;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+
+.work-schedule-page .work-schedule-header-actions {
+    align-items: center;
+    gap: 6px;
+}
+
+.work-schedule-page .bulk-shift-form {
+    display: grid;
+    grid-template-columns: minmax(0, auto) auto;
+    grid-template-rows: auto 40px;
+    column-gap: 6px;
+    row-gap: 4px;
+}
+
+.work-schedule-page .bulk-shift-form label.sr-only {
+    grid-column: 1 / -1;
+    justify-self: center;
+}
+
+.work-schedule-page .bulk-shift-select {
+    width: 285px;
+    min-width: 285px;
+    height: 40px;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    height: 40px;
+    min-height: 40px;
+    align-self: stretch;
+}
+
+@media (max-width: 768px) {
+    .work-schedule-page .bulk-shift-form {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .work-schedule-page .bulk-shift-select {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+
+@media (max-width: 768px) {
+    .work-schedule-page .work-schedule-header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .work-schedule-page .bulk-shift-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .work-schedule-page .bulk-shift-confirm,
+    .work-schedule-page .work-schedule-header-actions>a {
+        align-self: flex-start;
+    }
+}
+
+
+
+/* Align all three work-schedule controls horizontally */
+.work-schedule-page .work-schedule-header-actions {
+    align-items: flex-end;
+}
+
+.work-schedule-page .bulk-shift-form {
+    grid-template-rows: 22px 40px;
+    align-items: center;
+}
+
+.work-schedule-page .bulk-shift-form label.sr-only {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    align-self: center;
+    justify-self: center;
+}
+
+.work-schedule-page .bulk-shift-select,
+.work-schedule-page .bulk-shift-confirm {
+    grid-row: 2;
+    align-self: center;
+}
+
+.work-schedule-page .work-schedule-header-actions > a.btn {
+    align-self: flex-end;
+}
+
+
+
+
+/* Puce color for bulk shift controls */
+.work-schedule-page .bulk-shift-select {
+    background-color: #CC8899;
+    border-color: #B87587;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-select:focus {
+    outline-color: #CC8899;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    background-color: #CC8899;
+    border-color: #B87587;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-confirm:hover {
+    background-color: #BE778B;
+    border-color: #A96579;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-confirm:focus-visible {
+    outline-color: #CC8899;
+}
+
+
+/* =========================================
+   EMPLOYEE SCHEDULE ASSIGNMENTS PAGE
+   ========================================= */
+
+/* White Back to Schedules button */
+.employee-schedule-assignments-page .content-header .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
+}
+
+.employee-schedule-assignments-page .content-header .btn-secondary:hover {
+    background: #929292;
+    border-color: #e8e8e8;
+    color: #202124;
+}
+
+/* Keep assignment controls vertically centered in each row */
+.employee-schedule-assignments-page .data-table tbody td {
+    vertical-align: middle;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child form {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child .form-group {
+    flex: 0 0 285px;
+    width: 285px;
+    min-width: 285px;
+    max-width: 285px;
+    margin: 0;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child select {
+    display: block;
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child .btn-primary {
+    flex-shrink: 0;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+
+/* White Back to Schedules buttons on Create/Edit pages */
+.work-schedule-form-page .content-header .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
+}
+
+.work-schedule-form-page .content-header .btn-secondary:hover {
+    background: #8b8b8b;
+    border-color: #e8e8e8;
+    color: #202124;
+>>>>>>> Stashed changes
 }

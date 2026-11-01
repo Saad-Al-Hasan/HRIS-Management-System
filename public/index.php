@@ -15,6 +15,10 @@ require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
 require_once __DIR__ . '/../app/controllers/EmployeeController.php';
 require_once __DIR__ . '/../app/controllers/RfidController.php';
 require_once __DIR__ . '/../app/controllers/AttendanceController.php';
+<<<<<<< Updated upstream
+=======
+require_once __DIR__ . '/../app/controllers/WorkScheduleController.php';
+>>>>>>> Stashed changes
 
 
 $action = $_GET['action'] ?? 'login';
@@ -25,6 +29,10 @@ $adminEmployeeController = new AdminEmployeeController();
 $employeeController = new EmployeeController();
 $rfidController = new RfidController();
 $attendanceController = new AttendanceController();
+<<<<<<< Updated upstream
+=======
+$workScheduleController = new WorkScheduleController();
+>>>>>>> Stashed changes
 
 
 switch ($action) {
@@ -196,6 +204,55 @@ switch ($action) {
         $attendanceController->scan();
         break;
 
+<<<<<<< Updated upstream
+=======
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Work Schedule Management (US-08)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'work-schedules':
+        $workScheduleController->index();
+        break;
+
+    case 'work-schedules-create':
+        $workScheduleController->create();
+        break;
+
+    case 'work-schedules-store':
+        $workScheduleController->store();
+        break;
+
+    case 'work-schedules-edit':
+        $workScheduleController->edit();
+        break;
+
+    case 'work-schedules-update':
+        $workScheduleController->update();
+        break;
+
+    case 'work-schedule-assignments':
+        $workScheduleController->assignments();
+        break;
+
+    case 'work-schedule-assign':
+        $workScheduleController->assign();
+        break;
+
+    case 'work-schedules-delete':
+        $workScheduleController->delete();
+        break;
+
+    case 'work-schedules-assign-all':
+        $workScheduleController->assignAllEmployees();
+        break;
+
+
+
+>>>>>>> Stashed changes
     /*
 |--------------------------------------------------------------------------
 | Employee Account & Profile
