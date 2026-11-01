@@ -1,4 +1,4 @@
-<aside class="admin-sidebar">
+<aside class="admin-sidebar" id="mainSidebar">
 
     <!-- =====================================================
          BRAND
@@ -43,7 +43,8 @@
 
             <!-- Dashboard -->
 
-            <a href="/HRIS-Management-System/public/index.php?action=dashboard" class="sidebar-link active">
+            <a href="/HRIS-Management-System/public/index.php?action=dashboard"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'dashboard' ? 'active' : '' ?>">
 
                 <span class="sidebar-link-icon">
 
@@ -65,29 +66,28 @@
 
             <!-- Employees -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
-
+            <a href="/HRIS-Management-System/public/index.php?action=employees"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employees' ? 'active' : '' ?>"
+                title="Employee Management">
                 <span class="sidebar-link-icon">
-
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="9" cy="8" r="3" />
                         <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
                         <path d="M16 5.5c2.2.4 3.5 1.8 3.5 3.8" />
                         <path d="M18 14c1.8.8 3 2.8 3 5" />
                     </svg>
-
                 </span>
 
                 <span class="sidebar-link-text">
                     Employees
                 </span>
-
             </a>
 
 
             <!-- RFID -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=rfid"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'rfid' ? 'active' : '' ?>">
 
                 <span class="sidebar-link-icon">
 
@@ -122,6 +122,30 @@
 
                 <span class="sidebar-link-text">
                     Attendance
+                </span>
+
+            </a>
+
+
+
+            <!-- Attendance Station -->
+
+            <a href="/HRIS-Management-System/public/index.php?action=attendance-station"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'attendance-station' ? 'active' : '' ?>"
+                title="Attendance Station">
+
+                <span class="sidebar-link-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="16" rx="2" />
+                        <path d="M7 8h4" />
+                        <path d="M7 12h10" />
+                        <path d="M7 16h6" />
+                        <circle cx="17" cy="8" r="1" />
+                    </svg>
+                </span>
+
+                <span class="sidebar-link-text">
+                    Attendance Station
                 </span>
 
             </a>
@@ -243,17 +267,19 @@
             </div>
 
 
+
+
             <!-- Administrator Accounts -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
-
+            <a href="/HRIS-Management-System/public/index.php?action=administrators"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'administrators' ? 'active' : '' ?>">
                 <span class="sidebar-link-icon">
 
                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <circle cx="12" cy="8" r="3" />
-                        <path d="M5 21c.5-4 3-6 7-6s6.5 2 7 6" />
-                        <path d="M19 5v5" />
-                        <path d="M16.5 7.5h5" />
+                        <circle cx="9" cy="8" r="3" />
+                        <path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6" />
+                        <path d="M16 5.5c2.2.4 3.5 1.8 3.5 3.8" />
+                        <path d="M18 14c1.8.8 3 2.8 3 5" />
                     </svg>
 
                 </span>
@@ -289,8 +315,8 @@
 
             <!-- My Profile -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
-
+            <a href="/HRIS-Management-System/public/index.php?action=profile"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'profile' ? 'active' : '' ?>">
                 <span class="sidebar-link-icon">
 
                     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -347,16 +373,12 @@
          SIDEBAR FOOTER
          ===================================================== -->
 
-<div class="sidebar-footer">
+    <div class="sidebar-footer">
 
-    <a
-        href="https://www.myolbd.com/"
-        target="_blank"
-        rel="noopener noreferrer"
-    >
-        MY Outsourcing Limited
-    </a>
+        <a href="https://www.myolbd.com/" target="_blank" rel="noopener noreferrer">
+            MY Outsourcing Limited
+        </a>
 
-</div>
+    </div>
 
 </aside>

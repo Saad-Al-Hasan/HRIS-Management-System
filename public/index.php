@@ -10,11 +10,21 @@ require_once __DIR__ . '/../app/core/Middleware.php';
 
 require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/AdminController.php';
+require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
+require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+require_once __DIR__ . '/../app/controllers/RfidController.php';
+require_once __DIR__ . '/../app/controllers/AttendanceController.php';
 
 
 $action = $_GET['action'] ?? 'login';
 
 $authController = new AuthController();
+$adminController = new AdminController();
+$adminEmployeeController = new AdminEmployeeController();
+$employeeController = new EmployeeController();
+$rfidController = new RfidController();
+$attendanceController = new AttendanceController();
 
 
 switch ($action) {
@@ -49,6 +59,174 @@ switch ($action) {
         break;
 
 
+
+    /*
+|--------------------------------------------------------------------------
+| Administrator Account & Profile
+|--------------------------------------------------------------------------
+*/
+
+    case 'administrators':
+
+        $adminController->index();
+
+        break;
+
+
+    case 'administrator-create':
+
+        $adminController->create();
+
+        break;
+
+
+    case 'administrator-store':
+
+        $adminController->store();
+
+        break;
+
+
+    case 'administrator-edit':
+
+        $adminController->edit();
+
+        break;
+
+
+    case 'administrator-update':
+
+        $adminController->update();
+
+        break;
+
+
+    case 'profile':
+
+        $adminController->profile();
+
+        break;
+
+
+    case 'profile-update':
+
+        $adminController->updateProfile();
+
+        break;
+
+
+    /*
+|--------------------------------------------------------------------------
+| Employee Management (Administrator)
+|--------------------------------------------------------------------------
+*/
+
+    case 'employees':
+
+        $adminEmployeeController->index();
+
+        break;
+
+    case 'employee-view':
+
+        $adminEmployeeController->viewDetails();
+
+        break;
+
+
+    case 'employee-edit':
+
+        $adminEmployeeController->edit();
+
+        break;
+
+
+    case 'employee-update':
+
+        $adminEmployeeController->update();
+
+        break;
+
+
+    case 'employee-create':
+
+        $adminEmployeeController->create();
+
+        break;
+
+
+    case 'employee-store':
+
+        $adminEmployeeController->store();
+
+        break;
+
+    /*
+    |--------------------------------------------------------------------------
+    | RFID Employee Identification (US-03)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'rfid':
+        $rfidController->index();
+        break;
+
+    case 'rfid-assign':
+        $rfidController->assignPage();
+        break;
+
+    case 'rfid-store':
+        $rfidController->store();
+        break;
+
+    case 'rfid-unassign':
+        $rfidController->unassign();
+        break;
+
+    /*
+|--------------------------------------------------------------------------
+| RFID Attendance Station (US-04, US-05)
+|--------------------------------------------------------------------------
+*/
+    case 'attendance-station':
+        $attendanceController->station();
+        break;
+
+    case 'attendance-scan':
+        $attendanceController->scan();
+        break;
+
+    /*
+|--------------------------------------------------------------------------
+| Employee Account & Profile
+|--------------------------------------------------------------------------
+*/
+
+    case 'employee-dashboard':
+
+        $employeeController->dashboard();
+
+        break;
+
+
+    case 'employee-profile':
+
+        $employeeController->profile();
+
+        break;
+
+    case 'employee-profile-picture-update':
+
+        $employeeController->updateProfilePicture();
+
+        break;
+
+    case 'employee-toggle-status':
+
+        $adminEmployeeController->toggleStatus();
+
+        break;
+
     default:
 
         http_response_code(404);
@@ -56,3 +234,5 @@ switch ($action) {
 
         break;
 }
+
+

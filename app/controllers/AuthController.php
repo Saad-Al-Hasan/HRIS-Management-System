@@ -3,6 +3,7 @@
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
+require_once __DIR__ . '/../models/Employee.php';
 
 class AuthController extends Controller
 {
@@ -64,7 +65,20 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        $this->redirect('/HRIS-Management-System/public/index.php');
+        if ((int) $user['role_id'] === 1) {
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=dashboard'
+            );
+        } elseif ((int) $user['role_id'] === 2) {
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=employee-dashboard'
+            );
+        } else {
+            Auth::logout();
+
+            http_response_code(403);
+            die('403 - Access Denied');
+        }
     }
 
     public function logout(): void
@@ -81,12 +95,28 @@ class AuthController extends Controller
         $roleId = Auth::roleId();
 
         if ($roleId === 1) {
-            $this->view('admin/dashboard');
+            $employeeModel = new Employee();
+            $totalEmployees = count($employeeModel->getAll());
+
+            $this->view('admin/dashboard', [
+                'totalEmployees' => $totalEmployees,
+            ]);
+
             return;
         }
 
         if ($roleId === 2) {
-            $this->view('employee/dashboard');
+            $userId = Auth::userId();
+
+            $employeeModel = new Employee();
+            $employee = $userId !== null
+                ? $employeeModel->findByUserId($userId)
+                : null;
+
+            $this->view('employee/dashboard', [
+                'employee' => $employee,
+            ]);
+
             return;
         }
 
