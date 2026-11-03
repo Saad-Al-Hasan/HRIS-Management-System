@@ -12,18 +12,12 @@ $employeeCode = $employee['employee_code'] ?? 'Not assigned';
 $rfidIdentifier = $rfidIdentifier ?? 'Not assigned';
 $department = $employee['department'] ?? 'Not assigned';
 $designation = $employee['designation'] ?? 'Not assigned';
-<<<<<<< Updated upstream
-
-$joiningDate = 'Not available';
-
-=======
 $scheduleName = $schedule['name'] ?? 'Not assigned';
 $scheduleHours = $schedule['hours'] ?? '';
 
 $joiningDate = 'Not available';
 
 
->>>>>>> Stashed changes
 if (!empty($employee['joining_date'])) {
     $timestamp = strtotime($employee['joining_date']);
 
@@ -62,87 +56,6 @@ require_once __DIR__ . '/layouts/sidebar.php';
             <!-- Employee ID -->
             <div class="employee-dashboard-stat-card">
                 <div class="employee-dashboard-stat-icon">#</div>
-<<<<<<< Updated upstream
-
-                <div class="employee-dashboard-stat-content">
-                    <span class="employee-dashboard-stat-label">
-                        Employee ID
-                    </span>
-
-                    <strong class="employee-dashboard-stat-value">
-                        <?= htmlspecialchars($employeeCode) ?>
-                    </strong>
-
-                    <small>Your unique employee code</small>
-                </div>
-            </div>
-
-            <!-- RFID Identifier -->
-            <div class="employee-dashboard-stat-card">
-                <div class="employee-dashboard-stat-icon">▣</div>
-
-                <div class="employee-dashboard-stat-content">
-                    <span class="employee-dashboard-stat-label">
-                        RFID Identifier
-                    </span>
-
-                    <strong class="employee-dashboard-stat-value">
-                        <?= htmlspecialchars($rfidIdentifier) ?>
-                    </strong>
-
-                    <small>Your assigned RFID card number</small>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Employee Details -->
-        <div class="employee-dashboard-stats">
-
-            <!-- Department -->
-            <div class="employee-dashboard-stat-card">
-                <div class="employee-dashboard-stat-icon">⌂</div>
-
-                <div class="employee-dashboard-stat-content">
-                    <span class="employee-dashboard-stat-label">
-                        Department
-                    </span>
-
-                    <strong class="employee-dashboard-stat-value">
-                        <?= htmlspecialchars($department) ?>
-                    </strong>
-
-                    <small>Your current department</small>
-                </div>
-            </div>
-
-            <!-- Designation -->
-            <div class="employee-dashboard-stat-card">
-                <div class="employee-dashboard-stat-icon">★</div>
-
-                <div class="employee-dashboard-stat-content">
-                    <span class="employee-dashboard-stat-label">
-                        Designation
-                    </span>
-
-                    <strong class="employee-dashboard-stat-value">
-                        <?= htmlspecialchars($designation) ?>
-                    </strong>
-
-                    <small>Your current position</small>
-                </div>
-            </div>
-
-            <!-- Joining Date -->
-            <div class="employee-dashboard-stat-card">
-                <div class="employee-dashboard-stat-icon">◷</div>
-
-                <div class="employee-dashboard-stat-content">
-                    <span class="employee-dashboard-stat-label">
-                        Joining Date
-                    </span>
-
-=======
 
                 <div class="employee-dashboard-stat-content">
                     <span class="employee-dashboard-stat-label">
@@ -237,7 +150,6 @@ require_once __DIR__ . '/layouts/sidebar.php';
                         Joining Date
                     </span>
 
->>>>>>> Stashed changes
                     <strong class="employee-dashboard-stat-value">
                         <?= htmlspecialchars($joiningDate) ?>
                     </strong>

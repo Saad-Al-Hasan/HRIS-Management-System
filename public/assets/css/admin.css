@@ -2697,11 +2697,6 @@ table {
 
 .rfid-status:has(.rfid-status-indicator.connected) strong {
     color: #4ade80;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 }
 
 
@@ -3122,9 +3117,6 @@ table {
     background: #8b8b8b;
     border-color: #e8e8e8;
     color: #202124;
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
 }
 /* My Profile pages: narrower card and fields */
 .profile-card-narrow {
@@ -3182,5 +3174,4 @@ table {
 
 @media (max-width: 600px) {
     .employee-filter-form { grid-template-columns: 1fr; padding: 16px; }
->>>>>>> Stashed changes
 }

@@ -15,14 +15,7 @@ require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
 require_once __DIR__ . '/../app/controllers/EmployeeController.php';
 require_once __DIR__ . '/../app/controllers/RfidController.php';
 require_once __DIR__ . '/../app/controllers/AttendanceController.php';
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 require_once __DIR__ . '/../app/controllers/WorkScheduleController.php';
->>>>>>> Stashed changes
-=======
-require_once __DIR__ . '/../app/controllers/WorkScheduleController.php';
->>>>>>> Stashed changes
 
 
 $action = $_GET['action'] ?? 'login';
@@ -33,14 +26,7 @@ $adminEmployeeController = new AdminEmployeeController();
 $employeeController = new EmployeeController();
 $rfidController = new RfidController();
 $attendanceController = new AttendanceController();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 $workScheduleController = new WorkScheduleController();
->>>>>>> Stashed changes
-=======
-$workScheduleController = new WorkScheduleController();
->>>>>>> Stashed changes
 
 
 switch ($action) {
@@ -212,11 +198,6 @@ switch ($action) {
         $attendanceController->scan();
         break;
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
 
 
     /*
@@ -263,10 +244,6 @@ switch ($action) {
 
 
 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
     /*
 |--------------------------------------------------------------------------
 | Employee Account & Profile
