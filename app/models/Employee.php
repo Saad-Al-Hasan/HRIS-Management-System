@@ -89,11 +89,50 @@ class Employee extends Model
                 ':designation' => $employeeData['designation'],
                 ':joining_date' => $employeeData['joining_date'],
             ]);
+            $employeeId = (int) $this->db->lastInsertId();
+
+            // Automatically assign the default 9 AM - 6 PM shift.
+            $defaultScheduleSql = "
+    SELECT id
+    FROM work_schedules
+    WHERE name = :default_name
+    LIMIT 1
+";
+
+            $defaultScheduleStmt = $this->db->prepare($defaultScheduleSql);
+            $defaultScheduleStmt->execute([
+                ':default_name' => '9 AM - 6 PM',
+            ]);
+
+            $defaultScheduleId = $defaultScheduleStmt->fetchColumn();
+
+            if ($defaultScheduleId === false) {
+                throw new RuntimeException(
+                    'The default 9 AM - 6 PM work schedule was not found.'
+                );
+            }
+
+            $assignmentSql = "
+    INSERT INTO employee_schedules (
+        employee_id,
+        schedule_id
+    ) VALUES (
+        :employee_id,
+        :schedule_id
+    )
+";
+
+            $assignmentStmt = $this->db->prepare($assignmentSql);
+            $assignmentStmt->execute([
+                ':employee_id' => $employeeId,
+                ':schedule_id' => (int) $defaultScheduleId,
+            ]);
 
             $this->db->commit();
 
             return true;
-        } catch (PDOException $e) {
+
+        } catch (Throwable $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
             }
@@ -299,7 +338,7 @@ class Employee extends Model
         INNER JOIN employees
             ON employees.user_id = users.id
         WHERE users.role_id = 2
-        ORDER BY users.full_name ASC
+        ORDER BY employees.employee_code ASC
     ";
 
         $stmt = $this->db->prepare($sql);
@@ -307,6 +346,99 @@ class Employee extends Model
 
         return $stmt->fetchAll();
     }
+
+
+    public function getFiltered(array $filters = [], string $search = ''): array
+    {
+        $sql = "
+        SELECT
+            users.id AS user_id,
+            users.username,
+            users.email,
+            users.full_name,
+            users.status,
+            employees.id AS employee_id,
+            employees.employee_code,
+            employees.phone,
+            employees.address,
+            employees.department,
+            employees.designation,
+            employees.joining_date
+        FROM users
+        INNER JOIN employees
+            ON employees.user_id = users.id
+        WHERE users.role_id = 2
+    ";
+
+        $params = [];
+
+        $search = trim($search);
+
+        if ($search !== '') {
+            $sql .= " AND (
+        employees.employee_code LIKE :search_code
+        OR users.username LIKE :search_username
+    )";
+
+            $params[':search_code'] = '%' . $search . '%';
+            $params[':search_username'] = '%' . $search . '%';
+        }
+
+        if (!empty($filters['department'])) {
+            $sql .= " AND employees.department = :department";
+            $params[':department'] = $filters['department'];
+        }
+
+        if (!empty($filters['designation'])) {
+            $sql .= " AND employees.designation = :designation";
+            $params[':designation'] = $filters['designation'];
+        }
+
+        if (!empty($filters['status'])) {
+            $sql .= " AND users.status = :status";
+            $params[':status'] = $filters['status'];
+        }
+
+        $sql .= " ORDER BY employees.employee_code ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll();
+    }
+
+
+    public function getDepartments(): array
+    {
+        $sql = "
+        SELECT DISTINCT department
+        FROM employees
+        WHERE department IS NOT NULL
+          AND department <> ''
+        ORDER BY department ASC
+    ";
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+    public function getDesignations(): array
+    {
+        $sql = "
+        SELECT DISTINCT designation
+        FROM employees
+        WHERE designation IS NOT NULL
+          AND designation <> ''
+        ORDER BY designation ASC
+    ";
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+
+
 
     public function findByUserId(int $userId): ?array
     {

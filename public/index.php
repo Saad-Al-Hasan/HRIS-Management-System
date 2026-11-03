@@ -14,6 +14,8 @@ require_once __DIR__ . '/../app/controllers/AdminController.php';
 require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
 require_once __DIR__ . '/../app/controllers/EmployeeController.php';
 require_once __DIR__ . '/../app/controllers/RfidController.php';
+require_once __DIR__ . '/../app/controllers/AttendanceController.php';
+require_once __DIR__ . '/../app/controllers/WorkScheduleController.php';
 
 
 $action = $_GET['action'] ?? 'login';
@@ -23,6 +25,8 @@ $adminController = new AdminController();
 $adminEmployeeController = new AdminEmployeeController();
 $employeeController = new EmployeeController();
 $rfidController = new RfidController();
+$attendanceController = new AttendanceController();
+$workScheduleController = new WorkScheduleController();
 
 
 switch ($action) {
@@ -180,6 +184,110 @@ switch ($action) {
     case 'rfid-unassign':
         $rfidController->unassign();
         break;
+
+    /*
+|--------------------------------------------------------------------------
+| RFID Attendance Station (US-04, US-05)
+|--------------------------------------------------------------------------
+*/
+    case 'attendance-station':
+        $attendanceController->station();
+        break;
+
+    case 'attendance-scan':
+        $attendanceController->scan();
+        break;
+
+    case 'attendance-activity':
+        Middleware::requireLogin();
+
+        if (Auth::roleId() !== 1) {
+            http_response_code(403);
+            exit;
+        }
+
+        require_once __DIR__ . '/../app/models/Attendance.php';
+
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+
+        $attendanceModel = new Attendance();
+        $today = date('Y-m-d');
+
+        $activity = $attendanceModel->getTodayActivity($today, 500);
+
+        $uploadDirectory = __DIR__ . '/uploads/profile_pictures/';
+        $uploadUrl = '/HRIS-Management-System/public/uploads/profile_pictures/';
+
+        foreach ($activity as &$scan) {
+            $userId = (int) ($scan['user_id'] ?? 0);
+            $profilePicture = null;
+
+            foreach (['png', 'jpg', 'jpeg', 'webp'] as $extension) {
+                $filename = 'userid_' . $userId . '.' . $extension;
+
+                if (is_file($uploadDirectory . $filename)) {
+                    $profilePicture = $uploadUrl . $filename;
+                    break;
+                }
+            }
+
+            $scan['profile_picture'] = $profilePicture;
+        }
+        unset($scan);
+
+        echo json_encode(
+            $activity,
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+        );
+
+        exit;
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Work Schedule Management (US-08)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'work-schedules':
+        $workScheduleController->index();
+        break;
+
+    case 'work-schedules-create':
+        $workScheduleController->create();
+        break;
+
+    case 'work-schedules-store':
+        $workScheduleController->store();
+        break;
+
+    case 'work-schedules-edit':
+        $workScheduleController->edit();
+        break;
+
+    case 'work-schedules-update':
+        $workScheduleController->update();
+        break;
+
+    case 'work-schedule-assignments':
+        $workScheduleController->assignments();
+        break;
+
+    case 'work-schedule-assign':
+        $workScheduleController->assign();
+        break;
+
+    case 'work-schedules-delete':
+        $workScheduleController->delete();
+        break;
+
+    case 'work-schedules-assign-all':
+        $workScheduleController->assignAllEmployees();
+        break;
+
+
 
     /*
 |--------------------------------------------------------------------------

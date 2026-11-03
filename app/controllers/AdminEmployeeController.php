@@ -18,9 +18,21 @@ class AdminEmployeeController extends Controller
     {
         Middleware::requireAdmin();
 
+        $filters = [
+            'department' => trim($_GET['department'] ?? ''),
+            'designation' => trim($_GET['designation'] ?? ''),
+            'status' => trim($_GET['status'] ?? '')
+        ];
+
+        $search = trim($_GET['search'] ?? '');
+
         $this->view('admin/employees/index', [
             'pageTitle' => 'Employee Management',
-            'employees' => $this->employeeModel->getAll()
+            'employees' => $this->employeeModel->getFiltered($filters, $search),
+            'filters' => $filters,
+            'search' => $search,
+            'departments' => $this->employeeModel->getDepartments(),
+            'designations' => $this->employeeModel->getDesignations()
         ]);
     }
 
@@ -479,8 +491,17 @@ class AdminEmployeeController extends Controller
                 : 'Employee deactivated successfully.';
         }
 
-        $this->redirect(
-            '/HRIS-Management-System/public/index.php?action=employees'
-        );
+        $redirectParams = [
+            'action' => 'employees',
+            'search' => trim($_POST['search'] ?? ''),
+            'department' => trim($_POST['department'] ?? ''),
+            'designation' => trim($_POST['designation'] ?? ''),
+            'status' => trim($_POST['status'] ?? '')
+        ];
+
+        $redirectUrl = '/HRIS-Management-System/public/index.php?'
+            . http_build_query($redirectParams);
+
+        $this->redirect($redirectUrl);
     }
 }

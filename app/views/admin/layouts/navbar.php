@@ -12,9 +12,32 @@ $pageTitle = $pageTitle ?? 'Dashboard';
 $displayName = Auth::fullName() ?? 'User';
 $displayRole = $isEmployee ? 'EMPLOYEE' : 'ADMINISTRATOR';
 
-$avatarPath = $isEmployee
+$userId = Auth::userId();
+
+$profilePictureDirectory = dirname(__DIR__, 4)
+    . '/public/uploads/profile_pictures';
+
+$profilePictureUrl = null;
+
+if ($userId !== null) {
+    foreach (['png', 'jpg'] as $extension) {
+        $fileName = 'userid_' . $userId . '.' . $extension;
+        $filePath = $profilePictureDirectory . '/' . $fileName;
+
+        if (is_file($filePath)) {
+            $profilePictureUrl =
+                '/HRIS-Management-System/public/uploads/profile_pictures/'
+                . $fileName;
+            break;
+        }
+    }
+}
+
+$avatarPath = $profilePictureUrl ?? (
+    $isEmployee
     ? '/HRIS-Management-System/public/assets/images/employee-avatar.png'
-    : '/HRIS-Management-System/public/assets/images/admin-avatar.png';
+    : '/HRIS-Management-System/public/assets/images/admin-avatar.png'
+);
 
 ?>
 

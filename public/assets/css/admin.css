@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 @font-face {
     font-family: 'Andika';
     src: url('../fonts/Andika-Regular.ttf') format('truetype');
@@ -488,12 +487,15 @@ body {
    ========================================================= */
 
 .dashboard-stats {
-    display: grid;
+    display: flex;
 
     grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-    gap: 18px;
+    justify-content: center;
+    align-items: stretch;
+    gap: 14px;
+    width: 100%;
 
     margin-bottom: 22px;
 }
@@ -523,6 +525,13 @@ body {
     transform: translateY(-2px);
 
     border-color: #41464c;
+}
+
+/* Make each card narrower and keep all four equal */
+.dashboard-stats .dashboard-stat-card {
+    flex: 0 1 430px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .stat-icon {
@@ -2698,2705 +2707,1430 @@ table {
 
 .rfid-status:has(.rfid-status-indicator.connected) strong {
     color: #4ade80;
-=======
-@font-face {
-    font-family: 'Andika';
-    src: url('../fonts/Andika-Regular.ttf') format('truetype');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* =========================================================
-   MYOL HRIS - Admin Panel
-   ========================================================= */
-
-:root {
-    --bg-main: #101214;
-    --bg-sidebar: #151719;
-    --bg-card: #1c1f22;
-    --bg-hover: #24282c;
-
-    --border: #2b2f33;
-
-    --myol-red: #e00000;
-    --myol-red-light: #ff3b3b;
-
-    --text-primary: #ffffff;
-    --text-secondary: #a7adb4;
-    --text-muted: #737a82;
-
-    --sidebar-width: 260px;
-    --navbar-height: 70px;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-html,
-body {
-    min-height: 100%;
-}
-
-body {
-    background: var(--bg-main);
-    color: var(--text-primary);
-    font-family: 'Andika', sans-serif;
 }
 
 
-/* =========================================================
-   ADMIN LAYOUT
-   ========================================================= */
 
-.admin-layout {
-    min-height: 100vh;
-    display: flex;
+/* Work Schedule Management: white secondary buttons */
+.work-schedule-page .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
+}
+
+.work-schedule-page .btn-secondary:hover {
+    background: #e8e8e8;
+    border-color: #e8e8e8;
+    color: #202124;
 }
 
 
-/* =========================================================
-   SIDEBAR
-   ========================================================= */
 
-.admin-sidebar {
-    width: var(--sidebar-width);
-    height: 100vh;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-
-    background: var(--bg-sidebar);
-    border-right: 1px solid var(--border);
-
-    display: flex;
-    flex-direction: column;
-
-    z-index: 1000;
-}
-
-
-/* Sidebar Brand */
-
-.sidebar-brand {
-    height: var(--navbar-height);
-
+/* Work Schedule Management action buttons */
+.work-schedule-page .schedule-actions {
     display: flex;
     align-items: center;
-
-    padding: 0 22px;
-
-    border-bottom: 1px solid var(--border);
-}
-
-.sidebar-brand img {
-    width: 42px;
-    height: 42px;
-
-    object-fit: contain;
-
-    margin-right: 12px;
-}
-
-.sidebar-brand-text {
-    display: flex;
-    flex-direction: column;
-}
-
-.sidebar-brand-title {
-    font-size: 17px;
-    font-weight: 700;
-
-    color: var(--text-primary);
-}
-
-.sidebar-brand-subtitle {
-    margin-top: 3px;
-
-    font-size: 10px;
-    letter-spacing: 1px;
-
-    color: var(--myol-red);
-    text-transform: uppercase;
-}
-
-
-/* Sidebar Navigation */
-
-.sidebar-nav {
-    flex: 1;
-
-    padding: 20px 12px;
-
-    overflow-y: auto;
-}
-
-.sidebar-section {
-    margin-bottom: 24px;
-}
-
-.sidebar-section-title {
-    padding: 0 12px 9px;
-
-    font-size: 10px;
-    font-weight: 700;
-
-    letter-spacing: 1.4px;
-
-    color: var(--text-muted);
-}
-
-
-/* Navigation Links */
-
-.sidebar-link {
-    display: flex;
-    align-items: center;
-
-    width: 100%;
-    min-height: 44px;
-
-    padding: 0 12px;
-    margin-bottom: 4px;
-
-    border-radius: 7px;
-
-    color: var(--text-secondary);
-    text-decoration: none;
-
-    font-size: 14px;
-
-    transition:
-        background 0.2s ease,
-        color 0.2s ease;
-}
-
-.sidebar-link:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-.sidebar-link.active {
-    background: rgba(224, 0, 0, 0.12);
-    color: #ffffff;
-
-    border-left: 3px solid var(--myol-red);
-
-    padding-left: 9px;
-}
-
-.sidebar-link-icon {
-    width: 24px;
-
-    margin-right: 10px;
-
-    font-size: 16px;
-
-    text-align: center;
-}
-
-.sidebar-link-text {
-    flex: 1;
-}
-
-
-/* Coming Soon */
-
-.sidebar-link.disabled {
-    cursor: default;
-    opacity: 0.55;
-}
-
-.sidebar-link.disabled:hover {
-    background: transparent;
-    color: var(--text-secondary);
-}
-
-
-/* Sidebar Footer */
-
-.sidebar-footer {
-    padding: 15px 18px;
-
-    border-top: 1px solid var(--border);
-
-    font-size: 11px;
-
-    color: var(--text-muted);
-
-    text-align: center;
-}
-
-
-/* =========================================================
-   MAIN AREA
-   ========================================================= */
-
-.admin-main {
-    width: calc(100% - var(--sidebar-width));
-
-    margin-left: var(--sidebar-width);
-
-    min-height: 100vh;
-}
-
-
-/* =========================================================
-   TOP NAVBAR
-   ========================================================= */
-
-.admin-navbar {
-    height: var(--navbar-height);
-
-    background: var(--bg-sidebar);
-
-    border-bottom: 1px solid var(--border);
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    padding: 0 28px;
-
-    position: sticky;
-    top: 0;
-
-    z-index: 900;
-}
-
-
-/* Navbar Left */
-
-.navbar-title {
-    display: flex;
-    flex-direction: column;
-}
-
-.navbar-title-main {
-    font-size: 18px;
-    font-weight: 700;
-
-    color: var(--text-primary);
-}
-
-.navbar-title-sub {
-    margin-top: 3px;
-
-    font-size: 11px;
-
-    color: var(--text-muted);
-}
-
-
-/* Navbar Right */
-
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-left: auto;
-}
-
-
-/* Notification */
-
-.navbar-notification {
-    width: 38px;
-    height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border: 1px solid var(--border);
-    border-radius: 7px;
-
-    color: var(--text-secondary);
-
-    cursor: pointer;
-
-    transition: all 0.2s ease;
-}
-
-.navbar-notification:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-
-/* User */
-
-.navbar-user {
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-}
-
-.navbar-user-avatar {
-    width: 38px;
-    height: 38px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: var(--myol-red);
-
-    color: #ffffff;
-
-    font-size: 14px;
-    font-weight: 700;
-}
-
-.navbar-user-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.navbar-user-name {
-    font-size: 13px;
-    font-weight: 600;
-
-    color: var(--text-primary);
-}
-
-.navbar-user-role {
-    margin-top: 2px;
-
-    font-size: 10px;
-
-    color: var(--text-muted);
-
-    text-transform: uppercase;
-    letter-spacing: 0.6px;
-}
-
-
-/* =========================================================
-   CONTENT
-   ========================================================= */
-
-.admin-content {
-    padding: 30px;
-}
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-    :root {
-        --sidebar-width: 220px;
-    }
-
-    .admin-content {
-        padding: 22px;
-    }
-
-    .admin-navbar {
-        padding: 0 20px;
-    }
-}
-
-
-@media (max-width: 700px) {
-
-    .admin-sidebar {
-        width: 70px;
-    }
-
-    .sidebar-brand {
-        justify-content: center;
-        padding: 0;
-    }
-
-    .sidebar-brand img {
-        margin-right: 0;
-    }
-
-    .sidebar-brand-text,
-    .sidebar-section-title,
-    .sidebar-link-text,
-    .sidebar-footer {
-        display: none;
-    }
-
-    .sidebar-link {
-        justify-content: center;
-        padding: 0;
-    }
-
-    .sidebar-link-icon {
-        margin-right: 0;
-    }
-
-    .sidebar-link.active {
-        padding-left: 0;
-        border-left: none;
-    }
-
-    .admin-main {
-        width: calc(100% - 70px);
-        margin-left: 70px;
-    }
-
-    .navbar-user-info {
-        display: none;
-    }
-}
-
-
-/* =========================================================
-   DASHBOARD
-   ========================================================= */
-
-.dashboard-welcome {
-    margin-bottom: 28px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.dashboard-welcome h1 {
-    font-size: 25px;
-    font-weight: 700;
-
-    color: var(--text-primary);
-}
-
-.dashboard-welcome p {
-    margin-top: 7px;
-
-    font-size: 13px;
-
-    color: var(--text-secondary);
-}
-
-
-/* =========================================================
-   STAT CARDS
-   ========================================================= */
-
-.dashboard-stats {
-    display: grid;
-
-    grid-template-columns:
-        repeat(4, minmax(0, 1fr));
-
-    gap: 18px;
-
-    margin-bottom: 22px;
-}
-
-.dashboard-stat-card {
-    min-height: 135px;
-
-    padding: 20px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 16px;
-
-    background: var(--bg-card);
-
-    border: 1px solid var(--border);
-
-    border-radius: 10px;
-
-    transition:
-        transform 0.2s ease,
-        border-color 0.2s ease;
-}
-
-.dashboard-stat-card:hover {
-    transform: translateY(-2px);
-
-    border-color: #41464c;
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 9px;
-
-    background: rgba(224, 0, 0, 0.10);
-
-    color: var(--myol-red);
-
-    font-size: 21px;
-}
-
-.stat-content {
-    display: flex;
-    flex-direction: column;
-}
-
-.stat-label {
-    font-size: 12px;
-
-    color: var(--text-secondary);
-}
-
-.stat-value {
-    margin-top: 5px;
-
-    font-size: 27px;
-
-    color: var(--text-primary);
-}
-
-.stat-description {
-    margin-top: 4px;
-
-    font-size: 10px;
-
-    color: var(--text-muted);
-}
-
-
-/* =========================================================
-   DASHBOARD GRID
-   ========================================================= */
-
-.dashboard-grid {
-    display: grid;
-
-    grid-template-columns:
-        minmax(0, 1.7fr) minmax(280px, 1fr);
-
-    gap: 18px;
-
-    margin-bottom: 18px;
-}
-
-
-/* =========================================================
-   DASHBOARD CARD
-   ========================================================= */
-
-.dashboard-card {
-    background: var(--bg-card);
-
-    border: 1px solid var(--border);
-
-    border-radius: 10px;
-
-    padding: 22px;
-}
-
-.dashboard-card-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-
-    margin-bottom: 20px;
-}
-
-.dashboard-card-header h2 {
-    font-size: 16px;
-
-    font-weight: 700;
-
-    color: var(--text-primary);
-}
-
-.dashboard-card-header p {
-    margin-top: 5px;
-
-    font-size: 11px;
-
-    color: var(--text-muted);
-}
-
-.dashboard-card-badge {
-    padding: 5px 9px;
-
-    border-radius: 5px;
-
-    background: rgba(224, 0, 0, 0.10);
-
-    color: var(--myol-red);
-
-    font-size: 9px;
-    font-weight: 700;
-
-    text-transform: uppercase;
-
-    letter-spacing: 0.7px;
-}
-
-
-/* =========================================================
-   ATTENDANCE
-   ========================================================= */
-
-.attendance-overview {
-    display: flex;
-    flex-direction: column;
-
-    gap: 13px;
-}
-
-.attendance-item {
-    min-height: 58px;
-
-    padding: 10px 12px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    border-radius: 7px;
-
-    background: #181b1e;
-}
-
-.attendance-item>div {
-    flex: 1;
-}
-
-.attendance-item strong {
-    display: block;
-
-    font-size: 12px;
-
-    color: var(--text-primary);
-}
-
-.attendance-item small {
-    display: block;
-
-    margin-top: 3px;
-
-    font-size: 10px;
-
-    color: var(--text-muted);
-}
-
-.attendance-number {
-    font-size: 16px;
-
-    font-weight: 700;
-
-    color: var(--text-primary);
-}
-
-.attendance-dot {
-    width: 9px;
-    height: 9px;
-
-    border-radius: 50%;
-
-    flex-shrink: 0;
-}
-
-.attendance-dot.present {
-    background: #55c47a;
-}
-
-.attendance-dot.late {
-    background: #e0a12b;
-}
-
-.attendance-dot.absent {
-    background: var(--myol-red);
-}
-
-
-/* =========================================================
-   RFID STATUS
-   ========================================================= */
-
-.rfid-status {
-    display: flex;
-    align-items: center;
-
-    gap: 12px;
-
-    padding: 15px;
-
-    margin-bottom: 18px;
-
-    border-radius: 7px;
-
-    background: #181b1e;
-}
-
-.rfid-status-indicator {
-    width: 11px;
-    height: 11px;
-
-    border-radius: 50%;
-
-    background: var(--myol-red);
-
-    box-shadow:
-        0 0 0 4px rgba(224, 0, 0, 0.10);
-}
-
-.rfid-status strong {
-    display: block;
-
-    font-size: 12px;
-
-    color: var(--text-primary);
-}
-
-.rfid-status p {
-    margin-top: 4px;
-
-    font-size: 10px;
-
-    color: var(--text-muted);
-}
-
-.rfid-info {
-    display: flex;
-    justify-content: space-between;
-
-    padding: 11px 0;
-
-    border-bottom: 1px solid var(--border);
-}
-
-.rfid-info:last-child {
-    border-bottom: none;
-}
-
-.rfid-info span {
-    font-size: 11px;
-
-    color: var(--text-muted);
-}
-
-.rfid-info strong {
-    font-size: 11px;
-
-    color: var(--text-secondary);
-}
-
-
-/* =========================================================
-   ACTIVITY
-   ========================================================= */
-
-.activity-card {
-    margin-bottom: 25px;
-}
-
-.activity-empty {
-    min-height: 180px;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
-
-    text-align: center;
-}
-
-.activity-empty-icon {
-    width: 48px;
-    height: 48px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    margin-bottom: 12px;
-
-    border-radius: 50%;
-
-    background: rgba(224, 0, 0, 0.08);
-
-    color: var(--myol-red);
-
-    font-size: 20px;
-}
-
-.activity-empty h3 {
-    font-size: 13px;
-
-    color: var(--text-primary);
-}
-
-.activity-empty p {
-    margin-top: 6px;
-
-    font-size: 11px;
-
-    color: var(--text-muted);
-}
-
-
-/* =========================================================
-   DASHBOARD RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 1100px) {
-
-    .dashboard-stats {
-        grid-template-columns:
-            repeat(2, minmax(0, 1fr));
-    }
-}
-
-
-@media (max-width: 800px) {
-
-    .dashboard-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-
-@media (max-width: 550px) {
-
-    .dashboard-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .dashboard-welcome h1 {
-        font-size: 21px;
-    }
-}
-
-
-/* =========================================================
-   POLISHED ICONS
-   ========================================================= */
-
-.sidebar-link-icon svg {
-    width: 16px;
-    height: 16px;
-
-    fill: none;
-    stroke: currentColor;
-
-    stroke-width: 1.7;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-
-    display: block;
-}
-
-.sidebar-link.active .sidebar-link-icon {
-    color: var(--myol-red-light);
-}
-
-
-/* =========================================================
-   POLISHED NOTIFICATION
-   ========================================================= */
-
-.navbar-notification {
-    border: 1px solid var(--border);
-    background: transparent;
-
-    padding: 0;
-}
-
-.navbar-notification svg {
-    width: 16px;
-    height: 16px;
-
-    fill: none;
-    stroke: currentColor;
-
-    stroke-width: 1.7;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-
-/* =========================================================
-   USER MENU
-   ========================================================= */
-
-.navbar-user-menu {
-    position: relative;
-}
-
-.navbar-user {
-    border: none;
-    background: transparent;
-
-    padding: 4px 7px;
-
-    border-radius: 8px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    cursor: pointer;
-
-    color: inherit;
-
-    transition: background 0.2s ease;
-}
-
-.navbar-user:hover {
-    background: var(--bg-hover);
-}
-
-.navbar-user-arrow {
-    width: 14px;
-    height: 14px;
-
-    margin-left: 2px;
-
-    fill: none;
-    stroke: var(--text-muted);
-
-    stroke-width: 2;
-
-    stroke-linecap: round;
-    stroke-linejoin: round;
-
-    transition: transform 0.2s ease;
-}
-
-.navbar-user-menu.open .navbar-user-arrow {
-    transform: rotate(180deg);
-}
-
-
-/* =========================================================
-   PROFILE DROPDOWN
-   ========================================================= */
-
-.profile-dropdown {
-    position: absolute;
-
-    top: calc(100% + 10px);
-    right: 0;
-
-    width: 250px;
-
-    padding: 8px;
-
-    background: #191c1f;
-
-    border: 1px solid var(--border);
-
-    border-radius: 9px;
-
-    box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.35);
-
-    opacity: 0;
-    visibility: hidden;
-
-    transform:
-        translateY(-5px) scale(0.98);
-
-    transform-origin: top right;
-
-    transition:
-        opacity 0.15s ease,
-        visibility 0.15s ease,
-        transform 0.15s ease;
-
-    z-index: 1200;
-}
-
-.navbar-user-menu.open .profile-dropdown {
-    opacity: 1;
-    visibility: visible;
-
-    transform:
-        translateY(0) scale(1);
-}
-
-
-/* Dropdown Header */
-
-.profile-dropdown-header {
-    display: flex;
-    align-items: center;
-
-    gap: 11px;
-
-    padding: 10px;
-}
-
-.profile-dropdown-avatar {
-    width: 38px;
-    height: 38px;
-
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: var(--myol-red);
-
-    color: #ffffff;
-
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.profile-dropdown-header strong {
-    display: block;
-
-    font-size: 12px;
-
-    color: var(--text-primary);
-}
-
-.profile-dropdown-header span {
-    display: block;
-
-    margin-top: 4px;
-
-    font-size: 10px;
-
-    color: var(--text-muted);
-}
-
-
-/* Divider */
-
-.profile-dropdown-divider {
-    height: 1px;
-
-    margin: 5px 4px;
-
-    background: var(--border);
-}
-
-
-/* Dropdown Links */
-
-.profile-dropdown-link {
-    min-height: 40px;
-
-    display: flex;
-    align-items: center;
-
-    gap: 10px;
-
-    padding: 0 10px;
-
-    border-radius: 6px;
-
-    color: var(--text-secondary);
-
-    text-decoration: none;
-
-    font-size: 12px;
-
-    transition:
-        background 0.15s ease,
-        color 0.15s ease;
-}
-
-.profile-dropdown-link svg {
-    width: 15px;
-    height: 15px;
-
-    fill: none;
-    stroke: currentColor;
-
-    stroke-width: 1.7;
-
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-.profile-dropdown-link:not(.disabled):hover {
-    background: var(--bg-hover);
-
-    color: var(--text-primary);
-}
-
-.profile-dropdown-link.disabled {
-    cursor: default;
-    opacity: 0.5;
-}
-
-.profile-dropdown-link.profile-logout {
-    color: #ff4a4a;
-}
-
-.profile-dropdown-link.profile-logout:hover {
-    background: rgba(224, 0, 0, 0.10);
-
-    color: #ff5c5c;
-}
-
-
-/* =========================================================
-   SIDEBAR BRAND POLISH
-   ========================================================= */
-
-.sidebar-brand img {
-    border-radius: 5px;
-}
-
-.sidebar-brand-title {
-    letter-spacing: 0.2px;
-}
-
-.sidebar-brand-subtitle {
-    font-size: 9px;
-
-    font-weight: 700;
-}
-
-
-/* =========================================================
-   SIDEBAR FOOTER
-   ========================================================= */
-
-.sidebar-footer {
-    font-size: 9px;
-
-    letter-spacing: 0.2px;
-}
-
-
-/* =========================================================
-   MOBILE USER MENU
-   ========================================================= */
-
-@media (max-width: 700px) {
-
-    .profile-dropdown {
-        right: -5px;
-    }
-
-    .navbar-user {
-        padding-right: 0;
-    }
-
-    .navbar-user-arrow {
-        display: none;
-    }
-}
-
-
-/* =========================================================
-   SIDEBAR COMPANY LINK
-   ========================================================= */
-
-.sidebar-footer a {
-    color: var(--myol-red);
-
-    font-weight: 700;
-
-    text-decoration: underline;
-
-    text-underline-offset: 3px;
-
-    transition: color 0.2s ease;
-}
-
-.sidebar-footer a:hover {
-    color: var(--myol-red-light);
-}
-
-
-
-/* =========================================================
-   ADMINISTRATOR ACCOUNTS
-   ========================================================= */
-
-.content-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    margin-bottom: 24px;
-}
-
-.content-header h2 {
-    margin: 0 0 6px;
-    font-size: 24px;
-    font-weight: 700;
-    color: #ffffff;
-}
-
-.content-header p {
-    margin: 0;
-    color: #8f969f;
-    font-size: 14px;
-}
-
-
-/* Primary Button */
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     gap: 8px;
-    min-height: 42px;
-    padding: 0 18px;
-    border-radius: 6px;
-    border: 1px solid transparent;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s ease;
 }
 
-.btn-primary {
-    background: #e31b23;
-    color: #ffffff;
-    border-color: #e31b23;
-}
-
-.btn-primary:hover {
-    background: #c9151c;
-    border-color: #c9151c;
-}
-
-
-/* Content Card */
-
-.content-card {
-    background: #15181c;
-    border: 1px solid #292e34;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
-}
-
-.card-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 22px;
-    border-bottom: 1px solid #292e34;
-}
-
-.card-header h3 {
-    margin: 0 0 5px;
-    color: #ffffff;
-    font-size: 17px;
-    font-weight: 700;
-}
-
-.card-header p {
+.work-schedule-page .schedule-actions form {
     margin: 0;
-    color: #7f8790;
-    font-size: 13px;
 }
 
-
-/* Table */
-
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.admin-table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 850px;
-}
-
-.admin-table th {
-    padding: 14px 18px;
-    background: #1b1f24;
-    border-bottom: 1px solid #30363d;
-    color: #9da5ae;
-    font-size: 12px;
-    font-weight: 600;
-    text-align: left;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+.work-schedule-page .schedule-actions .btn {
     white-space: nowrap;
 }
 
-.admin-table td {
-    padding: 16px 18px;
-    border-bottom: 1px solid #252a30;
-    color: #d8dce1;
-    font-size: 14px;
-    vertical-align: middle;
-}
-
-.admin-table tbody tr {
-    transition: background 0.2s ease;
-}
-
-.admin-table tbody tr:hover {
-    background: #1b1f24;
-}
-
-.admin-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.admin-table td strong {
-    color: #ffffff;
-    font-weight: 600;
-}
-
-
-/* Status */
-
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-active {
-    background: rgba(34, 197, 94, 0.12);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.2);
-}
-
-.status-inactive {
-    background: rgba(239, 68, 68, 0.12);
-    color: #f87171;
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-
-/* Table Action */
-
-.table-action {
-    display: inline-flex;
-    align-items: center;
-    padding: 6px 11px;
-    border: 1px solid #343a41;
-    border-radius: 5px;
-    color: #e31b23;
-    background: transparent;
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    transition: 0.2s ease;
-}
-
-.table-action:hover {
-    color: #ffffff;
-    background: #e31b23;
-    border-color: #e31b23;
-}
-
-
-/* Empty State */
-
-.empty-state {
-    padding: 50px 20px !important;
-    text-align: center;
-    color: #777f88 !important;
-}
-
-
-/* Success Message */
-
-.alert {
-    margin-bottom: 20px;
-    padding: 13px 16px;
-    border-radius: 6px;
-    font-size: 14px;
-}
-
-.alert-success {
-    background: rgba(34, 197, 94, 0.10);
-    border: 1px solid rgba(34, 197, 94, 0.25);
-    color: #4ade80;
-}
-
-
-/* Administrator Page Responsive */
-
-@media (max-width: 768px) {
-
-    .content-header {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .content-header .btn {
-        width: 100%;
-    }
-
-    .content-header h2 {
-        font-size: 21px;
-    }
-
-}
-
-
-/* =========================================================
-   ADMINISTRATOR FORM
-   ========================================================= */
-
-.form-container {
-    padding: 24px;
-}
-
-.form-group {
-    margin-bottom: 20px;
-    max-width: 650px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 8px;
-    color: #d8dce1;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.form-group input,
-.form-group select,
-.form-group textarea {
-    width: 100%;
-    height: 42px;
-    padding: 0 13px;
-    box-sizing: border-box;
-
-    background: #101317;
-    border: 1px solid #343a41;
-    border-radius: 6px;
-
-    color: #ffffff;
-    font-family: inherit;
-    font-size: 14px;
-
-    outline: none;
-    transition: border-color 0.2s ease,
-        box-shadow 0.2s ease;
-}
-
-.form-group input::placeholder {
-    color: #6f7780;
-}
-
-.form-group input:focus,
-.form-group select:focus {
-    border-color: #e31b23;
-    box-shadow: 0 0 0 2px rgba(227, 27, 35, 0.12);
-}
-
-.form-group select {
-    cursor: pointer;
-}
-
-.form-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    margin-top: 28px;
-    padding-top: 20px;
-
-    border-top: 1px solid #292e34;
-}
-
-
-.form-group textarea {
-    min-height: 90px;
-    padding: 10px 13px;
-    height: auto;
-    resize: vertical;
-    box-sizing: border-box;
-}
-
-.form-group textarea:focus {
-    border-color: #e31b23;
-    box-shadow: 0 0 0 2px rgba(227, 27, 35, 0.12);
-}
-
-
-.btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    min-height: 42px;
-    padding: 0 18px;
-
-    border: 1px solid #343a41;
-    border-radius: 6px;
-
-    background: #1b1f24;
-    color: #b7bec6;
-
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 600;
-
-    transition: 0.2s ease;
-}
-
-.btn-secondary:hover {
-    background: #252a30;
-    border-color: #464d55;
-    color: #ffffff;
-}
-
-.alert-error {
-    margin-bottom: 20px;
-    padding: 13px 16px;
-
-    background: rgba(239, 68, 68, 0.10);
-    border: 1px solid rgba(239, 68, 68, 0.25);
-    border-radius: 6px;
-
-    color: #f87171;
-    font-size: 14px;
-}
-
-
-/* Responsive */
-
-@media (max-width: 768px) {
-
-    .form-container {
-        padding: 18px;
-    }
-
-    .form-group {
-        max-width: none;
-    }
-
-    .form-actions {
-        flex-direction: column-reverse;
-        align-items: stretch;
-    }
-
-    .form-actions .btn,
-    .form-actions .btn-secondary {
-        width: 100%;
-    }
-
-}
-
-
-/* Employee Management Table */
-
-.table-responsive {
-    width: 100%;
-    overflow-x: auto;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: left;
-    font-size: 13px;
-}
-
-.data-table thead {
-    background: #191c20;
-}
-
-.data-table th {
-    padding: 14px 16px;
-    color: #aeb5bf;
-    font-weight: 600;
-    white-space: nowrap;
-    border-bottom: 1px solid #30343a;
-}
-
-.data-table td {
-    padding: 14px 16px;
-    color: #e5e7eb;
-    white-space: nowrap;
-    border-bottom: 1px solid #292d32;
-}
-
-.data-table tbody tr:hover {
-    background: #1b1e22;
-}
-
-.data-table tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.data-table .empty-state {
-    padding: 30px 16px;
-    text-align: center;
-    color: #9299a3;
-}
-
-
-/* Form Validation Error Styling */
-
-.field-error {
-    display: block;
-    margin-top: 6px;
-    padding: 8px 10px;
-    color: #ff8585;
-    background: rgba(220, 38, 38, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    border-left: 3px solid #ef4444;
-    border-radius: 5px;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.5;
-}
-
-.form-group input:has(+ .field-error),
-.form-group select:has(+ .field-error),
-.form-group textarea:has(+ .field-error) {
-    border-color: #ef4444;
-}
-
-.form-group input:focus:has(+ .field-error),
-.form-group select:focus:has(+ .field-error),
-.form-group textarea:focus:has(+ .field-error) {
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.18);
-}
-
-.alert.alert-error {
-    display: block;
-    margin-bottom: 18px;
-    padding: 13px 16px;
-    color: #ffb4b4;
-    background: rgba(220, 38, 38, 0.12);
-    border: 1px solid rgba(239, 68, 68, 0.4);
-    border-left: 4px solid #ef4444;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    line-height: 1.6;
-}
-
-
-/* Apply Andika throughout the HRIS interface */
-
-body,
-button,
-input,
-select,
-textarea,
-table {
-    font-family: 'Andika', sans-serif;
-}
-
-
-/* Navbar user logos */
-.navbar-user-avatar img,
-.profile-dropdown-avatar img {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: contain;
-    border-radius: 50%;
-}
-
-
-/* Add Employee: equal-height information cards */
-.employee-create-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: 20px;
-    align-items: stretch;
-}
-
-.employee-create-grid>.content-card {
-    min-width: 0;
-    margin-bottom: 0;
-    height: 100%;
-}
-
-@media (max-width: 900px) {
-    .employee-create-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Read-only employee code field */
-#employee_code[readonly] {
-    background: #1b1f24;
-    color: #a7adb4;
+.work-schedule-page .schedule-actions .btn:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
 }
 
-/* Keep the Actions column at the far right */
-.data-table th:last-child,
-.data-table td:last-child {
-    text-align: right;
+/* Red Delete button */
+.work-schedule-page .schedule-actions .btn-danger {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #ffffff;
 }
 
-.data-table td:last-child {
-    white-space: nowrap;
+.work-schedule-page .schedule-actions .btn-danger:hover {
+    background: #b91c1c;
+    border-color: #b91c1c;
+    color: #ffffff;
 }
 
-.data-table td:last-child form,
-.data-table td:last-child .table-action {
+
+
+
+/* Work Schedule: Employee Assignment Count Badges */
+.work-schedule-page .employee-count-badge {
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 26px;
+    padding: 0 9px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.work-schedule-page .employee-count-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.work-schedule-page .employee-count-zero {
+    background: rgba(148, 163, 184, 0.12);
+    color: #a1a1aa;
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+
+/* Center employee count badges in the column */
+.work-schedule-page .employee-count-cell {
+    text-align: center;
     vertical-align: middle;
 }
 
 
-/* Employee Details: two-column layout inside one card */
-.employee-details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    padding: 24px;
-    align-items: start;
-}
 
-.employee-details-grid .form-group {
-    max-width: none;
-    min-width: 0;
-    margin-bottom: 0;
-}
-
-.employee-details-grid input[readonly],
-.employee-details-grid textarea[readonly] {
-    cursor: default;
-}
-
-@media (max-width: 768px) {
-    .employee-details-grid {
-        grid-template-columns: 1fr;
-        padding: 18px;
-    }
-}
-
-/* Employee My Profile: two-column layout */
-.employee-details-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    padding: 24px;
-    align-items: start;
-}
-
-.employee-details-grid .form-group {
-    max-width: none;
-    min-width: 0;
-    margin-bottom: 0;
-}
-
-.employee-details-grid input[readonly],
-.employee-details-grid textarea[readonly] {
-    cursor: default;
-}
-
-@media (max-width: 768px) {
-    .employee-details-grid {
-        grid-template-columns: 1fr;
-        padding: 18px;
-    }
-}
-
-
-/* Employee Dashboard Summary Cards */
-
-.employee-dashboard-stats {
-    display: flex;
-    justify-content: center;
-    align-items: stretch;
-    flex-wrap: wrap;
-    gap: 18px;
-    margin-bottom: 24px;
-}
-
-.employee-dashboard-stat-card {
-    flex: 0 1 calc(25% - 14px);
-    min-width: 240px;
-    min-height: 110px;
-    padding: 20px 16px;
-
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 9px;
-
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.employee-dashboard-stat-card:hover {
-    transform: translateY(-2px);
-    border-color: #41464c;
-}
-
-.employee-dashboard-stat-icon {
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 9px;
-    background: rgba(224, 0, 0, 0.12);
-    color: var(--myol-red-light);
-
-    font-size: 22px;
-    font-weight: 700;
-}
-
-.employee-dashboard-stat-content {
-    min-width: 0;
+/* Center the Create/Edit Work Schedule form */
+.work-schedule-form-page .admin-content {
     display: flex;
     flex-direction: column;
-    gap: 5px;
 }
 
-.employee-dashboard-stat-label {
-    color: var(--text-secondary);
-    font-size: 12px;
+.work-schedule-form-page .content-header {
+    width: 100%;
 }
 
-.employee-dashboard-stat-value {
-    color: var(--text-primary);
-    font-size: 17px;
-    overflow-wrap: anywhere;
+.work-schedule-form-page .content-card {
+    width: 100%;
+    max-width: 760px;
+    margin: 24px auto 0;
+    align-self: center;
+    box-sizing: border-box;
 }
 
-.employee-dashboard-stat-content small {
-    color: var(--text-muted);
-    font-size: 10px;
+/* Keep the form fields comfortable inside the centered card */
+.work-schedule-form-page .content-card form {
+    padding: 24px;
 }
 
-@media (max-width: 1100px) {
-    .employee-dashboard-stat-card {
-        flex-basis: calc(50% - 9px);
+.work-schedule-form-page .content-card .form-group {
+    max-width: 100%;
+}
+
+.work-schedule-form-page .content-card .form-group input {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Keep the form responsive on smaller screens */
+@media (max-width: 600px) {
+    .work-schedule-form-page .content-card {
+        max-width: 100%;
+        margin-top: 16px;
+    }
+
+    .work-schedule-form-page .content-card form {
+        padding: 16px;
     }
 }
 
-@media (max-width: 550px) {
-    .employee-dashboard-stat-card {
-        flex-basis: 100%;
+
+
+/* Bulk shift assignment controls */
+.work-schedule-page .work-schedule-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.work-schedule-page .work-schedule-header-actions {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.work-schedule-page .bulk-shift-form {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.work-schedule-page .bulk-shift-form label.sr-only {
+    position: static;
+    width: auto;
+    height: auto;
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    clip-path: none;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.work-schedule-page .bulk-shift-select {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    min-width: 235px;
+    padding: 0 12px;
+    border: 1px solid #d97706;
+    border-radius: 6px;
+    background-color: #f59e0b;
+    color: #111827;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.work-schedule-page .bulk-shift-select:focus {
+    outline: 2px solid #fbbf24;
+    outline-offset: 2px;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    align-self: center;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    white-space: nowrap;
+    background-color: #16a34a;
+    border: 1px solid #15803d;
+    border-radius: 6px;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.work-schedule-page .bulk-shift-confirm:hover {
+    background-color: #15803d;
+    border-color: #166534;
+}
+
+.work-schedule-page .bulk-shift-confirm:focus-visible {
+    outline: 2px solid #22c55e;
+    outline-offset: 2px;
+}
+
+.work-schedule-page .work-schedule-header-actions>a.btn {
+    align-self: center;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+
+.work-schedule-page .work-schedule-header-actions {
+    align-items: center;
+    gap: 6px;
+}
+
+.work-schedule-page .bulk-shift-form {
+    display: grid;
+    grid-template-columns: minmax(0, auto) auto;
+    grid-template-rows: auto 40px;
+    column-gap: 6px;
+    row-gap: 4px;
+}
+
+.work-schedule-page .bulk-shift-form label.sr-only {
+    grid-column: 1 / -1;
+    justify-self: center;
+}
+
+.work-schedule-page .bulk-shift-select {
+    width: 285px;
+    min-width: 285px;
+    height: 40px;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    height: 40px;
+    min-height: 40px;
+    align-self: stretch;
+}
+
+@media (max-width: 768px) {
+    .work-schedule-page .bulk-shift-form {
+        width: 100%;
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .work-schedule-page .bulk-shift-select {
+        width: 100%;
         min-width: 0;
     }
 }
 
 
-/* Employee Dashboard Attendance Card */
+@media (max-width: 768px) {
+    .work-schedule-page .work-schedule-header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
 
-.employee-attendance-card {
-    margin-top: 0;
+    .work-schedule-page .bulk-shift-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .work-schedule-page .bulk-shift-confirm,
+    .work-schedule-page .work-schedule-header-actions>a {
+        align-self: flex-start;
+    }
 }
 
-.employee-attendance-empty {
-    min-height: 300px;
-    display: flex;
-    flex-direction: column;
+
+
+/* Align all three work-schedule controls horizontally */
+.work-schedule-page .work-schedule-header-actions {
+    align-items: flex-end;
+}
+
+.work-schedule-page .bulk-shift-form {
+    grid-template-rows: 22px 40px;
     align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 30px 20px;
 }
 
-.employee-attendance-empty-icon {
-    width: 88px;
-    height: 88px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 22px;
-    border-radius: 50%;
-    background: rgba(224, 0, 0, 0.10);
-    color: var(--myol-red);
-    font-size: 36px;
+.work-schedule-page .bulk-shift-form label.sr-only {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    align-self: center;
+    justify-self: center;
 }
 
-.employee-attendance-empty h3 {
-    color: var(--text-primary);
-    font-size: 22px;
-    margin-bottom: 10px;
+.work-schedule-page .bulk-shift-select,
+.work-schedule-page .bulk-shift-confirm {
+    grid-row: 2;
+    align-self: center;
 }
 
-.employee-attendance-empty p {
-    color: var(--text-muted);
-    font-size: 15px;
+.work-schedule-page .work-schedule-header-actions>a.btn {
+    align-self: flex-end;
 }
 
+
+
+
+/* Puce color for bulk shift controls */
+.work-schedule-page .bulk-shift-select {
+    background-color: #CC8899;
+    border-color: #B87587;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-select:focus {
+    outline-color: #CC8899;
+}
+
+.work-schedule-page .bulk-shift-confirm {
+    background-color: #CC8899;
+    border-color: #B87587;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-confirm:hover {
+    background-color: #BE778B;
+    border-color: #A96579;
+    color: #24151B;
+}
+
+.work-schedule-page .bulk-shift-confirm:focus-visible {
+    outline-color: #CC8899;
+}
 
 
 /* =========================================
-   FLOATING GLASSMORPHISM NAVBAR
-   Admin + Employee
+   EMPLOYEE SCHEDULE ASSIGNMENTS PAGE
    ========================================= */
 
-.admin-topbar {
-    position: sticky;
-    top: 12px;
-    z-index: 1000;
-
-    width: 100%;
-    height: auto;
-    min-height: 0;
-
-    display: flex;
-    justify-content: center;
-
-    padding: 0 24px;
-    margin: 12px 0 20px;
-
-    background: transparent;
-    border: none;
-    box-shadow: none;
+/* White Back to Schedules button */
+.employee-schedule-assignments-page .content-header .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
 }
 
-/* Floating glass container */
-.floating-navbar {
-    width: 72%;
-    max-width: 1100px;
-    min-height: 76px;
-
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 28px;
-
-    padding: 14px 26px;
-
-    /* Stronger glassmorphism */
-    background: rgba(30, 33, 38, 0.42);
-    border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 24px;
-
-    -webkit-backdrop-filter: blur(32px) saturate(180%);
-    backdrop-filter: blur(32px) saturate(180%);
-
-    box-shadow:
-        0 16px 45px rgba(0, 0, 0, 0.30),
-        0 0 22px rgba(255, 255, 255, 0.025),
-        inset 0 1px 0 rgba(255, 255, 255, 0.12),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.035);
-
-    transition:
-        background 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease,
-        transform 0.3s ease;
+.employee-schedule-assignments-page .content-header .btn-secondary:hover {
+    background: #929292;
+    border-color: #e8e8e8;
+    color: #202124;
 }
 
-.floating-navbar:hover {
-    background: rgba(55, 60, 68, 0.72);
-    border-color: rgba(255, 255, 255, 0.42);
-
-    box-shadow:
-        0 20px 55px rgba(0, 0, 0, 0.4),
-        0 0 28px rgba(255, 255, 255, 0.07),
-        inset 0 1px 0 rgba(255, 255, 255, 0.22);
-
-    transform: translateY(-2px);
+/* Keep assignment controls vertically centered in each row */
+.employee-schedule-assignments-page .data-table tbody td {
+    vertical-align: middle;
 }
 
-/* Page title */
-.floating-navbar .navbar-page-info {
-    min-width: 0;
-    flex: 1;
-}
-
-.floating-navbar .navbar-page-info h2 {
-    margin: 0 0 4px;
-    color: var(--text-primary);
-    font-size: 16px;
-    font-weight: 700;
-}
-
-.floating-navbar .navbar-page-info span {
-    display: block;
-    color: var(--text-muted);
-    font-size: 11px;
-}
-
-/* Right-side controls */
-.floating-navbar .navbar-right {
+.employee-schedule-assignments-page .data-table tbody td:last-child form {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 14px;
-    margin-left: auto;
+    gap: 8px;
+    margin: 0;
 }
 
-/* Notification button */
-.floating-navbar .navbar-icon-btn {
-    width: 40px;
-    height: 40px;
+.employee-schedule-assignments-page .data-table tbody td:last-child .form-group {
+    flex: 0 0 285px;
+    width: 285px;
+    min-width: 285px;
+    max-width: 285px;
+    margin: 0;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child select {
+    display: block;
+    width: 100%;
+    height: 42px;
+    min-height: 42px;
+    box-sizing: border-box;
+}
+
+.employee-schedule-assignments-page .data-table tbody td:last-child .btn-primary {
     flex-shrink: 0;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.045);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-
-    cursor: pointer;
-    transition: 0.2s ease;
-}
-
-.floating-navbar .navbar-icon-btn:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.22);
-}
-
-.floating-navbar .navbar-icon-btn svg {
-    width: 18px;
-    height: 18px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-}
-
-/* User dropdown trigger */
-.floating-navbar .navbar-user {
-    position: relative;
-    flex-shrink: 0;
-}
-
-.floating-navbar .navbar-user-toggle {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    padding: 5px 8px;
-    color: var(--text-primary);
-
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 14px;
-
-    cursor: pointer;
-    text-align: left;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.floating-navbar .navbar-user-toggle:hover,
-.floating-navbar .navbar-user-toggle[aria-expanded="true"] {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.1);
-}
-
-.floating-navbar .navbar-avatar {
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-
-    object-fit: cover;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.floating-navbar .navbar-avatar-fallback {
-    display: none;
-    width: 38px;
-    height: 38px;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-
-    color: #ffffff;
-    background: #e60012;
-    border-radius: 50%;
-    font-weight: 700;
-}
-
-.floating-navbar .navbar-user-info {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
-.floating-navbar .navbar-user-info strong {
-    max-width: 180px;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    height: 42px;
+    min-height: 42px;
+    padding: 0 16px;
     white-space: nowrap;
-
-    color: var(--text-primary);
-    font-size: 12px;
-    font-weight: 700;
 }
 
-.floating-navbar .navbar-user-info small {
-    color: var(--text-muted);
-    font-size: 9px;
-    letter-spacing: 0.8px;
+
+/* White Back to Schedules buttons on Create/Edit pages */
+.work-schedule-form-page .content-header .btn-secondary {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #202124;
 }
 
-.floating-navbar .navbar-chevron {
-    width: 14px;
-    height: 14px;
-    flex-shrink: 0;
-
-    fill: none;
-    stroke: var(--text-muted);
-    stroke-width: 1.8;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-
-    transition: transform 0.2s ease;
+.work-schedule-form-page .content-header .btn-secondary:hover {
+    background: #8b8b8b;
+    border-color: #e8e8e8;
+    color: #202124;
 }
 
-.floating-navbar .navbar-user-toggle[aria-expanded="true"] .navbar-chevron {
-    transform: rotate(180deg);
-}
 
-/* Dropdown menu */
-.floating-navbar .navbar-dropdown {
-    position: absolute;
-    top: calc(100% + 12px);
-    right: 0;
-    z-index: 1100;
 
-    width: 240px;
-    padding: 8px;
+/* =========================================
+   EMPLOYEE MY PROFILE — COMPACT LAYOUT
+   ========================================= */
 
-    background: rgba(25, 28, 32, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.13);
-    border-radius: 16px;
-
-    -webkit-backdrop-filter: blur(24px);
-    backdrop-filter: blur(24px);
-
-    box-shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
-}
-
-.floating-navbar .navbar-dropdown[hidden] {
-    display: none !important;
-}
-
-.floating-navbar .navbar-dropdown-header {
+.employee-profile-page .admin-content {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    padding: 12px;
-}
-
-.floating-navbar .navbar-dropdown-header strong {
-    color: var(--text-primary);
-    font-size: 13px;
-}
-
-.floating-navbar .navbar-dropdown-header small {
-    color: var(--text-muted);
-    font-size: 10px;
-    letter-spacing: 0.6px;
-}
-
-.floating-navbar .navbar-dropdown-link {
-    display: flex;
     align-items: center;
-    padding: 11px 12px;
-
-    color: var(--text-secondary);
-    text-decoration: none;
-    font-size: 12px;
-
-    border-radius: 9px;
-    transition: background 0.2s ease, color 0.2s ease;
 }
 
-.floating-navbar .navbar-dropdown-link:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.07);
+.employee-profile-page .content-header {
+    width: 100%;
+    max-width: 1100px;
 }
 
-.floating-navbar .navbar-dropdown-link.disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
+.employee-profile-page .content-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
 }
 
-.floating-navbar .navbar-dropdown-divider {
-    height: 1px;
-    margin: 6px 4px;
-    background: rgba(255, 255, 255, 0.1);
+.employee-profile-page .employee-details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+    padding: 22px 26px;
 }
 
-.floating-navbar .navbar-logout-link {
-    color: #ff626b;
+.employee-profile-page .employee-details-grid .form-group {
+    width: 100%;
+    max-width: 480px;
 }
 
-.floating-navbar .navbar-logout-link:hover {
-    color: #ff858b;
-    background: rgba(230, 0, 18, 0.12);
-}
-
-/* Responsive layout */
-@media (max-width: 1200px) {
-    .floating-navbar {
-        width: 84%;
-    }
+.employee-profile-page .employee-details-grid input,
+.employee-profile-page .employee-details-grid textarea {
+    width: 100%;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
-    .admin-topbar {
-        top: 8px;
-        padding: 0 12px;
-        margin: 8px 0 16px;
+    .employee-profile-page .content-card {
+        max-width: 100%;
     }
 
-    .floating-navbar {
+    .employee-profile-page .employee-details-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .employee-profile-page .employee-details-grid .form-group {
+        max-width: 100%;
+    }
+}
+
+
+
+/* =========================================
+   ADMIN MY PROFILE — COMPACT LAYOUT
+   ========================================= */
+
+.admin-profile-page .admin-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.admin-profile-page .content-header {
+    width: 100%;
+    max-width: 1100px;
+}
+
+.admin-profile-page .content-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.admin-profile-page .form-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.admin-profile-page .form-container .form-group {
+    width: 100%;
+    max-width: 480px;
+}
+
+.admin-profile-page .form-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 12px 8px;
+    box-sizing: border-box;
+}
+
+/* Center admin profile fields inside the card */
+.admin-profile-page .form-container .form-group {
+    width: 100%;
+    max-width: 480px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.admin-profile-page .form-container .form-group input,
+.admin-profile-page .form-container .form-group select {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+
+    .admin-profile-page .content-card,
+    .admin-profile-page .form-container {
+        max-width: 100%;
+    }
+
+    .admin-profile-page .form-container {
+        padding: 18px;
+    }
+
+    .admin-profile-page .form-container .form-group {
+        max-width: 100%;
+    }
+
+    .admin-profile-page .form-actions {
+        flex-wrap: wrap;
+    }
+}
+
+/* Reduce excess space below Admin Profile buttons */
+.admin-profile-page .content-card {
+    padding-bottom: 8px;
+}
+
+.admin-profile-page .form-actions {
+    margin-bottom: 0;
+    padding-bottom: 6;
+}
+
+.admin-profile-page .form-container {
+    padding-bottom: 0.5;
+}
+
+
+/* Add Employee: improve spacing inside information panels */
+.employee-create-grid>.content-card>.form-grid {
+    padding: 18px 22px 22px;
+    box-sizing: border-box;
+}
+
+.employee-create-grid>.content-card>.form-grid .form-group {
+    min-width: 0;
+}
+
+
+
+/* Employee Management: white Activate/Deactivate buttons */
+.employee-status-btn {
+    background-color: #ffffff;
+    color: #151515;
+    border: 1px solid #d1d5db;
+}
+
+.employee-status-btn:hover {
+    background-color: #e5e7eb;
+    color: #111111;
+    border-color: #d1d5db;
+}
+
+
+
+/* Employee Management - Filter button */
+.card-header .btn-secondary {
+    background-color: #80c4a2;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Filter Employees button hover */
+.card-header .btn-secondary:hover {
+    background-color: #49836b;
+    border-color: #000000;
+    color: #050505;
+}
+
+/* Employee Management - Filter dropdowns */
+#employee-filter-panel select {
+    background-color: #a7a7a7;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Dropdown options */
+#employee-filter-panel select option {
+    background-color: #a7a7a7;
+    color: #000000;
+}
+
+/* Employee Management - Reset button */
+#employee-filter-panel a.btn-secondary {
+    background-color: #CC8899;
+    border-color: #000000;
+    color: #020202;
+}
+
+/* Reset button hover */
+#employee-filter-panel a.btn-secondary:hover {
+    background-color: #aa7082;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Employee Management - Apply Filters button */
+#employee-filter-panel button[type="submit"] {
+    background-color: #80c4a2;
+    border-color: #000000;
+    color: #000000;
+}
+
+#employee-filter-panel button[type="submit"]:hover {
+    background-color: #49836b;
+    border-color: #000000;
+}
+
+
+
+/* Employee Management - Header search */
+.employee-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.employee-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.employee-search-form input[type="text"] {
+    width: 250px;
+    max-width: 100%;
+    padding: 10px 12px;
+    background-color: #1a1d20;
+    color: #ffffff;
+    border: 1px solid #3b4148;
+    border-radius: 6px;
+    outline: none;
+}
+
+.employee-search-form input[type="text"]::placeholder {
+    color: #a0a7af;
+}
+
+.employee-search-form input[type="text"]:focus {
+    border-color: #468C9B;
+    box-shadow: 0 0 0 2px rgba(70, 140, 155, 0.2);
+}
+
+.employee-search-form button {
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .employee-header-actions {
         width: 100%;
-        min-height: 60px;
-        gap: 10px;
-        padding: 10px 12px;
-        border-radius: 17px;
+        justify-content: flex-start;
     }
 
-    .floating-navbar .navbar-right {
-        gap: 7px;
+    .employee-search-form {
+        flex: 1;
+        min-width: 0;
     }
 
-    .floating-navbar .navbar-user-info strong {
-        max-width: 115px;
-    }
-
-    .floating-navbar .navbar-page-info h2 {
-        font-size: 14px;
-    }
-
-    .floating-navbar .navbar-page-info span {
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .floating-navbar .navbar-icon-btn {
-        width: 34px;
-        height: 34px;
-    }
-
-    .floating-navbar .navbar-avatar,
-    .floating-navbar .navbar-avatar-fallback {
-        width: 32px;
-        height: 32px;
-    }
-
-    .floating-navbar .navbar-user-toggle {
-        gap: 6px;
-        padding: 4px;
-    }
-
-    .floating-navbar .navbar-user-info strong {
-        max-width: 90px;
-        font-size: 10px;
-    }
-
-    .floating-navbar .navbar-user-info small {
-        font-size: 8px;
-    }
-
-    .floating-navbar .navbar-chevron {
-        display: none;
+    .employee-search-form input[type="text"] {
+        width: 100%;
+        min-width: 0;
     }
 }
 
 
-/* Premium ambient glow behind the floating navbar */
-.admin-topbar {
-    position: sticky;
-    isolation: isolate;
-    overflow: visible;
+/* Dashboard: evenly distribute Attendance Overview content */
+.attendance-overview {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 10px;
+    height: calc(100% - 75px);
+    min-height: 0;
 }
 
-.admin-topbar::before {
-    content: "";
-    position: absolute;
-
-    top: -28px;
-    left: 50%;
-    transform: translateX(-50%);
-
-    width: 76%;
-    height: 115px;
-
-    background: radial-gradient(ellipse at center,
-            rgba(230, 0, 18, 0.14) 0%,
-            rgba(230, 0, 18, 0.07) 38%,
-            rgba(230, 0, 18, 0.025) 62%,
-            transparent 78%);
-
-    filter: blur(28px);
-    pointer-events: none;
-    z-index: -1;
+.attendance-item {
+    flex: 1;
+    min-height: 0;
+    padding: 10px 12px;
 }
 
-/* =========================================
-   ANIMATED CRIMSON SMOKE — GLASS NAVBAR
-   ========================================= */
 
-.floating-navbar {
-    position: relative;
-    isolation: isolate;
+
+
+
+/* Dashboard: center each stat card's icon and text as one compact group */
+.dashboard-stats .dashboard-stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: left;
 }
 
-/* Smoke layers */
-.floating-navbar::before,
-.floating-navbar::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: -1;
-    background-repeat: no-repeat;
+/* Keep the icon compact */
+.dashboard-stats .dashboard-stat-card > .stat-icon {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    margin: 0;
 }
 
-/* Deep red smoke drifting from the left */
-.floating-navbar::before {
-    background:
-        radial-gradient(ellipse at 15% 120%,
-            rgba(230, 0, 18, 0.32) 0%,
-            rgba(190, 0, 20, 0.18) 25%,
-            transparent 58%),
-        radial-gradient(ellipse at 45% -50%,
-            rgba(180, 0, 25, 0.20) 0%,
-            transparent 55%),
-        radial-gradient(ellipse at 85% 130%,
-            rgba(230, 0, 18, 0.18) 0%,
-            transparent 48%);
-
-    background-size: 160% 220%, 150% 200%, 170% 240%;
-    background-position: 0% 100%, 100% 0%, 100% 100%;
-
-    filter: blur(13px);
-    opacity: 0.85;
-
-    animation: crimsonSmokeDrift 8s ease-in-out infinite alternate;
+/* Keep the text group at its natural width */
+.dashboard-stats .dashboard-stat-card > .stat-content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    text-align: center;
 }
 
-/* Softer crimson mist moving in the opposite direction */
-.floating-navbar::after {
-    background:
-        radial-gradient(ellipse at 75% 0%,
-            rgba(255, 25, 45, 0.20) 0%,
-            transparent 48%),
-        radial-gradient(ellipse at 35% 110%,
-            rgba(145, 0, 20, 0.28) 0%,
-            transparent 52%);
-
-    background-size: 180% 240%, 160% 220%;
-    background-position: 100% 0%, 0% 100%;
-
-    filter: blur(18px);
-    opacity: 0.75;
-
-    animation: crimsonSmokeFlow 11s ease-in-out infinite alternate;
+/* Remove unwanted horizontal margins */
+.dashboard-stats .dashboard-stat-card .stat-label,
+.dashboard-stats .dashboard-stat-card .stat-value,
+.dashboard-stats .dashboard-stat-card .stat-description {
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
 }
 
-/* Keep navbar content above the smoke */
-.floating-navbar>* {
-    position: relative;
-    z-index: 1;
-}
 
-/* Slow, fluid movement */
-@keyframes crimsonSmokeDrift {
-    0% {
-        background-position: 0% 100%, 100% 0%, 100% 100%;
-        transform: translate3d(-2%, 2%, 0) scale(1);
-    }
-
-    50% {
-        background-position: 65% 50%, 20% 70%, 30% 40%;
-        transform: translate3d(1%, -1%, 0) scale(1.04);
-    }
-
-    100% {
-        background-position: 100% 0%, 0% 100%, 0% 0%;
-        transform: translate3d(2%, 1%, 0) scale(1.02);
-    }
-}
-
-@keyframes crimsonSmokeFlow {
-    0% {
-        background-position: 100% 0%, 0% 100%;
-        transform: translate3d(2%, -1%, 0) scale(1.02);
-    }
-
-    50% {
-        background-position: 30% 60%, 70% 35%;
-        transform: translate3d(-1%, 1%, 0) scale(1.06);
-    }
-
-    100% {
-        background-position: 0% 100%, 100% 0%;
-        transform: translate3d(-2%, -1%, 0) scale(1);
-    }
-}
-
-/* Respect reduced-motion preferences */
-@media (prefers-reduced-motion: reduce) {
-
-    .floating-navbar::before,
-    .floating-navbar::after {
-        animation: none;
-    }
-}
 
 
 /* =========================================
-   COLLAPSIBLE SIDEBAR
-   Admin + Employee
+   TODAY'S ACTIVITY FEED
    ========================================= */
 
-.sidebar-toggle {
+.activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    min-width: 0;
+}
+
+.activity-item-icon {
+    flex: 0 0 40px;
     width: 40px;
     height: 40px;
-    flex-shrink: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
-
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.sidebar-toggle:hover {
-    background: rgba(230, 0, 18, 0.18);
-    border-color: rgba(230, 0, 18, 0.45);
-}
-
-.sidebar-toggle svg {
-    width: 20px;
-    height: 20px;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.8;
-    stroke-linecap: round;
-}
-
-/* Smooth sidebar and content movement */
-.admin-sidebar {
-    transition: transform 0.25s ease;
-}
-
-.admin-main {
-    transition: margin-left 0.25s ease, width 0.25s ease;
-}
-
-/* Collapsed desktop layout */
-.admin-layout.sidebar-collapsed .admin-sidebar {
-    transform: translateX(-100%);
-}
-
-.admin-layout.sidebar-collapsed .admin-main {
-    width: 100%;
-    margin-left: 0;
-}
-
-/* Keep collapsed layout working on mobile */
-@media (max-width: 700px) {
-    .admin-layout.sidebar-collapsed .admin-main {
-        width: 100%;
-        margin-left: 0;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-    .admin-sidebar,
-    .admin-main {
-        transition: none;
-    }
-}
-
-
-/* =========================================
-   TEAM CREDIT — ADMIN + EMPLOYEE
-   ========================================= */
-
-.team-credit {
-    position: relative;
-    left: auto;
-    right: auto;
-    bottom: auto;
-    transform: none;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-
-    width: fit-content;
-    max-width: calc(100% - 32px);
-    margin: 8px auto 16px;
-    padding: 7px 15px;
-
-    background: rgba(25, 28, 32, 0.78);
-    border: 1px solid rgba(255, 255, 255, 0.10);
-    border-radius: 20px;
-
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-
-    font-size: 10px;
-    white-space: nowrap;
-    pointer-events: none;
-}
-
-.team-credit-label {
-    color: #8d949d;
-}
-
-.team-credit-name {
-    color: #ff4545;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    font-size: 22px;
     font-weight: 700;
 }
 
-@media (max-width: 700px) {
-    .team-credit {
-        margin: 8px auto 16px;
-        padding: 6px 11px;
-        font-size: 9px;
+.activity-item-details {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.activity-item-details strong {
+    color: #f1f5f9;
+    font-size: 14px;
+}
+
+.activity-item-details span,
+.activity-item-details small {
+    color: #94a3b8;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.activity-item-status {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+}
+
+.activity-item-status span {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .activity-item {
+        gap: 9px;
+        padding: 11px;
+    }
+
+    .activity-item-icon {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        font-size: 19px;
+    }
+
+    .activity-item-status span {
+        white-space: normal;
+        overflow-wrap: anywhere;
     }
 }
 
 
-/* =========================================
-   TRAVELING CRIMSON LIGHT — GLASS NAVBAR
-   ========================================= */
 
-@property --navbar-border-angle {
-    syntax: "<angle>";
-    initial-value: 0deg;
-    inherits: false;
+
+.activity-scan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 5px 0;
 }
 
-.floating-navbar {
+.activity-scan-row small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.activity-scan-status {
+    flex: 0 0 auto;
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .activity-scan-row {
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .activity-scan-status {
+        white-space: normal;
+        text-align: right;
+    }
+}
+
+
+
+.activity-employee-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.activity-employee-photo {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #2a2d32;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.activity-employee-identity {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.activity-employee-identity strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.activity-employee-identity span {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.activity-employee-scans {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .activity-employee-photo {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+    }
+}
+
+
+
+/* Stack attendance details below employee identity */
+.activity-item-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.activity-item-vertical .activity-employee-header {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.activity-item-vertical .activity-employee-scans {
+    width: 100%;
+    padding-left: 0;
+}
+
+.activity-item-vertical .activity-scan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+/* Continuous glowing animation around employee profile pictures */
+.activity-employee-photo {
     position: relative;
-    isolation: isolate;
+    border: 1px solid rgba(200, 175, 230, 0.8);
+    animation: employeePhotoGlow 3s ease-in-out infinite;
+    will-change: box-shadow, border-color;
 }
 
-/* Animated light around the glass edge */
-.navbar-border-light {
-    position: absolute;
-    inset: -1px;
-    padding: 1.5px;
-    border-radius: inherit;
-    pointer-events: none;
-    z-index: 2;
+@keyframes employeePhotoGlow {
+    0%, 100% {
+        box-shadow:
+            /* Soft red base */
+            0 0 5px 1px rgba(255, 55, 75, 0.45),
+            0 0 11px 3px rgba(220, 35, 60, 0.3),
+            0 0 18px 5px rgba(190, 0, 45, 0.18),
 
-    background: conic-gradient(from var(--navbar-border-angle),
-            transparent 0deg,
-            transparent 275deg,
-            rgba(224, 0, 0, 0.12) 295deg,
-            rgba(255, 25, 40, 0.65) 315deg,
-            #ffb0b0 330deg,
-            #ff2020 342deg,
-            rgba(255, 25, 40, 0.5) 352deg,
-            transparent 360deg);
-
-    -webkit-mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-
-    mask:
-        linear-gradient(#fff 0 0) content-box,
-        linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-
-    animation: navbarBorderTravel 6s linear infinite;
-}
-
-@keyframes navbarBorderTravel {
-    from {
-        --navbar-border-angle: 0deg;
+            /* Gentle light purple overlay */
+            0 0 4px 1px rgba(200, 160, 255, 0.4),
+            0 0 9px 3px rgba(180, 120, 255, 0.22);
+        border-color: rgba(200, 160, 255, 0.75);
     }
 
-    to {
-        --navbar-border-angle: 360deg;
+    50% {
+        box-shadow:
+            /* Slightly stronger red */
+            0 0 7px 2px rgba(255, 45, 70, 0.65),
+            0 0 15px 4px rgba(235, 25, 60, 0.42),
+            0 0 24px 7px rgba(190, 0, 45, 0.28),
+
+            /* Soft purple highlight */
+            0 0 6px 2px rgba(220, 190, 255, 0.6),
+            0 0 13px 4px rgba(190, 140, 255, 0.38);
+        border-color: rgba(225, 205, 255, 0.9);
     }
 }
 
-/* Keep navbar content above the border effect */
-.floating-navbar>*:not(.navbar-border-light) {
+
+
+/* Premium employee attendance cards */
+.activity-item-vertical {
     position: relative;
-    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(165, 135, 190, 0.16);
+    border-radius: 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(34, 35, 42, 0.98),
+        rgba(27, 28, 34, 0.98)
+    );
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        transform 0.25s ease;
 }
 
-/* Respect reduced-motion preferences */
+.activity-item-vertical:hover {
+    border-color: rgba(190, 140, 230, 0.42);
+    background: linear-gradient(
+        135deg,
+        rgba(40, 34, 45, 0.98),
+        rgba(29, 29, 37, 0.98)
+    );
+    transform: translateY(-2px);
+}
+
+.activity-item-vertical .activity-employee-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 14px;
+}
+
+.activity-item-vertical .activity-employee-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.activity-item-vertical .activity-employee-identity strong {
+    color: #f5f0fa;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.activity-item-vertical .activity-employee-identity span {
+    color: #a8a0b5;
+    font-size: 11px;
+}
+
+/* Keep the existing profile-picture aura */
+.activity-item-vertical .activity-employee-photo {
+    flex-shrink: 0;
+}
+
+/* Attendance timeline rows */
+.activity-item-vertical .activity-employee-scans {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+}
+
+.activity-item-vertical .activity-scan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 34px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.activity-item-vertical .activity-scan-row:hover {
+    background: rgba(190, 140, 230, 0.07);
+    border-color: rgba(190, 140, 230, 0.14);
+}
+
+.activity-item-vertical .activity-scan-row small {
+    color: #c5bfd0;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.activity-item-vertical .activity-scan-status {
+    flex-shrink: 0;
+    font-size: 10px;
+    border-radius: 6px;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+    .activity-item-vertical {
+        padding: 12px;
+    }
+
+    .activity-item-vertical .activity-employee-header {
+        gap: 12px;
+    }
+
+    .activity-item-vertical .activity-scan-row {
+        gap: 8px;
+        padding: 7px;
+    }
+}
+
+
+/* Main Today's Activity container — subtle red neon accent */
+.activity-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 85, 105, 0.22);
+    border-radius: 14px;
+
+    background:
+        radial-gradient(
+            ellipse at top left,
+            rgba(180, 35, 55, 0.09),
+            transparent 55%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(29, 27, 32, 0.98),
+            rgba(24, 25, 29, 0.98)
+        );
+
+    box-shadow:
+        0 0 12px rgba(255, 55, 80, 0.045),
+        inset 0 1px 0 rgba(255, 150, 165, 0.035);
+
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+/* Gentle red highlight on hover */
+.activity-card:hover {
+    border-color: rgba(255, 85, 105, 0.38);
+
+    box-shadow:
+        0 0 18px rgba(255, 55, 80, 0.08),
+        inset 0 1px 0 rgba(255, 150, 165, 0.06);
+}
+
+/* Accent the section heading */
+.activity-card h2 {
+    text-shadow: 0 0 10px rgba(255, 90, 115, 0.16);
+}
+
+
+
+/* LIVE indicator for Today's Activity */
+.activity-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #16a34a;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+.activity-live-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.65);
+    animation: activity-live-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes activity-live-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(0.8);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .navbar-border-light {
+    .activity-live-dot {
         animation: none;
     }
 }
 
 
+/* Dynamic Today's Activity status */
+.activity-live-badge[data-status="checking"] {
+    color: #a7adb4;
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+.activity-live-badge[data-status="checking"] .activity-live-dot {
+    background: #a7adb4;
+    box-shadow: none;
+    animation: none;
+}
+
+.activity-live-badge[data-status="offline"] {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.activity-live-badge[data-status="offline"] .activity-live-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.55);
+    animation: none;
+}
+
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+}
+
+
+
+/* Soft glow animation for LIVE status */
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+    animation: liveTextGlow 2s ease-in-out infinite;
+}
+
+.activity-live-badge[data-status="live"] .activity-live-dot {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.65);
+    animation: liveDotGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes liveTextGlow {
+    0%, 100% {
+        text-shadow: 0 0 2px rgba(74, 222, 128, 0.25);
+    }
+    50% {
+        text-shadow:
+            0 0 5px rgba(74, 222, 128, 0.75),
+            0 0 10px rgba(74, 222, 128, 0.35);
+    }
+}
+
+@keyframes liveDotGlow {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(34, 197, 94, 0.45);
+    }
+    50% {
+        box-shadow:
+            0 0 8px rgba(34, 197, 94, 0.9),
+            0 0 13px rgba(34, 197, 94, 0.4);
+    }
+}
+
+
+
+/* Glowing LIVE badge box */
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.55);
+    animation: liveBoxGlow 2s ease-in-out infinite;
+}
+
+@keyframes liveBoxGlow {
+    0%, 100% {
+        box-shadow: 0 0 3px rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+    50% {
+        box-shadow:
+            0 0 7px rgba(34, 197, 94, 0.4),
+            0 0 14px rgba(34, 197, 94, 0.2);
+        border-color: rgba(74, 222, 128, 0.9);
+    }
+}
+
+
+
+/* Glowing OFFLINE badge box */
+.activity-live-badge[data-status="offline"] {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.55);
+    animation: offlineBoxGlow 2s ease-in-out infinite;
+}
+
+.activity-live-badge[data-status="offline"] .activity-live-dot {
+    background: #ef4444;
+    animation: offlineDotGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes offlineBoxGlow {
+    0%, 100% {
+        box-shadow: 0 0 3px rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        box-shadow:
+            0 0 7px rgba(239, 68, 68, 0.4),
+            0 0 14px rgba(239, 68, 68, 0.2);
+        border-color: rgba(248, 113, 113, 0.9);
+    }
+}
+
+@keyframes offlineDotGlow {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(239, 68, 68, 0.45);
+    }
+    50% {
+        box-shadow:
+            0 0 8px rgba(239, 68, 68, 0.9),
+            0 0 13px rgba(239, 68, 68, 0.4);
+    }
+}
+
+
 /* =========================================
-   RFID REGISTRATION — CARD SPACING
+   ATTENDANCE STATION — ANIMATED NAVBAR TOGGLE
+   Shortcut: Alt + H
    ========================================= */
 
-.rfid-registration-card {
-    padding: 0 22px 22px;
+/* Smooth navbar transitions */
+.attendance-station-page .admin-topbar {
+    transition:
+        opacity 350ms ease,
+        transform 350ms ease;
+    will-change: opacity, transform;
 }
 
-.rfid-registration-card>.card-header {
-    margin: 0 -22px 22px;
+/* Hide: fade out and slide upward */
+.attendance-station-page .admin-topbar.attendance-navbar-hiding {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
 }
 
-.rfid-registration-card .form-group {
-    margin-bottom: 22px;
+/* Fully hidden */
+.attendance-station-page .admin-topbar.attendance-navbar-hidden {
+    display: none !important;
 }
 
-.rfid-registration-card .form-actions {
-    margin: 24px -22px 0;
-    padding: 20px 22px 0;
+/* Show: start above the screen and fade in downward */
+.attendance-station-page .admin-topbar.attendance-navbar-showing {
+    animation: attendanceNavbarSlideDown 350ms ease forwards;
+    pointer-events: auto;
+}
+
+@keyframes attendanceNavbarSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .attendance-station-page .admin-topbar {
+        transition: none;
+    }
+
+    .attendance-station-page .admin-topbar.attendance-navbar-showing {
+        animation: none;
+    }
 }
 
 
-/* Live RFID reader connection status */
-.rfid-status-indicator {
-    background: var(--myol-red);
-    transition: background 0.2s ease, box-shadow 0.2s ease;
+/* Hide the sidebar scrollbar without disabling scrolling */
+.admin-sidebar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-.rfid-status-indicator.connected {
-    background: #22c55e;
-    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+.admin-sidebar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
 }
 
-.rfid-status:has(.rfid-status-indicator.connected) strong {
-    color: #4ade80;
->>>>>>> Stashed changes
+/* Hide sidebar navigation scrollbar while preserving scrolling */
+.sidebar-nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
 }

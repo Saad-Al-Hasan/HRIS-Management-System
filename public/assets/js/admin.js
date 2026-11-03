@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -53,103 +52,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const rfidConnectionText = document.getElementById('rfid-connection-text');
     const rfidConnectionDescription = document.getElementById('rfid-connection-description');
 
-    if (
-        rfidIndicator &&
-        rfidConnectionText &&
-        rfidConnectionDescription
-    ) {
-        async function updateRfidStatus() {
-            try {
-                const response = await fetch(
-                    '/HRIS-Management-System/public/rfid-reader-status.json?t=' + Date.now(),
-                    { cache: 'no-store' }
-                );
+    const activityStatusBadge =
+        document.getElementById('activity-feed-status');
 
-                if (!response.ok) {
-                    throw new Error('HTTP ' + response.status);
-                }
+    const activityStatusText =
+        document.getElementById('activity-feed-status-text');
 
-                const status = await response.json();
+    function updateActivityBadge(connected) {
+        if (!activityStatusBadge || !activityStatusText) return;
 
-                if (status.connected === true) {
-                    rfidIndicator.classList.add('connected');
-                    rfidConnectionText.textContent = 'Connected';
-                    rfidConnectionDescription.textContent =
-                        'JT308 USB reader is detected.';
-                } else {
-                    rfidIndicator.classList.remove('connected');
-                    rfidConnectionText.textContent = 'Not Connected';
-                    rfidConnectionDescription.textContent =
-                        'Connect the JT308 USB reader.';
-                }
-            } catch (error) {
-                rfidIndicator.classList.remove('connected');
-                rfidConnectionText.textContent = 'Status Unavailable';
-                rfidConnectionDescription.textContent =
-                    'Cannot read reader status. Check the Windows monitor.';
-
-                console.error('RFID status check failed:', error);
-            }
-        }
-
-        updateRfidStatus();
-        setInterval(updateRfidStatus, 2000);
+        activityStatusBadge.dataset.status = connected ? 'live' : 'offline';
+        activityStatusText.textContent = connected ? 'LIVE' : 'OFFLINE';
     }
-});
-=======
-
-document.addEventListener('DOMContentLoaded', function () {
-
-    // =========================================
-    // PROFILE DROPDOWN
-    // =========================================
-
-    const userMenu = document.querySelector('.navbar-user-menu');
-    const userMenuButton = document.getElementById('userMenuButton');
-
-    if (userMenu && userMenuButton) {
-
-        userMenuButton.addEventListener('click', function (event) {
-            event.stopPropagation();
-
-            const isOpen = userMenu.classList.toggle('open');
-
-            userMenuButton.setAttribute(
-                'aria-expanded',
-                isOpen ? 'true' : 'false'
-            );
-        });
-
-        document.addEventListener('click', function (event) {
-            if (!userMenu.contains(event.target)) {
-                userMenu.classList.remove('open');
-
-                userMenuButton.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
-            }
-        });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                userMenu.classList.remove('open');
-
-                userMenuButton.setAttribute(
-                    'aria-expanded',
-                    'false'
-                );
-            }
-        });
-    }
-
-    // =========================================
-    // LIVE JT308 RFID READER STATUS
-    // =========================================
-
-    const rfidIndicator = document.getElementById('rfid-status-indicator');
-    const rfidConnectionText = document.getElementById('rfid-connection-text');
-    const rfidConnectionDescription = document.getElementById('rfid-connection-description');
 
     if (
         rfidIndicator &&
@@ -174,17 +88,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     rfidConnectionText.textContent = 'Connected';
                     rfidConnectionDescription.textContent =
                         'JT308 USB reader is detected.';
+                    updateActivityBadge(true);
                 } else {
                     rfidIndicator.classList.remove('connected');
                     rfidConnectionText.textContent = 'Not Connected';
                     rfidConnectionDescription.textContent =
                         'Connect the JT308 USB reader.';
+                    updateActivityBadge(false);
                 }
             } catch (error) {
                 rfidIndicator.classList.remove('connected');
                 rfidConnectionText.textContent = 'Status Unavailable';
                 rfidConnectionDescription.textContent =
                     'Cannot read reader status. Check the Windows monitor.';
+                updateActivityBadge(false);
 
                 console.error('RFID status check failed:', error);
             }
@@ -193,5 +110,47 @@ document.addEventListener('DOMContentLoaded', function () {
         updateRfidStatus();
         setInterval(updateRfidStatus, 2000);
     }
+
+    // =========================================
+    // ATTENDANCE STATION NAVBAR TOGGLE (ALT + H)
+    // =========================================
+
+    const attendanceStation = document.querySelector('.attendance-station-page');
+
+    if (attendanceStation) {
+        const topNavbar = attendanceStation.querySelector('.admin-topbar');
+
+        if (topNavbar) {
+            document.addEventListener('keydown', function (event) {
+                if (
+                    event.altKey &&
+                    event.key.toLowerCase() === 'h' &&
+                    !event.ctrlKey &&
+                    !event.metaKey
+                ) {
+                    event.preventDefault();
+
+                    if (topNavbar.classList.contains('attendance-navbar-hidden')) {
+                        // Show navbar: fade in while sliding down
+                        topNavbar.classList.remove('attendance-navbar-hidden');
+                        topNavbar.classList.add('attendance-navbar-showing');
+
+                        setTimeout(() => {
+                            topNavbar.classList.remove('attendance-navbar-showing');
+                        }, 350);
+
+                    } else {
+                        // Hide navbar: fade out while sliding up
+                        topNavbar.classList.add('attendance-navbar-hiding');
+
+                        setTimeout(() => {
+                            topNavbar.classList.remove('attendance-navbar-hiding');
+                            topNavbar.classList.add('attendance-navbar-hidden');
+                        }, 350);
+                    }
+                }
+            });
+        }
+    }
+
 });
->>>>>>> Stashed changes

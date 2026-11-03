@@ -6,7 +6,6 @@ interface RfidRegistrationServiceInterface
 {
     public function register(
         int $employeeId,
-        string $rfidIdentifier,
-        ?int $userId = null
+        string $rfidIdentifier
     ): array;
 }

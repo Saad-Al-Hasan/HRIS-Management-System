@@ -1,0 +1,1032 @@
+/* =========================================================
+   MYOL SMART ATTENDANCE TERMINAL
+   Dedicated visual theme — isolated from admin.css
+   ========================================================= */
+
+.attendance-terminal-page {
+    background:
+        radial-gradient(ellipse at 50% 45%, rgba(13, 35, 73, .20), transparent 55%),
+        #050608;
+    min-height: 100vh;
+}
+
+.attendance-terminal {
+    color: #eef4ff;
+    padding: 28px;
+}
+
+.terminal-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.terminal-eyebrow {
+    display: block;
+    color: #ff5365;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-bottom: 8px;
+}
+
+.terminal-heading h1 {
+    color: #f8fafc;
+    font-size: clamp(24px, 3vw, 34px);
+    letter-spacing: -.8px;
+    margin: 0 0 7px;
+}
+
+.terminal-heading p {
+    color: #8491a6;
+    font-size: 13px;
+    margin: 0;
+}
+
+.terminal-online {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+    color: #86efac;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    padding: 12px 16px;
+    border: 1px solid rgba(34, 197, 94, .22);
+    border-radius: 30px;
+    background: rgba(34, 197, 94, .055);
+}
+
+.online-dot,
+.footer-green-dot,
+.state-dot {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 12px rgba(34, 197, 94, .8);
+}
+
+.online-dot {
+    animation: terminalGreenPulse 2s ease-in-out infinite;
+}
+
+/* Main terminal enclosure */
+
+.terminal-shell {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #253044;
+    border-radius: 20px;
+    background:
+        radial-gradient(ellipse at 50% 43%, rgba(20, 54, 106, .14), transparent 48%),
+        linear-gradient(145deg, #0b0e15, #07090d 65%, #0a0b11);
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, .38),
+        inset 0 1px rgba(255, 255, 255, .025);
+}
+
+
+.terminal-topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 26px;
+    border-bottom: 1px solid rgba(148, 163, 184, .12);
+    background: rgba(255, 255, 255, .012);
+}
+
+.terminal-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.terminal-brand-icon {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 42px;
+    flex: 0 0 48px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: #080b11;
+    border: 1px solid rgba(148, 163, 184, .2);
+    box-shadow: 0 0 20px rgba(239, 35, 60, .12);
+}
+
+.terminal-brand-icon img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.terminal-brand strong,
+.terminal-brand span,
+.terminal-clock strong,
+.terminal-clock span {
+    display: block;
+}
+
+.terminal-brand strong {
+    color: #f8fafc;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+}
+
+.terminal-brand div>span {
+    margin-top: 5px;
+    color: #77849a;
+    font-size: 9px;
+    letter-spacing: 1.4px;
+}
+
+.terminal-clock {
+    text-align: right;
+}
+
+.terminal-clock strong {
+    color: #eaf2ff;
+    font-size: 25px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+}
+
+.terminal-clock span {
+    color: #8290a5;
+    margin-top: 4px;
+    font-size: 10px;
+    letter-spacing: 1px;
+}
+
+/* Scanner area */
+
+.terminal-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px 24px 34px;
+}
+
+.terminal-instructions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    color: #8ea4c5;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.instruction-line {
+    display: block;
+    width: clamp(20px, 5vw, 60px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #365c96);
+}
+
+.instruction-line:last-child {
+    transform: rotate(180deg);
+}
+
+.scanner-area {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 330px;
+    height: 330px;
+    max-width: 90vw;
+    margin: 10px 0 0;
+    isolation: isolate;
+}
+
+.scanner-orbit {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.orbit-one {
+    inset: 8px;
+    border: 1px solid rgba(59, 130, 246, .48);
+    box-shadow:
+        0 0 25px rgba(37, 99, 235, .08),
+        inset 0 0 25px rgba(37, 99, 235, .05);
+    animation: terminalOrbitBreath 4s ease-in-out infinite;
+}
+
+.orbit-two {
+    inset: 22px;
+    border: 2px solid transparent;
+    border-top-color: #4387ff;
+    border-right-color: rgba(239, 35, 60, .85);
+    border-bottom-color: rgba(59, 130, 246, .18);
+    border-left-color: rgba(239, 35, 60, .28);
+    border-radius: 50%;
+    box-shadow:
+        0 0 12px rgba(59, 130, 246, .22),
+        0 0 22px rgba(239, 35, 60, .12);
+    animation: terminalSpin 3s linear infinite;
+}
+
+.orbit-three {
+    inset: 37px;
+    border: 1px dashed rgba(148, 163, 184, .22);
+    animation: terminalSpin 28s linear infinite reverse;
+}
+
+.scanner-core {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    place-items: center;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 40%, rgba(23, 50, 91, .6), transparent 65%),
+        #080c14;
+    border: 2px solid rgba(59, 130, 246, .7);
+    box-shadow:
+        0 0 20px rgba(37, 99, 235, .3),
+        0 0 55px rgba(37, 99, 235, .17),
+        0 0 100px rgba(239, 35, 60, .08),
+        inset 0 0 32px rgba(37, 99, 235, .13);
+    animation: terminalCoreBreath 3.2s ease-in-out infinite;
+}
+
+.scanner-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: 184px;
+    height: 184px;
+    border-radius: 50%;
+    border: 1px solid rgba(239, 35, 60, .3);
+    background: radial-gradient(circle, #101827, #080b11 72%);
+}
+
+.scanner-icon {
+    width: 48px;
+    height: 48px;
+    fill: none;
+    stroke: #78b5ff;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 9px rgba(59, 130, 246, .65));
+}
+
+.scanner-label {
+    color: #8fbaff;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 5px;
+    padding-left: 5px;
+}
+
+.scanner-sweep {
+    position: absolute;
+    z-index: 3;
+    left: 50%;
+    top: 50%;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.scanner-sweep::before {
+    content: "";
+    position: absolute;
+    left: 5%;
+    right: 5%;
+    top: 50%;
+    height: 2px;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(96, 165, 250, .05),
+            #60a5fa,
+            rgba(239, 35, 60, .7),
+            transparent);
+    box-shadow: 0 0 14px #3b82f6;
+    animation: terminalScanSweep 3.6s ease-in-out infinite;
+}
+
+/* Text under scanner */
+
+.scanner-copy {
+    text-align: center;
+    margin-top: 2px;
+}
+
+.scanner-state {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+    color: #86efac;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 2.5px;
+}
+
+.state-dot {
+    animation: terminalGreenPulse 2s ease-in-out infinite;
+}
+
+.scanner-copy h2 {
+    margin: 17px 0 9px;
+    color: #f8fafc;
+    font-size: clamp(17px, 2vw, 23px);
+    letter-spacing: 1.2px;
+    font-weight: 800;
+    text-align: center;
+}
+
+.scanner-copy p {
+    color: #8795ab;
+    font-size: 12px;
+    line-height: 1.7;
+    margin: 0;
+    text-align: center;
+}
+
+/* RFID form */
+
+.terminal-scan-form {
+    width: min(100%, 490px);
+    margin-top: 27px;
+}
+
+.terminal-scan-form label {
+    display: block;
+    margin-bottom: 10px;
+    color: #9eacc2;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.terminal-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 0 15px;
+    border: 1px solid #27354b;
+    border-radius: 10px;
+    background: rgba(3, 6, 12, .8);
+    transition: border-color .2s, box-shadow .2s;
+}
+
+.terminal-input-wrap:focus-within {
+    border-color: #4788ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, .1), 0 0 25px rgba(59, 130, 246, .09);
+}
+
+.input-indicator {
+    width: 7px;
+    height: 7px;
+    flex: 0 0 7px;
+    border-radius: 50%;
+    background: #60a5fa;
+    box-shadow: 0 0 12px #3b82f6;
+}
+
+.terminal-input-wrap input {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: #f1f5f9;
+    background: transparent;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+}
+
+.terminal-input-wrap input::placeholder {
+    color: #56657c;
+}
+
+.input-tag {
+    flex: 0 0 auto;
+    color: #66758d;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+
+.terminal-submit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    min-height: 48px;
+    margin-top: 13px;
+    padding: 0 17px;
+    border: 1px solid rgba(248, 63, 80, .65);
+    border-radius: 9px;
+    color: white;
+    background: linear-gradient(105deg, #b91c31, #ef233c 60%, #c81e39);
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(239, 35, 60, .13);
+    transition: transform .2s, box-shadow .2s, filter .2s;
+}
+
+.terminal-submit:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+    box-shadow: 0 10px 32px rgba(239, 35, 60, .24);
+}
+
+.terminal-submit span:last-child {
+    font-size: 20px;
+}
+
+.terminal-helper {
+    margin: 12px 0 0;
+    text-align: center;
+    color: #627087;
+    font-size: 10px;
+}
+
+/* Scan result banners */
+
+.terminal-message {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: min(100%, 490px);
+    margin-top: 22px;
+    padding: 14px 17px;
+    border: 1px solid;
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.terminal-message strong {
+    font-size: 10px;
+    letter-spacing: 1.4px;
+}
+
+.terminal-error {
+    color: #fda4af;
+    background: rgba(127, 29, 29, .18);
+    border-color: rgba(248, 63, 80, .4);
+    box-shadow: inset 3px 0 #ef233c, 0 0 24px rgba(239, 35, 60, .05);
+}
+
+.terminal-success {
+    color: #86efac;
+    background: rgba(20, 83, 45, .18);
+    border-color: rgba(34, 197, 94, .38);
+    box-shadow: inset 3px 0 #22c55e, 0 0 24px rgba(34, 197, 94, .06);
+}
+
+/* Footer */
+
+.terminal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 17px 25px;
+    border-top: 1px solid rgba(148, 163, 184, .12);
+    color: #64748b;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    background: rgba(0, 0, 0, .15);
+}
+
+.terminal-footer>span:first-child {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.footer-green-dot {
+    width: 6px;
+    height: 6px;
+    flex-basis: 6px;
+}
+
+/* Animation */
+
+@keyframes terminalCoreBreath {
+
+    0%,
+    100% {
+        border-color: rgba(59, 130, 246, .7);
+        box-shadow:
+            0 0 20px rgba(37, 99, 235, .3),
+            0 0 55px rgba(37, 99, 235, .17),
+            0 0 100px rgba(239, 35, 60, .08),
+            inset 0 0 32px rgba(37, 99, 235, .13);
+    }
+
+    50% {
+        border-color: rgba(239, 35, 60, .8);
+        box-shadow:
+            0 0 28px rgba(239, 35, 60, .35),
+            0 0 65px rgba(37, 99, 235, .22),
+            0 0 115px rgba(239, 35, 60, .12),
+            inset 0 0 38px rgba(239, 35, 60, .1);
+    }
+}
+
+@keyframes terminalOrbitBreath {
+
+    0%,
+    100% {
+        transform: scale(.97);
+        opacity: .55;
+    }
+
+    50% {
+        transform: scale(1.035);
+        opacity: 1;
+    }
+}
+
+@keyframes terminalSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes terminalScanSweep {
+
+    0%,
+    100% {
+        transform: translateY(-72px);
+        opacity: 0;
+    }
+
+    15%,
+    80% {
+        opacity: .85;
+    }
+
+    50% {
+        transform: translateY(72px);
+        opacity: .9;
+    }
+}
+
+@keyframes terminalGreenPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        box-shadow: 0 0 12px rgba(34, 197, 94, .8);
+    }
+
+    50% {
+        opacity: .55;
+        box-shadow: 0 0 5px rgba(34, 197, 94, .4);
+    }
+}
+
+/* Responsive layout */
+
+@media (max-width: 700px) {
+    .attendance-terminal {
+        padding: 16px;
+    }
+
+    .terminal-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .terminal-online {
+        padding: 9px 12px;
+    }
+
+    .terminal-topbar {
+        padding: 16px;
+    }
+
+    .terminal-clock strong {
+        font-size: 19px;
+        letter-spacing: 1px;
+    }
+
+    .terminal-main {
+        padding: 25px 15px 28px;
+    }
+
+    .scanner-area {
+        width: 290px;
+        height: 290px;
+    }
+
+    .scanner-core {
+        width: 190px;
+        height: 190px;
+    }
+
+    .scanner-inner {
+        width: 158px;
+        height: 158px;
+    }
+
+    .scanner-sweep {
+        width: 165px;
+        height: 165px;
+    }
+
+    .terminal-footer {
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .attendance-terminal-page *,
+    .attendance-terminal-page *::before,
+    .attendance-terminal-page *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+
+
+/* =========================================================
+   LIVE JT308 READER STATUS
+   ========================================================= */
+
+.reader-status-offline {
+    color: #f87171 !important;
+    border-color: rgba(248, 63, 80, .38) !important;
+}
+
+.terminal-online.reader-status-offline {
+    background: rgba(127, 29, 29, .16) !important;
+}
+
+.reader-status-offline .online-dot,
+.reader-status-offline .state-dot,
+.reader-status-offline .footer-green-dot {
+    background: #ef4444 !important;
+    box-shadow: 0 0 12px rgba(239, 68, 68, .85) !important;
+    animation: terminalRedPulse 1.8s ease-in-out infinite;
+}
+
+.reader-status-connected {
+    color: #86efac !important;
+    border-color: rgba(34, 197, 94, .4) !important;
+}
+
+.terminal-online.reader-status-connected {
+    background: rgba(20, 83, 45, .18) !important;
+}
+
+.reader-status-connected .online-dot,
+.reader-status-connected .state-dot,
+.reader-status-connected .footer-green-dot {
+    background: #22c55e !important;
+    box-shadow: 0 0 12px rgba(34, 197, 94, .85) !important;
+    animation: terminalGreenPulse 2s ease-in-out infinite;
+}
+
+/* Change scanner lighting with the real reader state. */
+
+.attendance-terminal-page.reader-connected .scanner-core {
+    border-color: rgba(34, 197, 94, .85);
+    box-shadow:
+        0 0 25px rgba(34, 197, 94, .32),
+        0 0 65px rgba(34, 197, 94, .16),
+        inset 0 0 35px rgba(34, 197, 94, .12);
+}
+
+.attendance-terminal-page.reader-connected .scanner-icon {
+    stroke: #86efac;
+    filter: drop-shadow(0 0 9px rgba(34, 197, 94, .7));
+}
+
+.attendance-terminal-page.reader-connected .scanner-label {
+    color: #86efac;
+}
+
+.attendance-terminal-page.reader-disconnected .scanner-core {
+    border-color: rgba(239, 68, 68, .8);
+    box-shadow:
+        0 0 25px rgba(239, 68, 68, .22),
+        0 0 60px rgba(239, 68, 68, .12),
+        inset 0 0 35px rgba(239, 68, 68, .1);
+}
+
+.attendance-terminal-page.reader-disconnected .scanner-icon {
+    stroke: #f87171;
+    filter: drop-shadow(0 0 9px rgba(239, 68, 68, .6));
+}
+
+.attendance-terminal-page.reader-disconnected .scanner-label {
+    color: #fca5a5;
+}
+
+@keyframes terminalRedPulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .55;
+    }
+}
+
+
+
+/* =========================================================
+   CONTINUOUS BLUE + RED TRAIL AROUND THE TERMINAL SHELL
+   The trail follows the actual rounded rectangle perimeter.
+   ========================================================= */
+
+@property --terminal-border-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+/* Keep the shell as the positioning context. */
+.terminal-shell {
+    position: relative;
+    isolation: isolate;
+}
+
+/* Ensure no previous top-edge line remains. */
+.terminal-shell::before {
+    content: none !important;
+}
+
+/* Thin animated gradient border around all four edges. */
+.terminal-shell::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 2px;
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 10;
+
+    background: conic-gradient(
+        from var(--terminal-border-angle),
+        transparent 0deg,
+        transparent 205deg,
+        #3b82f6 225deg,
+        #8bbcff 238deg,
+        #3b82f6 250deg,
+        transparent 263deg,
+        transparent 278deg,
+        #ef233c 298deg,
+        #ff8290 311deg,
+        #ef233c 324deg,
+        transparent 337deg,
+        transparent 360deg
+    );
+
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+
+    filter:
+        drop-shadow(0 0 3px rgba(59, 130, 246, .65))
+        drop-shadow(0 0 4px rgba(239, 35, 60, .45));
+
+    animation: terminalBorderTrail 4s linear infinite;
+}
+
+@keyframes terminalBorderTrail {
+    from {
+        --terminal-border-angle: 0deg;
+    }
+
+    to {
+        --terminal-border-angle: 360deg;
+    }
+}
+
+
+
+/* =========================================================
+   CENTERED EMPLOYEE ATTENDANCE RESULT CARD
+   ========================================================= */
+
+.attendance-result-card {
+    width: min(100%, 1000px);
+    box-sizing: border-box;
+    margin: 22px auto 0;
+    padding: 22px 26px;
+    gap: 22px;
+    color: #d1fae5;
+    background:
+        radial-gradient(ellipse at 50% 50%, rgba(16, 185, 129, .08), transparent 75%),
+        rgba(2, 35, 24, .55);
+    border: 1px solid #10b981;
+    border-radius: 14px;
+    box-shadow:
+        inset 3px 0 #10b981,
+        0 0 24px rgba(16, 185, 129, .07);
+    text-align: center;
+}
+
+.attendance-result-card .attendance-result-heading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    color: #34f5a1;
+    font-size: 17px;
+    letter-spacing: 1.2px;
+}
+
+.attendance-result-check {
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 32px;
+    border: 2px solid #34f5a1;
+    border-radius: 50%;
+    font-size: 22px;
+    line-height: 1;
+}
+
+.attendance-result-content {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    align-items: center;
+    gap: 26px;
+    width: 100%;
+}
+
+.attendance-result-photo-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 24px;
+    border-right: 1px solid rgba(52, 245, 161, .3);
+}
+
+.attendance-result-photo {
+    display: block;
+    width: 118px;
+    height: 118px;
+    object-fit: cover;
+    border: 2px solid #34f5a1;
+    border-radius: 50%;
+    background: rgba(52, 245, 161, .08);
+    box-shadow: 0 0 22px rgba(52, 245, 161, .08);
+}
+
+.attendance-result-details {
+    min-width: 0;
+    text-align: left;
+}
+
+.attendance-result-identity,
+.attendance-result-outcome {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 20px;
+}
+
+.attendance-result-identity {
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(52, 245, 161, .25);
+}
+
+.attendance-result-rfid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px;
+    color: #a7cdbd;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+.attendance-result-rfid strong {
+    color: #f0fdf4;
+    font-size: 17px;
+    letter-spacing: .4px;
+}
+
+.attendance-result-name {
+    padding-left: 20px;
+    border-left: 1px solid rgba(52, 245, 161, .25);
+    color: #f0fdf4;
+    font-size: 19px;
+    font-weight: 750;
+    overflow-wrap: anywhere;
+}
+
+.attendance-result-outcome {
+    padding-top: 16px;
+}
+
+.attendance-result-status {
+    color: #34f5a1;
+    font-size: 16px;
+    font-weight: 800;
+    overflow-wrap: anywhere;
+}
+
+.attendance-result-time {
+    padding-left: 20px;
+    border-left: 1px solid rgba(52, 245, 161, .25);
+    color: #d1fae5;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+
+/* Tablet and mobile layout */
+@media (max-width: 700px) {
+    .attendance-result-card {
+        padding: 18px 14px;
+        gap: 18px;
+    }
+
+    .attendance-result-card .attendance-result-heading {
+        font-size: 14px;
+        letter-spacing: .7px;
+    }
+
+    .attendance-result-content {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .attendance-result-photo-wrap {
+        padding: 0 0 16px;
+        border-right: 0;
+        border-bottom: 1px solid rgba(52, 245, 161, .25);
+    }
+
+    .attendance-result-photo {
+        width: 96px;
+        height: 96px;
+    }
+
+    .attendance-result-details {
+        text-align: center;
+    }
+
+    .attendance-result-identity,
+    .attendance-result-outcome {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .attendance-result-identity {
+        padding-bottom: 14px;
+    }
+
+    .attendance-result-name,
+    .attendance-result-time {
+        padding: 0;
+        border-left: 0;
+        text-align: center;
+    }
+
+    .attendance-result-rfid {
+        justify-content: center;
+    }
+
+    .attendance-result-status {
+        text-align: center;
+    }
+
+    .attendance-result-outcome {
+        padding-top: 14px;
+    }
+}
