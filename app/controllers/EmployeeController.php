@@ -5,16 +5,19 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Middleware.php';
 require_once __DIR__ . '/../models/Employee.php';
 require_once __DIR__ . '/../models/RfidCard.php';
+require_once __DIR__ . '/../models/WorkSchedule.php';
 
 class EmployeeController extends Controller
 {
     private Employee $employeeModel;
     private RfidCard $rfidCardModel;
+    private WorkSchedule $workScheduleModel;
 
     public function __construct()
     {
         $this->employeeModel = new Employee();
         $this->rfidCardModel = new RfidCard();
+        $this->workScheduleModel = new WorkSchedule();
     }
 
     public function dashboard(): void
@@ -31,6 +34,18 @@ class EmployeeController extends Controller
         }
 
         $employee = $this->employeeModel->findByUserId($userId);
+
+        $assignedSchedule = null;
+
+        if (
+            $employee !== null &&
+            !empty($employee['employee_id'])
+        ) {
+            $assignedSchedule = $this->workScheduleModel
+                ->findEffectiveScheduleForEmployee(
+                    (int) $employee['employee_id']
+                );
+        }
 
         $rfidIdentifier = 'Not assigned';
 
@@ -50,6 +65,7 @@ class EmployeeController extends Controller
         $this->view('employee/dashboard', [
             'employee' => $employee,
             'rfidIdentifier' => $rfidIdentifier,
+            'assignedSchedule' => $assignedSchedule,
         ]);
     }
 
@@ -77,6 +93,17 @@ class EmployeeController extends Controller
             return;
         }
 
+
+        $assignedSchedule = null;
+
+        if (!empty($employee['employee_id'])) {
+            $assignedSchedule = $this->workScheduleModel
+                ->findEffectiveScheduleForEmployee(
+                    (int) $employee['employee_id']
+                );
+        }
+
+
         $rfidCard = null;
 
         if (!empty($employee['employee_id'])) {
@@ -89,7 +116,8 @@ class EmployeeController extends Controller
 
         $this->view('employee/profile', [
             'employee' => $employee,
-            'rfidIdentifier' => $rfidIdentifier
+            'rfidIdentifier' => $rfidIdentifier,
+            'assignedSchedule' => $assignedSchedule
         ]);
     }
 
@@ -134,9 +162,10 @@ class EmployeeController extends Controller
             return;
         }
 
-        if ($file['size'] > 5 * 1024 * 1024) {
+        // Maximum upload size: 1 MB.
+        if ($file['size'] > 1024 * 1024) {
             $_SESSION['employee_profile_picture_error'] =
-                'The profile picture must be 5 MB or smaller.';
+                'The profile picture must be 1 MB or smaller.';
 
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=employee-profile'

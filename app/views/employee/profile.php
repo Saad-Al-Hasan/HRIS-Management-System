@@ -11,7 +11,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
 ?>
 
-<div class="admin-main">
+<div class="admin-main employee-profile-page">
 
     <?php require_once __DIR__ . '/../admin/layouts/navbar.php'; ?>
 
@@ -126,7 +126,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
                             accept=".png,.jpg,.jpeg,image/png,image/jpeg" required style="display: none;">
 
                         <div style="margin-top: 8px; color: var(--text-muted); font-size: 11px;">
-                            PNG, JPG or JPEG · Maximum 5 MB
+                            PNG, JPG or JPEG · Maximum 1 MB
                         </div>
 
                         <div id="employee-picture-status" style="margin-top: 8px; font-size: 12px;" aria-live="polite">
@@ -162,10 +162,11 @@ require_once __DIR__ . '/layouts/sidebar.php';
                                 return;
                             }
 
-                            if (file.size > 5 * 1024 * 1024) {
-                                status.textContent = 'The image must be 5 MB or smaller.';
+                            if (file.size > 1024 * 1024) {
+                                alert('The profile picture must be 1 MB or smaller.');
                                 input.value = '';
                                 filename.textContent = 'Choose a Profile Picture';
+                                status.textContent = '';
                                 return;
                             }
 
@@ -220,6 +221,13 @@ require_once __DIR__ . '/layouts/sidebar.php';
                     </div>
 
                     <div class="form-group">
+                        <label>Assigned Shift</label>
+                        <input type="text"
+                            value="<?= htmlspecialchars($assignedSchedule['name'] ?? 'Not available', ENT_QUOTES, 'UTF-8') ?>"
+                            readonly>
+                    </div>
+
+                    <div class="form-group">
                         <label>Phone</label>
                         <input type="text" value="<?= htmlspecialchars($employee['phone'] ?? '') ?>" readonly>
                     </div>
@@ -252,7 +260,15 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
                 </div>
 
-                <div class="form-actions" style="display:flex; justify-content:flex-start; gap:10px; margin-top:24px;">
+                <div class="form-actions" style="
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding: 16px 12px 8px;
+    box-sizing: border-box;
+">
                     <a href="/HRIS-Management-System/public/index.php?action=employee-dashboard" class="btn btn-secondary">
                         Cancel
                     </a>

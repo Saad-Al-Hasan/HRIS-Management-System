@@ -642,10 +642,10 @@ class AdminController extends Controller
                 return;
             }
 
-            // Maximum upload size: 5 MB.
-            if ($profilePicture['size'] > 5 * 1024 * 1024) {
+            // Maximum upload size: 1 MB.
+            if ($profilePicture['size'] > 1024 * 1024) {
                 $this->view('admin/administrators/profile', [
-                    'error' => 'The profile picture must be 5 MB or smaller.',
+                    'error' => 'The profile picture must be 1 MB or smaller.',
                     'admin' => $admin
                 ]);
                 return;

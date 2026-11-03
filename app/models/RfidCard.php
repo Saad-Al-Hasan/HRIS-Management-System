@@ -151,4 +151,31 @@ class RfidCard extends Model
 
         return $stmt->rowCount() > 0;
     }
+
+
+    /**
+     * Get employees who do not currently have an RFID card assigned.
+     */
+    public function getEmployeesWithoutAssignedCard(): array
+    {
+        $sql = '
+            SELECT
+                e.id AS employee_id,
+                e.employee_code,
+                u.username
+            FROM employees e
+            INNER JOIN users u
+                ON u.id = e.user_id
+            LEFT JOIN rfid_cards rc
+                ON rc.employee_id = e.id
+            WHERE rc.id IS NULL
+              AND u.role_id = 2
+            ORDER BY e.employee_code ASC
+        ';
+
+        $stmt = $this->db->query($sql);
+
+        return $stmt->fetchAll();
+    }
+
 }

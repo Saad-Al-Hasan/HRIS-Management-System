@@ -45,7 +45,7 @@ class RfidController extends Controller
         Middleware::requireAdmin();
 
         $this->view('admin/rfid/assign', [
-            'employees' => $this->getEmployeesSortedByCode(),
+            'employees' => $this->rfidCardModel->getEmployeesWithoutAssignedCard(),
             'error' => $_SESSION['rfid_error'] ?? null,
             'success' => $_SESSION['rfid_success'] ?? null,
         ]);
@@ -93,8 +93,8 @@ class RfidController extends Controller
 
             $result = $proxy->register(
                 $employeeId === false || $employeeId === null
-                    ? 0
-                    : $employeeId,
+                ? 0
+                : $employeeId,
                 $identifier
             );
 

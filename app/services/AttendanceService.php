@@ -90,7 +90,7 @@ class AttendanceService
                 : 'present';
 
             try {
-                $this->attendance->createEntry(
+                $attendanceId = $this->attendance->createEntryWithHistory(
                     $employeeId,
                     $currentDate,
                     $nowSql,
@@ -141,8 +141,10 @@ class AttendanceService
             : 'Exit - Before';
 
         try {
-            $exitRecorded = $this->attendance->recordExit(
+            $exitRecorded = $this->attendance->recordExitWithHistory(
                 (int) $todayRecord['id'],
+                $employeeId,
+                $currentDate,
                 $nowSql,
                 $exitStatus
             );
