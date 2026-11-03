@@ -96,10 +96,34 @@ class AuthController extends Controller
 
         if ($roleId === 1) {
             $employeeModel = new Employee();
-            $totalEmployees = count($employeeModel->getAll());
+            $allEmployees = $employeeModel->getAll();
+
+            $totalEmployees = count(array_filter(
+                $allEmployees,
+                static fn(array $employee): bool =>
+                    ($employee['status'] ?? '') === 'active'
+            ));
+
+            require_once __DIR__ . '/../models/Attendance.php';
+
+            $attendanceModel = new Attendance();
+            $today = date('Y-m-d');
+
+            $todayActivity = $attendanceModel->getTodayActivity($today, 500);
+
+            $presentToday = $attendanceModel->countTodayByStatus($today, 'present');
+            $lateToday = $attendanceModel->countTodayByStatus($today, 'late');
+
+            $employeesWithEntryToday = $attendanceModel->countEmployeesWithEntryToday($today);
+
+            $absentToday = max(0, $totalEmployees - $employeesWithEntryToday);
 
             $this->view('admin/dashboard', [
                 'totalEmployees' => $totalEmployees,
+                'presentToday' => $presentToday,
+                'lateToday' => $lateToday,
+                'absentToday' => $absentToday,
+                'todayActivity' => $todayActivity,
             ]);
 
             return;

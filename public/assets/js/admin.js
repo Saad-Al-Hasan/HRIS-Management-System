@@ -52,6 +52,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const rfidConnectionText = document.getElementById('rfid-connection-text');
     const rfidConnectionDescription = document.getElementById('rfid-connection-description');
 
+    const activityStatusBadge =
+        document.getElementById('activity-feed-status');
+
+    const activityStatusText =
+        document.getElementById('activity-feed-status-text');
+
+    function updateActivityBadge(connected) {
+        if (!activityStatusBadge || !activityStatusText) return;
+
+        activityStatusBadge.dataset.status = connected ? 'live' : 'offline';
+        activityStatusText.textContent = connected ? 'LIVE' : 'OFFLINE';
+    }
+
     if (
         rfidIndicator &&
         rfidConnectionText &&
@@ -75,17 +88,20 @@ document.addEventListener('DOMContentLoaded', function () {
                     rfidConnectionText.textContent = 'Connected';
                     rfidConnectionDescription.textContent =
                         'JT308 USB reader is detected.';
+                    updateActivityBadge(true);
                 } else {
                     rfidIndicator.classList.remove('connected');
                     rfidConnectionText.textContent = 'Not Connected';
                     rfidConnectionDescription.textContent =
                         'Connect the JT308 USB reader.';
+                    updateActivityBadge(false);
                 }
             } catch (error) {
                 rfidIndicator.classList.remove('connected');
                 rfidConnectionText.textContent = 'Status Unavailable';
                 rfidConnectionDescription.textContent =
                     'Cannot read reader status. Check the Windows monitor.';
+                updateActivityBadge(false);
 
                 console.error('RFID status check failed:', error);
             }
@@ -94,4 +110,47 @@ document.addEventListener('DOMContentLoaded', function () {
         updateRfidStatus();
         setInterval(updateRfidStatus, 2000);
     }
+
+    // =========================================
+    // ATTENDANCE STATION NAVBAR TOGGLE (ALT + H)
+    // =========================================
+
+    const attendanceStation = document.querySelector('.attendance-station-page');
+
+    if (attendanceStation) {
+        const topNavbar = attendanceStation.querySelector('.admin-topbar');
+
+        if (topNavbar) {
+            document.addEventListener('keydown', function (event) {
+                if (
+                    event.altKey &&
+                    event.key.toLowerCase() === 'h' &&
+                    !event.ctrlKey &&
+                    !event.metaKey
+                ) {
+                    event.preventDefault();
+
+                    if (topNavbar.classList.contains('attendance-navbar-hidden')) {
+                        // Show navbar: fade in while sliding down
+                        topNavbar.classList.remove('attendance-navbar-hidden');
+                        topNavbar.classList.add('attendance-navbar-showing');
+
+                        setTimeout(() => {
+                            topNavbar.classList.remove('attendance-navbar-showing');
+                        }, 350);
+
+                    } else {
+                        // Hide navbar: fade out while sliding up
+                        topNavbar.classList.add('attendance-navbar-hiding');
+
+                        setTimeout(() => {
+                            topNavbar.classList.remove('attendance-navbar-hiding');
+                            topNavbar.classList.add('attendance-navbar-hidden');
+                        }, 350);
+                    }
+                }
+            });
+        }
+    }
+
 });

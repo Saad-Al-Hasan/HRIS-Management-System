@@ -17,7 +17,7 @@ if (empty($_SESSION['csrf_token'])) {
 
 <link rel="stylesheet" href="/HRIS-Management-System/public/assets/css/attendance-station.css">
 
-<div class="admin-main attendance-terminal-page">
+<div class="admin-main attendance-terminal-page attendance-station-page">
     <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
 
     <main class="admin-content attendance-terminal">

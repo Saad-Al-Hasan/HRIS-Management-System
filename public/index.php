@@ -198,6 +198,51 @@ switch ($action) {
         $attendanceController->scan();
         break;
 
+    case 'attendance-activity':
+        Middleware::requireLogin();
+
+        if (Auth::roleId() !== 1) {
+            http_response_code(403);
+            exit;
+        }
+
+        require_once __DIR__ . '/../app/models/Attendance.php';
+
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+
+        $attendanceModel = new Attendance();
+        $today = date('Y-m-d');
+
+        $activity = $attendanceModel->getTodayActivity($today, 500);
+
+        $uploadDirectory = __DIR__ . '/uploads/profile_pictures/';
+        $uploadUrl = '/HRIS-Management-System/public/uploads/profile_pictures/';
+
+        foreach ($activity as &$scan) {
+            $userId = (int) ($scan['user_id'] ?? 0);
+            $profilePicture = null;
+
+            foreach (['png', 'jpg', 'jpeg', 'webp'] as $extension) {
+                $filename = 'userid_' . $userId . '.' . $extension;
+
+                if (is_file($uploadDirectory . $filename)) {
+                    $profilePicture = $uploadUrl . $filename;
+                    break;
+                }
+            }
+
+            $scan['profile_picture'] = $profilePicture;
+        }
+        unset($scan);
+
+        echo json_encode(
+            $activity,
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+        );
+
+        exit;
+
 
 
     /*

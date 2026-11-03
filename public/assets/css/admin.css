@@ -487,12 +487,15 @@ body {
    ========================================================= */
 
 .dashboard-stats {
-    display: grid;
+    display: flex;
 
     grid-template-columns:
         repeat(4, minmax(0, 1fr));
 
-    gap: 18px;
+    justify-content: center;
+    align-items: stretch;
+    gap: 14px;
+    width: 100%;
 
     margin-bottom: 22px;
 }
@@ -522,6 +525,13 @@ body {
     transform: translateY(-2px);
 
     border-color: #41464c;
+}
+
+/* Make each card narrower and keep all four equal */
+.dashboard-stats .dashboard-stat-card {
+    flex: 0 1 430px;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 .stat-icon {
@@ -3016,7 +3026,7 @@ table {
     align-self: center;
 }
 
-.work-schedule-page .work-schedule-header-actions > a.btn {
+.work-schedule-page .work-schedule-header-actions>a.btn {
     align-self: flex-end;
 }
 
@@ -3118,60 +3128,1009 @@ table {
     border-color: #e8e8e8;
     color: #202124;
 }
-/* My Profile pages: narrower card and fields */
-.profile-card-narrow {
+
+
+
+/* =========================================
+   EMPLOYEE MY PROFILE — COMPACT LAYOUT
+   ========================================= */
+
+.employee-profile-page .admin-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.employee-profile-page .content-header {
     width: 100%;
-    max-width: 560px;
+    max-width: 1100px;
+}
+
+.employee-profile-page .content-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.employee-profile-page .employee-details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+    padding: 22px 26px;
+}
+
+.employee-profile-page .employee-details-grid .form-group {
+    width: 100%;
+    max-width: 480px;
+}
+
+.employee-profile-page .employee-details-grid input,
+.employee-profile-page .employee-details-grid textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .employee-profile-page .content-card {
+        max-width: 100%;
+    }
+
+    .employee-profile-page .employee-details-grid {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .employee-profile-page .employee-details-grid .form-group {
+        max-width: 100%;
+    }
+}
+
+
+
+/* =========================================
+   ADMIN MY PROFILE — COMPACT LAYOUT
+   ========================================= */
+
+.admin-profile-page .admin-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.admin-profile-page .content-header {
+    width: 100%;
+    max-width: 1100px;
+}
+
+.admin-profile-page .content-card {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.admin-profile-page .form-container {
+    width: 100%;
+    max-width: 760px;
+    margin: 0 auto;
+}
+
+.admin-profile-page .form-container .form-group {
+    width: 100%;
+    max-width: 480px;
+}
+
+.admin-profile-page .form-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 12px 8px;
+    box-sizing: border-box;
+}
+
+/* Center admin profile fields inside the card */
+.admin-profile-page .form-container .form-group {
+    width: 100%;
+    max-width: 480px;
     margin-left: auto;
     margin-right: auto;
-    box-sizing: border-box;
 }
 
-.profile-card-narrow.employee-profile-card {
-    max-width: 700px;
-}
-
-.profile-card-narrow .form-group {
-    max-width: none;
-}
-
-.profile-card-narrow .form-group input,
-.profile-card-narrow .form-group select,
-.profile-card-narrow .form-group textarea {
+.admin-profile-page .form-container .form-group input,
+.admin-profile-page .form-container .form-group select {
     width: 100%;
     box-sizing: border-box;
 }
 
-.profile-card-narrow .employee-details-grid {
-    gap: 16px;
-}
-/* Employees page: search and filter bar */
-.employee-filter-form {
-    display: grid;
-    grid-template-columns: minmax(200px, 1.6fr) repeat(3, minmax(140px, 1fr)) auto;
-    gap: 14px;
-    align-items: end;
-    padding: 18px 22px;
-    border-bottom: 1px solid #292e34;
+@media (max-width: 768px) {
+
+    .admin-profile-page .content-card,
+    .admin-profile-page .form-container {
+        max-width: 100%;
+    }
+
+    .admin-profile-page .form-container {
+        padding: 18px;
+    }
+
+    .admin-profile-page .form-container .form-group {
+        max-width: 100%;
+    }
+
+    .admin-profile-page .form-actions {
+        flex-wrap: wrap;
+    }
 }
 
-.employee-filter-form .form-group {
-    max-width: none;
-    min-width: 0;
+/* Reduce excess space below Admin Profile buttons */
+.admin-profile-page .content-card {
+    padding-bottom: 8px;
+}
+
+.admin-profile-page .form-actions {
     margin-bottom: 0;
+    padding-bottom: 6;
 }
 
-.employee-filter-actions {
+.admin-profile-page .form-container {
+    padding-bottom: 0.5;
+}
+
+
+/* Add Employee: improve spacing inside information panels */
+.employee-create-grid>.content-card>.form-grid {
+    padding: 18px 22px 22px;
+    box-sizing: border-box;
+}
+
+.employee-create-grid>.content-card>.form-grid .form-group {
+    min-width: 0;
+}
+
+
+
+/* Employee Management: white Activate/Deactivate buttons */
+.employee-status-btn {
+    background-color: #ffffff;
+    color: #151515;
+    border: 1px solid #d1d5db;
+}
+
+.employee-status-btn:hover {
+    background-color: #e5e7eb;
+    color: #111111;
+    border-color: #d1d5db;
+}
+
+
+
+/* Employee Management - Filter button */
+.card-header .btn-secondary {
+    background-color: #80c4a2;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Filter Employees button hover */
+.card-header .btn-secondary:hover {
+    background-color: #49836b;
+    border-color: #000000;
+    color: #050505;
+}
+
+/* Employee Management - Filter dropdowns */
+#employee-filter-panel select {
+    background-color: #a7a7a7;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Dropdown options */
+#employee-filter-panel select option {
+    background-color: #a7a7a7;
+    color: #000000;
+}
+
+/* Employee Management - Reset button */
+#employee-filter-panel a.btn-secondary {
+    background-color: #CC8899;
+    border-color: #000000;
+    color: #020202;
+}
+
+/* Reset button hover */
+#employee-filter-panel a.btn-secondary:hover {
+    background-color: #aa7082;
+    border-color: #000000;
+    color: #000000;
+}
+
+/* Employee Management - Apply Filters button */
+#employee-filter-panel button[type="submit"] {
+    background-color: #80c4a2;
+    border-color: #000000;
+    color: #000000;
+}
+
+#employee-filter-panel button[type="submit"]:hover {
+    background-color: #49836b;
+    border-color: #000000;
+}
+
+
+
+/* Employee Management - Header search */
+.employee-header-actions {
     display: flex;
-    gap: 10px;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
-@media (max-width: 1100px) {
-    .employee-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .employee-filter-search,
-    .employee-filter-actions { grid-column: 1 / -1; }
+.employee-search-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.employee-search-form input[type="text"] {
+    width: 250px;
+    max-width: 100%;
+    padding: 10px 12px;
+    background-color: #1a1d20;
+    color: #ffffff;
+    border: 1px solid #3b4148;
+    border-radius: 6px;
+    outline: none;
+}
+
+.employee-search-form input[type="text"]::placeholder {
+    color: #a0a7af;
+}
+
+.employee-search-form input[type="text"]:focus {
+    border-color: #468C9B;
+    box-shadow: 0 0 0 2px rgba(70, 140, 155, 0.2);
+}
+
+.employee-search-form button {
+    white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+    .employee-header-actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .employee-search-form {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .employee-search-form input[type="text"] {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
+
+/* Dashboard: evenly distribute Attendance Overview content */
+.attendance-overview {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    gap: 10px;
+    height: calc(100% - 75px);
+    min-height: 0;
+}
+
+.attendance-item {
+    flex: 1;
+    min-height: 0;
+    padding: 10px 12px;
+}
+
+
+
+
+
+/* Dashboard: center each stat card's icon and text as one compact group */
+.dashboard-stats .dashboard-stat-card {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: left;
+}
+
+/* Keep the icon compact */
+.dashboard-stats .dashboard-stat-card > .stat-icon {
+    flex: 0 0 auto;
+    width: auto;
+    height: auto;
+    margin: 0;
+}
+
+/* Keep the text group at its natural width */
+.dashboard-stats .dashboard-stat-card > .stat-content {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    min-width: 0;
+    text-align: center;
+}
+
+/* Remove unwanted horizontal margins */
+.dashboard-stats .dashboard-stat-card .stat-label,
+.dashboard-stats .dashboard-stat-card .stat-value,
+.dashboard-stats .dashboard-stat-card .stat-description {
+    width: auto;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+
+
+
+/* =========================================
+   TODAY'S ACTIVITY FEED
+   ========================================= */
+
+.activity-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    min-width: 0;
+}
+
+.activity-item-icon {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.activity-item-details {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.activity-item-details strong {
+    color: #f1f5f9;
+    font-size: 14px;
+}
+
+.activity-item-details span,
+.activity-item-details small {
+    color: #94a3b8;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+}
+
+.activity-item-status {
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+}
+
+.activity-item-status span {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 600;
 }
 
 @media (max-width: 600px) {
-    .employee-filter-form { grid-template-columns: 1fr; padding: 16px; }
+    .activity-item {
+        gap: 9px;
+        padding: 11px;
+    }
+
+    .activity-item-icon {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
+        font-size: 19px;
+    }
+
+    .activity-item-status span {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+}
+
+
+
+
+.activity-scan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 5px 0;
+}
+
+.activity-scan-row small {
+    color: #94a3b8;
+    font-size: 12px;
+}
+
+.activity-scan-status {
+    flex: 0 0 auto;
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #cbd5e1;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .activity-scan-row {
+        gap: 8px;
+        align-items: flex-start;
+    }
+
+    .activity-scan-status {
+        white-space: normal;
+        text-align: right;
+    }
+}
+
+
+
+.activity-employee-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.activity-employee-photo {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #2a2d32;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.activity-employee-identity {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    min-width: 0;
+}
+
+.activity-employee-identity strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.activity-employee-identity span {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.activity-employee-scans {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .activity-employee-photo {
+        width: 44px;
+        height: 44px;
+        flex-basis: 44px;
+    }
+}
+
+
+
+/* Stack attendance details below employee identity */
+.activity-item-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.activity-item-vertical .activity-employee-header {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.activity-item-vertical .activity-employee-scans {
+    width: 100%;
+    padding-left: 0;
+}
+
+.activity-item-vertical .activity-scan-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+
+/* Continuous glowing animation around employee profile pictures */
+.activity-employee-photo {
+    position: relative;
+    border: 1px solid rgba(200, 175, 230, 0.8);
+    animation: employeePhotoGlow 3s ease-in-out infinite;
+    will-change: box-shadow, border-color;
+}
+
+@keyframes employeePhotoGlow {
+    0%, 100% {
+        box-shadow:
+            /* Soft red base */
+            0 0 5px 1px rgba(255, 55, 75, 0.45),
+            0 0 11px 3px rgba(220, 35, 60, 0.3),
+            0 0 18px 5px rgba(190, 0, 45, 0.18),
+
+            /* Gentle light purple overlay */
+            0 0 4px 1px rgba(200, 160, 255, 0.4),
+            0 0 9px 3px rgba(180, 120, 255, 0.22);
+        border-color: rgba(200, 160, 255, 0.75);
+    }
+
+    50% {
+        box-shadow:
+            /* Slightly stronger red */
+            0 0 7px 2px rgba(255, 45, 70, 0.65),
+            0 0 15px 4px rgba(235, 25, 60, 0.42),
+            0 0 24px 7px rgba(190, 0, 45, 0.28),
+
+            /* Soft purple highlight */
+            0 0 6px 2px rgba(220, 190, 255, 0.6),
+            0 0 13px 4px rgba(190, 140, 255, 0.38);
+        border-color: rgba(225, 205, 255, 0.9);
+    }
+}
+
+
+
+/* Premium employee attendance cards */
+.activity-item-vertical {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(165, 135, 190, 0.16);
+    border-radius: 14px;
+    background: linear-gradient(
+        135deg,
+        rgba(34, 35, 42, 0.98),
+        rgba(27, 28, 34, 0.98)
+    );
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        transform 0.25s ease;
+}
+
+.activity-item-vertical:hover {
+    border-color: rgba(190, 140, 230, 0.42);
+    background: linear-gradient(
+        135deg,
+        rgba(40, 34, 45, 0.98),
+        rgba(29, 29, 37, 0.98)
+    );
+    transform: translateY(-2px);
+}
+
+.activity-item-vertical .activity-employee-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 14px;
+}
+
+.activity-item-vertical .activity-employee-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.activity-item-vertical .activity-employee-identity strong {
+    color: #f5f0fa;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.activity-item-vertical .activity-employee-identity span {
+    color: #a8a0b5;
+    font-size: 11px;
+}
+
+/* Keep the existing profile-picture aura */
+.activity-item-vertical .activity-employee-photo {
+    flex-shrink: 0;
+}
+
+/* Attendance timeline rows */
+.activity-item-vertical .activity-employee-scans {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+}
+
+.activity-item-vertical .activity-scan-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: 34px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.035);
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.activity-item-vertical .activity-scan-row:hover {
+    background: rgba(190, 140, 230, 0.07);
+    border-color: rgba(190, 140, 230, 0.14);
+}
+
+.activity-item-vertical .activity-scan-row small {
+    color: #c5bfd0;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.activity-item-vertical .activity-scan-status {
+    flex-shrink: 0;
+    font-size: 10px;
+    border-radius: 6px;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+    .activity-item-vertical {
+        padding: 12px;
+    }
+
+    .activity-item-vertical .activity-employee-header {
+        gap: 12px;
+    }
+
+    .activity-item-vertical .activity-scan-row {
+        gap: 8px;
+        padding: 7px;
+    }
+}
+
+
+/* Main Today's Activity container — subtle red neon accent */
+.activity-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 85, 105, 0.22);
+    border-radius: 14px;
+
+    background:
+        radial-gradient(
+            ellipse at top left,
+            rgba(180, 35, 55, 0.09),
+            transparent 55%
+        ),
+        linear-gradient(
+            135deg,
+            rgba(29, 27, 32, 0.98),
+            rgba(24, 25, 29, 0.98)
+        );
+
+    box-shadow:
+        0 0 12px rgba(255, 55, 80, 0.045),
+        inset 0 1px 0 rgba(255, 150, 165, 0.035);
+
+    transition:
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+/* Gentle red highlight on hover */
+.activity-card:hover {
+    border-color: rgba(255, 85, 105, 0.38);
+
+    box-shadow:
+        0 0 18px rgba(255, 55, 80, 0.08),
+        inset 0 1px 0 rgba(255, 150, 165, 0.06);
+}
+
+/* Accent the section heading */
+.activity-card h2 {
+    text-shadow: 0 0 10px rgba(255, 90, 115, 0.16);
+}
+
+
+
+/* LIVE indicator for Today's Activity */
+.activity-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: #16a34a;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.6px;
+}
+
+.activity-live-dot {
+    width: 8px;
+    height: 8px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.65);
+    animation: activity-live-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes activity-live-pulse {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.45;
+        transform: scale(0.8);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .activity-live-dot {
+        animation: none;
+    }
+}
+
+
+/* Dynamic Today's Activity status */
+.activity-live-badge[data-status="checking"] {
+    color: #a7adb4;
+    background: rgba(148, 163, 184, 0.12);
+    border-color: rgba(148, 163, 184, 0.35);
+}
+
+.activity-live-badge[data-status="checking"] .activity-live-dot {
+    background: #a7adb4;
+    box-shadow: none;
+    animation: none;
+}
+
+.activity-live-badge[data-status="offline"] {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.activity-live-badge[data-status="offline"] .activity-live-dot {
+    background: #ef4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.55);
+    animation: none;
+}
+
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+}
+
+
+
+/* Soft glow animation for LIVE status */
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+    animation: liveTextGlow 2s ease-in-out infinite;
+}
+
+.activity-live-badge[data-status="live"] .activity-live-dot {
+    background: #22c55e;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.65);
+    animation: liveDotGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes liveTextGlow {
+    0%, 100% {
+        text-shadow: 0 0 2px rgba(74, 222, 128, 0.25);
+    }
+    50% {
+        text-shadow:
+            0 0 5px rgba(74, 222, 128, 0.75),
+            0 0 10px rgba(74, 222, 128, 0.35);
+    }
+}
+
+@keyframes liveDotGlow {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(34, 197, 94, 0.45);
+    }
+    50% {
+        box-shadow:
+            0 0 8px rgba(34, 197, 94, 0.9),
+            0 0 13px rgba(34, 197, 94, 0.4);
+    }
+}
+
+
+
+/* Glowing LIVE badge box */
+.activity-live-badge[data-status="live"] {
+    color: #4ade80;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.55);
+    animation: liveBoxGlow 2s ease-in-out infinite;
+}
+
+@keyframes liveBoxGlow {
+    0%, 100% {
+        box-shadow: 0 0 3px rgba(34, 197, 94, 0.2);
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+    50% {
+        box-shadow:
+            0 0 7px rgba(34, 197, 94, 0.4),
+            0 0 14px rgba(34, 197, 94, 0.2);
+        border-color: rgba(74, 222, 128, 0.9);
+    }
+}
+
+
+
+/* Glowing OFFLINE badge box */
+.activity-live-badge[data-status="offline"] {
+    color: #f87171;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.55);
+    animation: offlineBoxGlow 2s ease-in-out infinite;
+}
+
+.activity-live-badge[data-status="offline"] .activity-live-dot {
+    background: #ef4444;
+    animation: offlineDotGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes offlineBoxGlow {
+    0%, 100% {
+        box-shadow: 0 0 3px rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        box-shadow:
+            0 0 7px rgba(239, 68, 68, 0.4),
+            0 0 14px rgba(239, 68, 68, 0.2);
+        border-color: rgba(248, 113, 113, 0.9);
+    }
+}
+
+@keyframes offlineDotGlow {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(239, 68, 68, 0.45);
+    }
+    50% {
+        box-shadow:
+            0 0 8px rgba(239, 68, 68, 0.9),
+            0 0 13px rgba(239, 68, 68, 0.4);
+    }
+}
+
+
+/* =========================================
+   ATTENDANCE STATION — ANIMATED NAVBAR TOGGLE
+   Shortcut: Alt + H
+   ========================================= */
+
+/* Smooth navbar transitions */
+.attendance-station-page .admin-topbar {
+    transition:
+        opacity 350ms ease,
+        transform 350ms ease;
+    will-change: opacity, transform;
+}
+
+/* Hide: fade out and slide upward */
+.attendance-station-page .admin-topbar.attendance-navbar-hiding {
+    opacity: 0;
+    transform: translateY(-100%);
+    pointer-events: none;
+}
+
+/* Fully hidden */
+.attendance-station-page .admin-topbar.attendance-navbar-hidden {
+    display: none !important;
+}
+
+/* Show: start above the screen and fade in downward */
+.attendance-station-page .admin-topbar.attendance-navbar-showing {
+    animation: attendanceNavbarSlideDown 350ms ease forwards;
+    pointer-events: auto;
+}
+
+@keyframes attendanceNavbarSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-100%);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .attendance-station-page .admin-topbar {
+        transition: none;
+    }
+
+    .attendance-station-page .admin-topbar.attendance-navbar-showing {
+        animation: none;
+    }
+}
+
+
+/* Hide the sidebar scrollbar without disabling scrolling */
+.admin-sidebar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.admin-sidebar::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+/* Hide sidebar navigation scrollbar while preserving scrolling */
+.sidebar-nav {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+    display: none;
 }

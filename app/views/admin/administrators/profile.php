@@ -11,7 +11,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 ?>
 
-<div class="admin-main">
+<div class="admin-main admin-profile-page">
 
     <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
 
@@ -131,15 +131,35 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             accept=".png,.jpg,.jpeg,image/png,image/jpeg" style="display: none;">
 
                         <div style="margin-top: 8px; color: var(--text-muted); font-size: 11px;">
-                            PNG, JPG or JPEG · Maximum 5 MB
+                            PNG, JPG or JPEG · Maximum 1 MB
                         </div>
 
                     </div>
 
                     <script>
                         document.getElementById('profile_picture')?.addEventListener('change', function () {
-                            const filename = this.files?.[0]?.name || 'Choose a Profile Picture';
-                            document.getElementById('profile-picture-filename').textContent = filename;
+                            const file = this.files?.[0];
+                            const filename = document.getElementById('profile-picture-filename');
+
+                            if (!file) {
+                                return;
+                            }
+
+                            if (!['image/png', 'image/jpeg'].includes(file.type)) {
+                                alert('Please select a PNG, JPG, or JPEG image.');
+                                this.value = '';
+                                filename.textContent = 'Choose a Profile Picture';
+                                return;
+                            }
+
+                            if (file.size > 1024 * 1024) {
+                                alert('The profile picture must be 1 MB or smaller.');
+                                this.value = '';
+                                filename.textContent = 'Choose a Profile Picture';
+                                return;
+                            }
+
+                            filename.textContent = file.name;
                         });
                     </script>
 
