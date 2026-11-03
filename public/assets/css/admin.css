@@ -2698,7 +2698,10 @@ table {
 .rfid-status:has(.rfid-status-indicator.connected) strong {
     color: #4ade80;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 }
 
 
@@ -3119,5 +3122,65 @@ table {
     background: #8b8b8b;
     border-color: #e8e8e8;
     color: #202124;
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+}
+/* My Profile pages: narrower card and fields */
+.profile-card-narrow {
+    width: 100%;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
+}
+
+.profile-card-narrow.employee-profile-card {
+    max-width: 700px;
+}
+
+.profile-card-narrow .form-group {
+    max-width: none;
+}
+
+.profile-card-narrow .form-group input,
+.profile-card-narrow .form-group select,
+.profile-card-narrow .form-group textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.profile-card-narrow .employee-details-grid {
+    gap: 16px;
+}
+/* Employees page: search and filter bar */
+.employee-filter-form {
+    display: grid;
+    grid-template-columns: minmax(200px, 1.6fr) repeat(3, minmax(140px, 1fr)) auto;
+    gap: 14px;
+    align-items: end;
+    padding: 18px 22px;
+    border-bottom: 1px solid #292e34;
+}
+
+.employee-filter-form .form-group {
+    max-width: none;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.employee-filter-actions {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 1100px) {
+    .employee-filter-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .employee-filter-search,
+    .employee-filter-actions { grid-column: 1 / -1; }
+}
+
+@media (max-width: 600px) {
+    .employee-filter-form { grid-template-columns: 1fr; padding: 16px; }
 >>>>>>> Stashed changes
 }
