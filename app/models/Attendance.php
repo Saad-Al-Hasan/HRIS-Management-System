@@ -567,5 +567,69 @@ SELECT
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function createManualAttendanceWithHistory(
+        int $employeeId,
+        string $attendanceDate,
+        string $entryTime,
+        string $entryStatus,
+        string $legacyStatus,
+        ?string $exitTime,
+        ?string $exitStatus
+    ): int {
+        if ($employeeId <= 0) {
+            throw new InvalidArgumentException('Invalid employee selected.');
+        }
 
+        if ($this->findByEmployeeAndDate($employeeId, $attendanceDate) !== null) {
+            throw new InvalidArgumentException(
+                'Attendance already exists for this employee on the selected date.'
+            );
+        }
+
+        $this->db->beginTransaction();
+
+        try {
+            $attendanceId = $this->createEntry(
+                $employeeId,
+                $attendanceDate,
+                $entryTime,
+                $entryStatus,
+                $legacyStatus
+            );
+
+            $this->recordScanHistory(
+                $employeeId,
+                $attendanceDate,
+                $entryTime,
+                'entry',
+                $entryStatus
+            );
+
+            if ($exitTime !== null && $exitStatus !== null) {
+                $this->recordExit(
+                    $attendanceId,
+                    $exitTime,
+                    $exitStatus
+                );
+
+                $this->recordScanHistory(
+                    $employeeId,
+                    $attendanceDate,
+                    $exitTime,
+                    'exit',
+                    $exitStatus
+                );
+            }
+
+            $this->db->commit();
+
+            return $attendanceId;
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $exception;
+        }
+    }
 }

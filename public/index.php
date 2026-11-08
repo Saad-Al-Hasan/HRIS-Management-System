@@ -203,6 +203,10 @@ switch ($action) {
         $attendanceController->management();
         break;
 
+    case 'modify-attendance':
+        $attendanceController->modify();
+        break;
+
     case 'attendance-activity':
         Middleware::requireLogin();
 
