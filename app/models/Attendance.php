@@ -356,5 +356,216 @@ u.full_name
         }
     }
 
+    /**
+     * Retrieve attendance records for administrative attendance management.
+     *
+     * @param string|null $attendanceDate Optional date filter in YYYY-MM-DD format.
+     * @return array
+     */
+    public function getAdministrativeAttendanceRecords(
+        ?string $attendanceDate = null
+    ): array {
+        $sql = '
+        SELECT
+            a.id AS attendance_id,
+            a.employee_id,
+            e.employee_code,
+            u.full_name,
+            e.department,
+            e.designation,
+            a.attendance_date,
+            a.entry_time,
+            a.entry_status,
+            a.exit_time,
+            a.exit_status,
+            a.status AS attendance_status
+        FROM attendance a
+        INNER JOIN employees e
+            ON e.id = a.employee_id
+        INNER JOIN users u
+            ON u.id = e.user_id
+        WHERE u.role_id = 2
+    ';
+
+        $params = [];
+
+        if ($attendanceDate !== null && $attendanceDate !== '') {
+            $sql .= ' AND a.attendance_date = :attendance_date';
+            $params[':attendance_date'] = $attendanceDate;
+        }
+
+        $sql .= '
+        ORDER BY
+            a.attendance_date DESC,
+            a.entry_time DESC,
+            e.employee_code ASC
+    ';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Retrieve all distinct employee departments.
+     *
+     * @return array
+     */
+    public function getAllDepartments(): array
+    {
+        $sql = "
+            SELECT DISTINCT department
+            FROM employees
+            WHERE department IS NOT NULL
+              AND TRIM(department) <> ''
+            ORDER BY department ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Retrieve active employee accounts belonging to a department.
+     *
+     * @param string $department
+     * @return array
+     */
+    public function getEmployeesByDepartment(string $department): array
+    {
+        if (trim($department) === '') {
+            return [];
+        }
+
+        $sql = "
+            SELECT
+                e.id,
+                e.employee_code,
+                e.department,
+                u.full_name
+            FROM employees e
+            INNER JOIN users u
+                ON u.id = e.user_id
+            WHERE e.department = :department
+              AND u.role_id = 2
+              AND u.status = 'active'
+            ORDER BY e.employee_code ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':department' => $department,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Retrieve attendance records for one employee within a date range.
+     *
+     * @param int $employeeId
+     * @param string $fromDate
+     * @param string $toDate
+     * @return array
+     */
+    public function getEmployeeAttendanceByDateRange(
+        int $employeeId,
+        string $fromDate,
+        string $toDate
+    ): array {
+        if (
+            $employeeId <= 0 ||
+            $fromDate === '' ||
+            $toDate === '' ||
+            $fromDate > $toDate
+        ) {
+            return [];
+        }
+
+        $sql = "
+SELECT
+    a.id AS attendance_id,
+    a.employee_id,
+    e.employee_code,
+    u.id AS user_id,
+    u.full_name,
+    e.department,
+                e.designation,
+                a.attendance_date,
+                a.entry_time,
+                a.entry_status,
+                a.exit_time,
+                a.exit_status,
+                a.status AS attendance_status
+            FROM attendance a
+            INNER JOIN employees e
+                ON e.id = a.employee_id
+            INNER JOIN users u
+                ON u.id = e.user_id
+            WHERE a.employee_id = :employee_id
+              AND e.id = :employee_id_check
+              AND u.role_id = 2
+              AND a.attendance_date BETWEEN :from_date AND :to_date
+            ORDER BY
+                a.attendance_date DESC,
+                a.entry_time DESC,
+                e.employee_code ASC
+        ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':employee_id' => $employeeId,
+            ':employee_id_check' => $employeeId,
+            ':from_date' => $fromDate,
+            ':to_date' => $toDate,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
+    /**
+     * Retrieve all RFID scans for one employee on a specific date.
+     */
+    public function getEmployeeScanHistoryForDate(
+        int $employeeId,
+        string $attendanceDate
+    ): array {
+        if ($employeeId <= 0 || $attendanceDate === '') {
+            return [];
+        }
+
+        $sql = "
+        SELECT
+            id AS scan_id,
+            employee_id,
+            attendance_date,
+            scan_time,
+            scan_type,
+            scan_status
+        FROM attendance_scan_history
+        WHERE employee_id = :employee_id
+          AND attendance_date = :attendance_date
+        ORDER BY scan_time ASC, id ASC
+    ";
+
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':employee_id' => $employeeId,
+            ':attendance_date' => $attendanceDate,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
 }

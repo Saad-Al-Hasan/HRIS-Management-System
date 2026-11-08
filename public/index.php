@@ -194,8 +194,13 @@ switch ($action) {
         $attendanceController->station();
         break;
 
+
     case 'attendance-scan':
         $attendanceController->scan();
+        break;
+
+    case 'attendance-management':
+        $attendanceController->management();
         break;
 
     case 'attendance-activity':
