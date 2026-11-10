@@ -6,18 +6,21 @@ require_once __DIR__ . '/../core/Middleware.php';
 require_once __DIR__ . '/../models/Employee.php';
 require_once __DIR__ . '/../models/RfidCard.php';
 require_once __DIR__ . '/../models/WorkSchedule.php';
+require_once __DIR__ . '/../models/Attendance.php';
 
 class EmployeeController extends Controller
 {
     private Employee $employeeModel;
     private RfidCard $rfidCardModel;
     private WorkSchedule $workScheduleModel;
+    private Attendance $attendanceModel;
 
     public function __construct()
     {
         $this->employeeModel = new Employee();
         $this->rfidCardModel = new RfidCard();
         $this->workScheduleModel = new WorkSchedule();
+        $this->attendanceModel = new Attendance();
     }
 
     public function dashboard(): void
@@ -35,37 +38,126 @@ class EmployeeController extends Controller
 
         $employee = $this->employeeModel->findByUserId($userId);
 
-        $assignedSchedule = null;
-
         if (
-            $employee !== null &&
-            !empty($employee['employee_id'])
+            $employee === null ||
+            empty($employee['employee_id'])
         ) {
-            $assignedSchedule = $this->workScheduleModel
-                ->findEffectiveScheduleForEmployee(
-                    (int) $employee['employee_id']
-                );
+            http_response_code(404);
+
+            $this->view('employee/dashboard', [
+                'employee' => $employee,
+                'rfidIdentifier' => 'Not assigned',
+                'assignedSchedule' => null,
+                'attendanceRecords' => [],
+                'attendanceFromDate' => '',
+                'attendanceToDate' => '',
+                'attendanceError' => null,
+            ]);
+
+            return;
         }
 
+        $employeeId = (int) $employee['employee_id'];
+
+        // Retrieve the employee's assigned work schedule.
+        $assignedSchedule = $this->workScheduleModel
+            ->findEffectiveScheduleForEmployee($employeeId);
+
+        // Retrieve the employee's RFID identifier.
         $rfidIdentifier = 'Not assigned';
 
-        if (
-            $employee !== null &&
-            !empty($employee['employee_id'])
-        ) {
-            $rfidCard = $this->rfidCardModel->findByEmployeeId(
-                (int) $employee['employee_id']
+        $rfidCard = $this->rfidCardModel->findByEmployeeId(
+            $employeeId
+        );
+
+        if ($rfidCard !== null) {
+            $rfidIdentifier = $rfidCard['rfid_identifier'];
+        }
+
+        // Read the optional attendance date filters.
+        $attendanceFromDate = trim(
+            (string) ($_GET['attendance_from'] ?? '')
+        );
+
+        $attendanceToDate = trim(
+            (string) ($_GET['attendance_to'] ?? '')
+        );
+
+        $attendanceError = null;
+        $attendanceRecords = [];
+
+        // Validate the date format.
+        $isValidDate = static function (string $date): bool {
+            if ($date === '') {
+                return true;
+            }
+
+            $parsedDate = DateTimeImmutable::createFromFormat(
+                '!Y-m-d',
+                $date
             );
 
-            if ($rfidCard !== null) {
-                $rfidIdentifier = $rfidCard['rfid_identifier'];
+            return $parsedDate !== false
+                && $parsedDate->format('Y-m-d') === $date;
+        };
+
+        if (
+            !$isValidDate($attendanceFromDate) ||
+            !$isValidDate($attendanceToDate)
+        ) {
+            $attendanceError =
+                'Please enter valid From Date and To Date values.';
+        } elseif (
+            $attendanceFromDate !== '' &&
+            $attendanceToDate !== '' &&
+            $attendanceFromDate > $attendanceToDate
+        ) {
+            $attendanceError =
+                'From Date cannot be later than To Date.';
+        } else {
+            /*
+             * Default attendance history to the current calendar month.
+             * The month automatically adjusts to 28, 29, 30, or 31 days.
+             */
+            $today = new DateTimeImmutable('today');
+
+            $fromDate = $attendanceFromDate !== ''
+                ? $attendanceFromDate
+                : $today->modify('first day of this month')->format('Y-m-d');
+
+            $toDate = $attendanceToDate !== ''
+                ? $attendanceToDate
+                : $today->format('Y-m-d');
+
+            // Never accept an employee ID from the browser.
+            // The ID comes from the authenticated employee profile.
+            $attendanceRecords =
+                $this->attendanceModel->getEmployeeAttendanceByDateRange(
+                    $employeeId,
+                    $fromDate,
+                    $toDate
+                );
+
+            // Attach RFID scan history to each attendance record.
+            foreach ($attendanceRecords as &$record) {
+                $record['scan_history'] =
+                    $this->attendanceModel->getEmployeeScanHistoryForDate(
+                        $employeeId,
+                        (string) $record['attendance_date']
+                    );
             }
+
+            unset($record);
         }
 
         $this->view('employee/dashboard', [
             'employee' => $employee,
             'rfidIdentifier' => $rfidIdentifier,
             'assignedSchedule' => $assignedSchedule,
+            'attendanceRecords' => $attendanceRecords,
+            'attendanceFromDate' => $attendanceFromDate,
+            'attendanceToDate' => $attendanceToDate,
+            'attendanceError' => $attendanceError,
         ]);
     }
 
