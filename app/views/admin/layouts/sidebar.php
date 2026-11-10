@@ -109,7 +109,9 @@
 
             <!-- Attendance -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=attendance-management"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'attendance-management' ? 'active' : '' ?>"
+                title="Administrative Attendance Management">
 
                 <span class="sidebar-link-icon">
 
@@ -151,7 +153,7 @@
             </a>
 
 
-            
+
             <!-- Work Schedules -->
 
             <a href="/HRIS-Management-System/public/index.php?action=work-schedules" class="sidebar-link <?= in_array($_GET['action'] ?? '', [

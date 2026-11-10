@@ -153,4 +153,154 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+
+    // =========================================
+    // EMPLOYEE ATTENDANCE RFID SCAN HISTORY
+    // =========================================
+
+    window.toggleEmployeeScanHistory = function (button) {
+        const panelId = button.getAttribute('aria-controls');
+        const panel = document.getElementById(panelId);
+
+        if (!panel) return;
+
+        const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+        panel.hidden = isExpanded;
+
+        button.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+
+        button.title = isExpanded
+            ? 'View RFID scan history'
+            : 'Hide RFID scan history';
+
+        button.innerHTML = isExpanded
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
+            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/>
+            <circle cx="12" cy="12" r="3"/>
+        </svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" width="17" height="17"
+            viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            aria-hidden="true">
+            <path d="M3 3l18 18"/>
+            <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/>
+            <path d="M9.9 5.2A11 11 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-4 4.8"/>
+            <path d="M6.6 6.6C3.7 8.5 2 12 2 12s3.5 7 10 7a10.7 10.7 0 0 0 4.2-.9"/>
+        </svg>`;
+
+    };
+
+
+    // =========================================
+    // LIVE ADMIN DASHBOARD STATISTICS
+    // =========================================
+
+    const totalEmployeesCounter =
+        document.getElementById('stat-total-employees');
+
+    const inTimeTodayCounter =
+        document.getElementById('stat-in-time-today');
+
+    const lateTodayCounter =
+        document.getElementById('stat-late-today');
+
+    const absentTodayCounter =
+        document.getElementById('stat-absent-today');
+
+    if (
+        totalEmployeesCounter &&
+        inTimeTodayCounter &&
+        lateTodayCounter &&
+        absentTodayCounter
+    ) {
+        const dashboardStatsEndpoint =
+            '/HRIS-Management-System/public/index.php?action=dashboard-stats';
+
+        let isRefreshingDashboardStats = false;
+
+        async function refreshDashboardStats() {
+
+            if (isRefreshingDashboardStats) return;
+
+            isRefreshingDashboardStats = true;
+
+            try {
+                const response = await fetch(
+                    dashboardStatsEndpoint,
+                    {
+                        method: 'GET',
+                        credentials: 'same-origin',
+                        cache: 'no-store',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Dashboard statistics request failed: ' +
+                        response.status
+                    );
+                }
+
+                const stats = await response.json();
+
+                totalEmployeesCounter.textContent =
+                    Number(stats.totalEmployees ?? 0);
+
+                inTimeTodayCounter.textContent =
+                    Number(stats.presentToday ?? 0);
+
+                lateTodayCounter.textContent =
+                    Number(stats.lateToday ?? 0);
+
+                absentTodayCounter.textContent =
+                    Number(stats.absentToday ?? 0);
+
+                // Update Attendance Overview counts as well.
+                const overviewPresent =
+                    document.getElementById('overview-present-today');
+
+                const overviewLate =
+                    document.getElementById('overview-late-today');
+
+                const overviewAbsent =
+                    document.getElementById('overview-absent-today');
+
+                if (overviewPresent) {
+                    overviewPresent.textContent =
+                        Number(stats.presentToday ?? 0);
+                }
+
+                if (overviewLate) {
+                    overviewLate.textContent =
+                        Number(stats.lateToday ?? 0);
+                }
+
+                if (overviewAbsent) {
+                    overviewAbsent.textContent =
+                        Number(stats.absentToday ?? 0);
+                }
+
+            } catch (error) {
+                console.error(
+                    'Could not refresh dashboard statistics:',
+                    error
+                );
+            } finally {
+                isRefreshingDashboardStats = false;
+            }
+        }
+
+        // Update immediately and repeat every 3 seconds.
+        refreshDashboardStats();
+
+        setInterval(refreshDashboardStats, 3000);
+    }
+
 });

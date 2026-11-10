@@ -75,7 +75,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
                         Total Employees
                     </span>
 
-                    <strong class="stat-value">
+                    <strong class="stat-value" id="stat-total-employees">
                         <?= (int) ($totalEmployees ?? 0) ?>
                     </strong>
 
@@ -102,7 +102,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
                         In Time Today
                     </span>
 
-                    <strong class="stat-value">
+                    <strong class="stat-value" id="stat-in-time-today">
                         <?= (int) ($presentToday ?? 0) ?>
                     </strong>
 
@@ -129,7 +129,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
                         Late Today
                     </span>
 
-                    <strong class="stat-value">
+                    <strong class="stat-value" id="stat-late-today">
                         <?= (int) ($lateToday ?? 0) ?>
                     </strong>
 
@@ -156,7 +156,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
                         Absent Today
                     </span>
 
-                    <strong class="stat-value">
+                    <strong class="stat-value" id="stat-absent-today">
                         <?= (int) ($absentToday ?? 0) ?>
                     </strong>
 
@@ -223,7 +223,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
                         </div>
 
-                        <span class="attendance-number">
+                        <span class="attendance-number" id="overview-present-today">
                             <?= (int) ($presentToday ?? 0) ?>
                         </span>
 
@@ -247,7 +247,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
                         </div>
 
-                        <span class="attendance-number">
+                        <span class="attendance-number" id="overview-late-today">
                             <?= (int) ($lateToday ?? 0) ?>
                         </span>
 
@@ -271,7 +271,7 @@ require_once __DIR__ . '/layouts/sidebar.php';
 
                         </div>
 
-                        <span class="attendance-number">
+                        <span class="attendance-number" id="overview-absent-today">
                             <?= (int) ($absentToday ?? 0) ?>
                         </span>
 
