@@ -147,4 +147,62 @@ class AuthController extends Controller
         http_response_code(403);
         die('403 - Access Denied');
     }
+
+
+    /**
+     * Return live dashboard statistics as JSON.
+     */
+    public function dashboardStats(): void
+    {
+        Middleware::requireLogin();
+
+        if (Auth::roleId() !== 1) {
+            http_response_code(403);
+            exit;
+        }
+
+        $employeeModel = new Employee();
+        $allEmployees = $employeeModel->getAll();
+
+        $totalEmployees = count(array_filter(
+            $allEmployees,
+            static fn(array $employee): bool =>
+                ($employee['status'] ?? '') === 'active'
+        ));
+
+        require_once __DIR__ . '/../models/Attendance.php';
+
+        $attendanceModel = new Attendance();
+        $today = date('Y-m-d');
+
+        $presentToday = $attendanceModel->countTodayByStatus(
+            $today,
+            'present'
+        );
+
+        $lateToday = $attendanceModel->countTodayByStatus(
+            $today,
+            'late'
+        );
+
+        $employeesWithEntryToday =
+            $attendanceModel->countEmployeesWithEntryToday($today);
+
+        $absentToday = max(
+            0,
+            $totalEmployees - $employeesWithEntryToday
+        );
+
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+
+        echo json_encode([
+            'totalEmployees' => $totalEmployees,
+            'presentToday' => $presentToday,
+            'lateToday' => $lateToday,
+            'absentToday' => $absentToday
+        ]);
+
+        exit;
+    }
 }

@@ -53,6 +53,12 @@ switch ($action) {
 
         break;
 
+    case 'dashboard-stats':
+
+        $authController->dashboardStats();
+
+        break;
+
 
     case 'logout':
 
@@ -194,17 +200,20 @@ switch ($action) {
         $attendanceController->station();
         break;
 
-
-    case 'attendance-scan':
-        $attendanceController->scan();
-        break;
-
     case 'attendance-management':
         $attendanceController->management();
         break;
 
     case 'modify-attendance':
         $attendanceController->modify();
+        break;
+
+    case 'save-modified-attendance':
+        $attendanceController->saveModifiedAttendance();
+        break;
+
+    case 'attendance-scan':
+        $attendanceController->scan();
         break;
 
     case 'attendance-activity':
