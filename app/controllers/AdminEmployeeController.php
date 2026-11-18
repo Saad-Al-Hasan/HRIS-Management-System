@@ -143,6 +143,7 @@ class AdminEmployeeController extends Controller
             'department' => trim($_POST['department'] ?? ''),
             'designation' => trim($_POST['designation'] ?? ''),
             'joining_date' => trim($_POST['joining_date'] ?? ''),
+            'monthly_salary' => trim($_POST['monthly_salary'] ?? ''),
         ];
 
         $errors = [];
@@ -199,6 +200,14 @@ class AdminEmployeeController extends Controller
         }
 
         if (
+            !preg_match('/^\d+(?:\.\d{1,2})?$/', $old['monthly_salary']) ||
+            (float) $old['monthly_salary'] <= 0 ||
+            (float) $old['monthly_salary'] > 9999999999.99
+        ) {
+            $errors['monthly_salary'] = 'Enter a valid monthly salary greater than 0 (maximum 2 decimal places).';
+        }
+
+        if (
             $old['email'] !== '' &&
             filter_var($old['email'], FILTER_VALIDATE_EMAIL) &&
             strcasecmp($old['email'], $employee['email']) !== 0 &&
@@ -249,6 +258,7 @@ class AdminEmployeeController extends Controller
                     'department' => $old['department'],
                     'designation' => $old['designation'],
                     'joining_date' => $old['joining_date'],
+                    'monthly_salary' => $old['monthly_salary'],
                 ]
             );
 
@@ -314,6 +324,7 @@ class AdminEmployeeController extends Controller
             'department' => trim($_POST['department'] ?? ''),
             'designation' => trim($_POST['designation'] ?? ''),
             'joining_date' => trim($_POST['joining_date'] ?? ''),
+            'monthly_salary' => trim($_POST['monthly_salary'] ?? ''),
         ];
 
         $password = $_POST['password'] ?? '';
@@ -334,6 +345,14 @@ class AdminEmployeeController extends Controller
             if ($old[$field] === '') {
                 $errors[$field] = 'This field is required.';
             }
+        }
+
+        if (
+            !preg_match('/^\d+(?:\.\d{1,2})?$/', $old['monthly_salary']) ||
+            (float) $old['monthly_salary'] <= 0 ||
+            (float) $old['monthly_salary'] > 9999999999.99
+        ) {
+            $errors['monthly_salary'] = 'Enter a valid monthly salary greater than 0 (maximum 2 decimal places).';
         }
 
         if (
@@ -414,6 +433,7 @@ class AdminEmployeeController extends Controller
                     'department' => $old['department'],
                     'designation' => $old['designation'],
                     'joining_date' => $old['joining_date'],
+                    'monthly_salary' => $old['monthly_salary'],
                 ]
             );
 

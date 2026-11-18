@@ -185,19 +185,22 @@
 
 
 
-            <!-- Salary -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <!-- Salary Processing -->
+
+            <a href="/HRIS-Management-System/public/index.php?action=salary-management" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
+                'salary-management',
+                'salary-calculate',
+                'salary-details'
+            ], true) ? 'active' : '' ?>">
 
                 <span class="sidebar-link-icon">
-
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <rect x="3" y="5" width="18" height="14" rx="2" />
                         <circle cx="12" cy="12" r="3" />
                         <path d="M7 9h.01" />
                         <path d="M17 15h.01" />
                     </svg>
-
                 </span>
 
                 <span class="sidebar-link-text">
@@ -208,7 +211,7 @@
 
         </div>
 
-
+        
         <!-- =================================================
              MANAGEMENT
              ================================================= -->
@@ -220,25 +223,50 @@
             </div>
 
 
-            <!-- Leave -->
+            <!-- Holiday Management -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=holidays" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
+                'holidays',
+                'holiday-store',
+                'holiday-delete'
+            ], true) ? 'active' : '' ?>" title="Holiday Management">
 
                 <span class="sidebar-link-icon">
 
                     <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M6 3h12" />
-                        <path d="M6 21h12" />
-                        <path d="M7 4c0 4 5 4 5 8s-5 4-5 8" />
-                        <path d="M17 4c0 4-5 4-5 8s5 4 5 8" />
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M7 3v4" />
+                        <path d="M17 3v4" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h3" />
+                        <path d="M8 17h6" />
                     </svg>
 
                 </span>
 
                 <span class="sidebar-link-text">
-                    Leave & Holidays
+                    Holiday Management
                 </span>
 
+            </a>
+
+
+            <!-- Leave Management -->
+            <a href="/HRIS-Management-System/public/index.php?action=leave-management" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
+                'leave-management',
+                'leave-review'
+            ], true) ? 'active' : '' ?>" title="Leave Management">
+                <span class="sidebar-link-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M7 3v4" />
+                        <path d="M17 3v4" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h3" />
+                        <path d="M8 17h6" />
+                    </svg>
+                </span>
+                <span class="sidebar-link-text">Leave Management</span>
             </a>
 
 

@@ -97,96 +97,13 @@ if (empty($_SESSION['csrf_token'])) {
                 </div>
 
                 <?php if (!empty($error)): ?>
-                    <div class="terminal-message terminal-error" role="alert">
+                    <div id="attendanceErrorCard" class="terminal-message terminal-error" role="alert">
                         <strong>SCAN UNSUCCESSFUL</strong>
                         <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                     </div>
                 <?php endif; ?>
-
-                <?php if (!empty($success)): ?>
-                    <?php
-                    $employee = is_array($attendanceEmployee ?? null)
-                        ? $attendanceEmployee
-                        : [];
-
-                    $employeeName = trim((string) ($employee['full_name'] ?? ''));
-                    $rfidNumber = trim((string) ($employee['identifier'] ?? ''));
-
-                    $employeeUserId = (int) ($employee['user_id'] ?? 0);
-
-                    $profilePictureDirectory = dirname(__DIR__, 4)
-                        . '/public/uploads/profile_pictures';
-
-                    $profilePictureUrl =
-                        '/HRIS-Management-System/public/assets/images/employee-avatar.png';
-
-                    if ($employeeUserId > 0) {
-                        foreach (['png', 'jpg', 'jpeg'] as $extension) {
-                            $fileName = 'userid_' . $employeeUserId . '.' . $extension;
-                            $filePath = $profilePictureDirectory . '/' . $fileName;
-
-                            if (is_file($filePath)) {
-                                $profilePictureUrl =
-                                    '/HRIS-Management-System/public/uploads/profile_pictures/'
-                                    . rawurlencode($fileName);
-                                break;
-                            }
-                        }
-                    }
-
-                    $attendanceMessage = (string) $success;
-                    $attendanceStatus = '';
-
-                    if (preg_match('/Status:\s*(Entry - In Time|Entry - Late|Exit - Before|Exit - In Time)\.?/i', $attendanceMessage, $matches)) {
-                        $attendanceStatus = $matches[1];
-                    } elseif (($attendanceType ?? '') === 'ENTRY') {
-                        $attendanceStatus = 'Entry';
-                    } elseif (($attendanceType ?? '') === 'EXIT') {
-                        $attendanceStatus = 'Exit';
-                    }
-                    ?>
-
-                    <div class="terminal-message terminal-success attendance-result-card" role="status">
-                        <div class="attendance-result-heading">
-                            <span class="attendance-result-check" aria-hidden="true">✓</span>
-                            <strong>ATTENDANCE RECORDED</strong>
-                        </div>
-
-                        <div class="attendance-result-content">
-                            <div class="attendance-result-photo-wrap">
-                                <img class="attendance-result-photo"
-                                    src="<?= htmlspecialchars($profilePictureUrl, ENT_QUOTES, 'UTF-8') ?>"
-                                    alt="<?= htmlspecialchars($employeeName !== '' ? $employeeName : 'Employee', ENT_QUOTES, 'UTF-8') ?>"
-                                    onerror="this.onerror=null;this.src='/HRIS-Management-System/public/assets/images/employee-avatar.png';">
-                            </div>
-
-                            <div class="attendance-result-details">
-                                <div class="attendance-result-identity">
-                                    <div class="attendance-result-rfid">
-                                        <span>RFID Card:</span>
-                                        <strong><?= htmlspecialchars($rfidNumber !== '' ? $rfidNumber : 'Unavailable', ENT_QUOTES, 'UTF-8') ?></strong>
-                                    </div>
-
-                                    <div class="attendance-result-name">
-                                        <?= htmlspecialchars($employeeName !== '' ? $employeeName : 'Employee details unavailable', ENT_QUOTES, 'UTF-8') ?>
-                                    </div>
-                                </div>
-
-                                <div class="attendance-result-outcome">
-                                    <strong class="attendance-result-status">
-                                        <?= htmlspecialchars($attendanceStatus !== '' ? $attendanceStatus : 'Attendance Recorded', ENT_QUOTES, 'UTF-8') ?>
-                                    </strong>
-
-                                    <span class="attendance-result-time">
-                                        <?= htmlspecialchars($attendanceMessage, ENT_QUOTES, 'UTF-8') ?>
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <form method="POST" action="/HRIS-Management-System/public/index.php?action=attendance-scan"
+                <div id="attendanceResultHost" aria-live="polite"></div>
+<form method="POST" action="/HRIS-Management-System/public/index.php?action=attendance-scan"
                     id="attendanceScanForm" class="terminal-scan-form" autocomplete="off">
                     <input type="hidden" name="csrf_token"
                         value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
@@ -234,11 +151,261 @@ if (empty($_SESSION['csrf_token'])) {
     ?>
 </div>
 
+<script src="/HRIS-Management-System/public/assets/js/rfid-input-adapter.js"></script>
 <script>
     (function () {
         const clock = document.getElementById('terminalClock');
         const date = document.getElementById('terminalDate');
         const input = document.getElementById('rfid_identifier');
+        const scanForm = document.getElementById('attendanceScanForm');
+        const resultHost = document.getElementById('attendanceResultHost');
+        const errorCard = document.getElementById('attendanceErrorCard');
+
+        let resultHideTimer = null;
+        const scanQueue = [];
+        let processingQueue = false;
+
+        function focusScanInput() {
+            if (input) {
+                input.focus({ preventScroll: true });
+            }
+        }
+
+        function hideAttendanceResult() {
+            if (resultHideTimer !== null) {
+                window.clearTimeout(resultHideTimer);
+                resultHideTimer = null;
+            }
+
+            if (resultHost) {
+                resultHost.replaceChildren();
+            }
+        }
+
+        function scheduleResultDismissal() {
+            if (resultHideTimer !== null) {
+                window.clearTimeout(resultHideTimer);
+            }
+
+            resultHideTimer = window.setTimeout(function () {
+                hideAttendanceResult();
+            }, 5000);
+        }
+
+        function makeElement(tag, className, text) {
+            const element = document.createElement(tag);
+
+            if (className) element.className = className;
+            if (text !== undefined && text !== null) {
+                element.textContent = String(text);
+            }
+
+            return element;
+        }
+
+        function showAttendanceResult(data) {
+            if (!resultHost) return;
+
+            hideAttendanceResult();
+
+            if (errorCard) {
+                errorCard.remove();
+            }
+
+            const employee = data.employee || {};
+            const employeeName = employee.full_name || 'Employee details unavailable';
+            const rfidNumber = employee.identifier || 'Unavailable';
+            const attendanceMessage = data.message || 'Attendance recorded.';
+            const attendanceType = data.type || '';
+            const statusMatch = attendanceMessage.match(
+                /Status:\s*(Entry - In Time|Entry - Late|Exit - Before|Exit - In Time)\.?/i
+            );
+
+            const attendanceStatus = statusMatch
+                ? statusMatch[1]
+                : (attendanceType === 'ENTRY' ? 'Entry' : 'Exit');
+
+            const card = makeElement(
+                'div',
+                'terminal-message terminal-success attendance-result-card'
+            );
+            card.id = 'attendanceResultCard';
+            card.setAttribute('role', 'status');
+
+            const heading = makeElement('div', 'attendance-result-heading');
+            const check = makeElement('span', 'attendance-result-check', '✓');
+            check.setAttribute('aria-hidden', 'true');
+            heading.append(
+                check,
+                makeElement('strong', '', 'ATTENDANCE RECORDED')
+            );
+
+            const content = makeElement('div', 'attendance-result-content');
+            const photoWrap = makeElement('div', 'attendance-result-photo-wrap');
+            const photo = makeElement('img', 'attendance-result-photo');
+            photo.alt = employeeName;
+            photo.src = '/HRIS-Management-System/public/assets/images/employee-avatar.png';
+
+            const userId = Number(employee.user_id || 0);
+            if (userId > 0) {
+                // The profile image is resolved by checking the known uploaded formats.
+                photo.src = '/HRIS-Management-System/public/uploads/profile_pictures/userid_'
+                    + userId + '.png';
+                photo.onerror = function () {
+                    if (photo.dataset.fallbackTried !== 'jpg') {
+                        photo.dataset.fallbackTried = 'jpg';
+                        photo.src = '/HRIS-Management-System/public/uploads/profile_pictures/userid_'
+                            + userId + '.jpg';
+                    } else if (photo.dataset.fallbackTried !== 'jpeg') {
+                        photo.dataset.fallbackTried = 'jpeg';
+                        photo.src = '/HRIS-Management-System/public/uploads/profile_pictures/userid_'
+                            + userId + '.jpeg';
+                    } else {
+                        photo.onerror = null;
+                        photo.src = '/HRIS-Management-System/public/assets/images/employee-avatar.png';
+                    }
+                };
+            }
+
+            photoWrap.appendChild(photo);
+
+            const details = makeElement('div', 'attendance-result-details');
+            const identity = makeElement('div', 'attendance-result-identity');
+            const rfid = makeElement('div', 'attendance-result-rfid');
+            rfid.append(
+                makeElement('span', '', 'RFID Card:'),
+                makeElement('strong', '', rfidNumber)
+            );
+
+            const name = makeElement('div', 'attendance-result-name', employeeName);
+            identity.append(rfid, name);
+
+            const outcome = makeElement('div', 'attendance-result-outcome');
+            outcome.append(
+                makeElement('strong', 'attendance-result-status', attendanceStatus),
+                makeElement('span', 'attendance-result-time', attendanceMessage)
+            );
+
+            details.append(identity, outcome);
+            content.append(photoWrap, details);
+            card.append(heading, content);
+            resultHost.replaceChildren(card);
+
+            scheduleResultDismissal();
+        }
+
+        function showAttendanceError(message) {
+            hideAttendanceResult();
+
+            if (errorCard) {
+                errorCard.remove();
+            }
+
+            const card = makeElement('div', 'terminal-message terminal-error');
+            card.id = 'attendanceErrorCard';
+            card.setAttribute('role', 'alert');
+            card.append(
+                makeElement('strong', '', 'SCAN UNSUCCESSFUL'),
+                makeElement('span', '', message || 'Unable to record attendance.')
+            );
+
+            resultHost.replaceChildren(card);
+
+            if (resultHideTimer !== null) {
+                window.clearTimeout(resultHideTimer);
+            }
+
+            resultHideTimer = window.setTimeout(function () {
+                hideAttendanceResult();
+            }, 5000);
+        }
+
+        async function sendAttendanceScan(identifier) {
+            const formData = new FormData(scanForm);
+            formData.set('rfid_identifier', identifier);
+
+            try {
+                const response = await fetch(scanForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    cache: 'no-store'
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (parseError) {
+                    throw new Error('The server returned an invalid response. Please refresh the station.');
+                }
+
+                if (!response.ok || !data) {
+                    throw new Error(data && data.message
+                        ? data.message
+                        : 'Unable to process this RFID scan.');
+                }
+
+                if (data.success) {
+                    showAttendanceResult(data);
+                } else {
+                    showAttendanceError(data.message);
+                }
+            } catch (error) {
+                showAttendanceError(error.message || 'A connection error occurred. Please try again.');
+            } finally {
+                focusScanInput();
+            }
+        }
+
+        async function processScanQueue() {
+            if (processingQueue) return;
+
+            processingQueue = true;
+
+            try {
+                while (scanQueue.length > 0) {
+                    const identifier = scanQueue.shift();
+                    await sendAttendanceScan(identifier);
+                }
+            } finally {
+                processingQueue = false;
+                focusScanInput();
+            }
+        }
+
+        function queueAttendanceScan(identifier) {
+            const normalizedIdentifier = String(identifier || '').trim();
+
+            if (!normalizedIdentifier) {
+                focusScanInput();
+                return;
+            }
+
+            scanQueue.push(normalizedIdentifier);
+            focusScanInput();
+            processScanQueue();
+        }
+
+        if (scanForm && input && typeof RfidInputAdapter !== 'undefined') {
+            const rfidAdapter = new RfidInputAdapter(input, queueAttendanceScan);
+            rfidAdapter.connect();
+
+            scanForm.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const identifier = input.value.trim();
+                input.value = '';
+
+                if (identifier) {
+                    queueAttendanceScan(identifier);
+                } else {
+                    focusScanInput();
+                }
+            });
+        }
 
         function updateClock() {
             const now = new Date();
@@ -257,6 +424,12 @@ if (empty($_SESSION['csrf_token'])) {
 
         updateClock();
         window.setInterval(updateClock, 1000);
+
+        if (errorCard) {
+            window.setTimeout(function () {
+                if (errorCard.isConnected) errorCard.remove();
+            }, 5000);
+        }
 
         window.addEventListener('load', function () {
             if (input) {

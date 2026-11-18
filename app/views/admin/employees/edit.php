@@ -73,6 +73,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </div>
 
                         <div class="form-group">
+                            <label for="monthly_salary">Monthly Salary (BDT) *</label>
+                            <input type="number" id="monthly_salary" name="monthly_salary"
+                                value="<?= $value('monthly_salary') ?>" min="0.01" step="0.01" required>
+                            <?php if (isset($errors['monthly_salary'])): ?>
+                                <small class="field-error">
+                                    <?= htmlspecialchars($errors['monthly_salary']) ?>
+                                </small>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="form-group">
                             <label for="email">Email Address *</label>
                             <input type="email" id="email" name="email" value="<?= $value('email') ?>" maxlength="150"
                                 required>

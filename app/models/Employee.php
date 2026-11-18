@@ -62,12 +62,13 @@ class Employee extends Model
             $sql = "
             INSERT INTO employees (
                 user_id,
-                employee_code,
-                phone,
-                address,
-                department,
-                designation,
-                joining_date
+employee_code,
+phone,
+address,
+department,
+designation,
+joining_date,
+monthly_salary
             ) VALUES (
                 :user_id,
                 :employee_code,
@@ -75,7 +76,8 @@ class Employee extends Model
                 :address,
                 :department,
                 :designation,
-                :joining_date
+                :joining_date,
+                :monthly_salary
             )
         ";
 
@@ -88,6 +90,7 @@ class Employee extends Model
                 ':department' => $employeeData['department'],
                 ':designation' => $employeeData['designation'],
                 ':joining_date' => $employeeData['joining_date'],
+                ':monthly_salary' => $employeeData['monthly_salary'],
             ]);
             $employeeId = (int) $this->db->lastInsertId();
 
@@ -174,6 +177,7 @@ class Employee extends Model
             employees.department,
             employees.designation,
             employees.joining_date,
+            employees.monthly_salary,
             employees.created_at,
             employees.updated_at
         FROM users
@@ -224,8 +228,9 @@ class Employee extends Model
                 phone = :phone,
                 address = :address,
                 department = :department,
-                designation = :designation,
-                joining_date = :joining_date
+designation = :designation,
+joining_date = :joining_date,
+monthly_salary = :monthly_salary
             WHERE user_id = :user_id
         ";
 
@@ -237,6 +242,7 @@ class Employee extends Model
                 ':department' => $employeeData['department'],
                 ':designation' => $employeeData['designation'],
                 ':joining_date' => $employeeData['joining_date'],
+                ':monthly_salary' => $employeeData['monthly_salary'],
                 ':user_id' => $userId,
             ]);
 
@@ -456,6 +462,7 @@ class Employee extends Model
                 employees.department,
                 employees.designation,
                 employees.joining_date,
+                employees.monthly_salary,
                 employees.created_at,
                 employees.updated_at
             FROM users
