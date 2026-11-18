@@ -151,6 +151,12 @@ class ModifyAttendanceTest extends TestCase
         $_POST = [];
         $_GET = [];
         $_SESSION = [];
+
+        unset($this->controller);
+        unset($this->attendanceModel);
+        unset($this->pdo);
+
+        http_response_code(200);
     }
 
     // Class under test: AttendanceController
@@ -223,8 +229,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => '0',
             'attendance_date' => '2026-01-15',
-            'entry_time' => '09:00',
-            'exit_time' => ''
+            'A_E_entry_time' => '09:00',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -248,8 +254,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => '1',
             'attendance_date' => '2026-02-30',
-            'entry_time' => '09:00',
-            'exit_time' => ''
+            'A_E_entry_time' => '09:00',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -273,8 +279,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => '1',
             'attendance_date' => '2026-01-15',
-            'entry_time' => '',
-            'exit_time' => ''
+            'A_E_entry_time' => '',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -282,7 +288,7 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertion
         $this->assertSame(
-            'Enter an entry time, an exit time, or both.',
+            'Enter an admin-edited entry time, an exit time, or both.',
             $_SESSION['modify_attendance_error']
         );
     }
@@ -298,8 +304,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => '1',
             'attendance_date' => '2026-01-15',
-            'entry_time' => '25:90',
-            'exit_time' => ''
+            'A_E_entry_time' => '25:90',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -307,7 +313,7 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertion
         $this->assertSame(
-            'Please enter a valid entry time.',
+            'Please enter a valid admin-edited entry time.',
             $_SESSION['modify_attendance_error']
         );
     }
@@ -321,10 +327,10 @@ class ModifyAttendanceTest extends TestCase
         // Setup
         $_POST = [
             'csrf_token' => 'test-csrf-token',
-            'employee_id' => '1',
+            'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => '2026-01-15',
-            'entry_time' => '09:00',
-            'exit_time' => '27:00'
+            'A_E_entry_time' => '09:00',
+            'A_E_exit_time' => '27:00'
         ];
 
         // Call
@@ -332,7 +338,7 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertion
         $this->assertSame(
-            'Please enter a valid exit time.',
+            'Please enter a valid admin-edited exit time.',
             $_SESSION['modify_attendance_error']
         );
     }
@@ -346,10 +352,10 @@ class ModifyAttendanceTest extends TestCase
         // Setup
         $_POST = [
             'csrf_token' => 'test-csrf-token',
-            'employee_id' => '1',
+            'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => '2026-01-15',
-            'entry_time' => '17:00',
-            'exit_time' => '09:00'
+            'A_E_entry_time' => '17:00',
+            'A_E_exit_time' => '09:00'
         ];
 
         // Call
@@ -357,7 +363,7 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertion
         $this->assertSame(
-            'Exit time must be later than entry time.',
+            'Admin-edited exit time must be later than admin-edited entry time.',
             $_SESSION['modify_attendance_error']
         );
     }
@@ -375,8 +381,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $this->testDateWithExit,
-            'entry_time' => '09:00',
-            'exit_time' => '18:00'
+            'A_E_entry_time' => '09:00',
+            'A_E_exit_time' => '18:00'
         ];
 
         // Call
@@ -399,8 +405,15 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertions
         $this->assertIsArray($attendance);
-        $this->assertSame('09:00:00', substr($attendance['entry_time'], 11));
-        $this->assertSame('18:00:00', substr($attendance['exit_time'], 11));
+        $this->assertSame(
+            '09:00:00',
+            substr($attendance['A_E_entry_time'], 11)
+        );
+
+        $this->assertSame(
+            '18:00:00',
+            substr($attendance['A_E_exit_time'], 11)
+        );
         $this->assertSame('present', $attendance['status']);
 
         // Verify both RFID scan-history records.
@@ -439,8 +452,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $this->testDateEntryOnly,
-            'entry_time' => '09:15',
-            'exit_time' => ''
+            'A_E_entry_time' => '09:15',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -463,8 +476,12 @@ class ModifyAttendanceTest extends TestCase
 
         // Assertions
         $this->assertIsArray($attendance);
-        $this->assertSame('09:15:00', substr($attendance['entry_time'], 11));
-        $this->assertNull($attendance['exit_time']);
+        $this->assertSame(
+            '09:15:00',
+            substr($attendance['A_E_entry_time'], 11)
+        );
+
+        $this->assertNull($attendance['A_E_exit_time']);
         $this->assertSame('present', $attendance['status']);
 
         // Verify only one entry scan was recorded.
@@ -493,18 +510,17 @@ class ModifyAttendanceTest extends TestCase
 
 
     // Class under test: AttendanceController
-    // Method under test: saveModifiedAttendance()
-    // Test ID: MOD-12
-    // Purpose: Verify duplicate attendance is rejected.
-    public function testSaveRejectsDuplicateAttendance(): void
+// Method under test: saveModifiedAttendance()
+// Test ID: MOD-12
+// Purpose: Verify an existing attendance record can be admin-edited.
+    public function testSaveUpdatesExistingAttendanceWithAdminEditedEntry(): void
     {
         // Setup: create an existing attendance record.
         $stmt = $this->pdo->prepare("
-            INSERT INTO attendance
-                (employee_id, attendance_date, entry_time, entry_status, status)
-            VALUES
-                (?, ?, ?, ?, ?)
-        ");
+        INSERT INTO attendance
+            (employee_id, attendance_date, entry_time, entry_status, status)
+        VALUES (?, ?, ?, ?, ?)
+    ");
 
         $stmt->execute([
             $this->testEmployeeId,
@@ -514,31 +530,50 @@ class ModifyAttendanceTest extends TestCase
             'present'
         ]);
 
-        // Setup: submit another attendance record for the same date.
+        // Submit an admin-edited entry time for the same date.
         $_POST = [
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $this->testDateWithExit,
-            'entry_time' => '09:15',
-            'exit_time' => ''
+            'A_E_entry_time' => '09:15',
+            'A_E_exit_time' => ''
         ];
 
         // Call
         $this->controller->saveModifiedAttendance();
 
-        // Assertion
+        // Verify the existing attendance record was retained and updated.
+        $stmt = $this->pdo->prepare("
+        SELECT entry_time, A_E_entry_time
+        FROM attendance
+        WHERE employee_id = ?
+          AND attendance_date = ?
+    ");
+
+        $stmt->execute([
+            $this->testEmployeeId,
+            $this->testDateWithExit
+        ]);
+
+        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($record);
         $this->assertSame(
-            'Attendance already exists for this employee on the selected date.',
-            $_SESSION['modify_attendance_error']
+            '09:00:00',
+            substr($record['entry_time'], 11)
+        );
+        $this->assertSame(
+            '09:15:00',
+            substr($record['A_E_entry_time'], 11)
         );
 
-        // Verify the original attendance record was not changed.
+        // Verify only one attendance record exists.
         $stmt = $this->pdo->prepare("
-            SELECT COUNT(*)
-            FROM attendance
-            WHERE employee_id = ?
-              AND attendance_date = ?
-        ");
+        SELECT COUNT(*)
+        FROM attendance
+        WHERE employee_id = ?
+          AND attendance_date = ?
+    ");
 
         $stmt->execute([
             $this->testEmployeeId,
@@ -546,7 +581,9 @@ class ModifyAttendanceTest extends TestCase
         ]);
 
         $this->assertSame(1, (int) $stmt->fetchColumn());
+        $this->assertArrayHasKey('modify_attendance_success', $_SESSION);
     }
+
 
     // Class under test: AttendanceController
     // Method under test: saveModifiedAttendance()
@@ -559,8 +596,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => '999999999',
             'attendance_date' => '2026-02-12',
-            'entry_time' => '09:00',
-            'exit_time' => ''
+            'A_E_entry_time' => '09:00',
+            'A_E_exit_time' => ''
         ];
 
         // Call
@@ -619,8 +656,8 @@ class ModifyAttendanceTest extends TestCase
                 'csrf_token' => 'test-csrf-token',
                 'employee_id' => (string) $this->testEmployeeId,
                 'attendance_date' => '2026-02-12',
-                'entry_time' => '09:00',
-                'exit_time' => ''
+                'A_E_entry_time' => '09:00',
+                'A_E_exit_time' => ''
             ];
 
             // Call
@@ -675,8 +712,8 @@ class ModifyAttendanceTest extends TestCase
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $date,
-            'entry_time' => '',
-            'exit_time' => '18:30'
+            'A_E_entry_time' => '',
+            'A_E_exit_time' => '18:30'
         ];
 
         // Call
@@ -684,7 +721,7 @@ class ModifyAttendanceTest extends TestCase
 
         // Verify the updated attendance record.
         $stmt = $this->pdo->prepare("
-            SELECT exit_time, exit_status
+            SELECT A_E_exit_time, A_E_exit_status
             FROM attendance
             WHERE employee_id = ? AND attendance_date = ?
         ");
@@ -693,8 +730,15 @@ class ModifyAttendanceTest extends TestCase
         $record = $stmt->fetch(PDO::FETCH_ASSOC);
 
         // Assertions
-        $this->assertSame('18:30:00', substr($record['exit_time'], 11));
-        $this->assertSame('Exit - In Time', $record['exit_status']);
+        $this->assertSame(
+            '18:30:00',
+            substr($record['A_E_exit_time'], 11)
+        );
+
+        $this->assertSame(
+            'Exit - In Time',
+            $record['A_E_exit_status']
+        );
 
         // Verify the exit scan history.
         $stmt = $this->pdo->prepare("
@@ -713,47 +757,57 @@ class ModifyAttendanceTest extends TestCase
 
 
     // Class under test: AttendanceController
-    // Method under test: saveModifiedAttendance()
-    // Test ID: MOD-16
-    // Purpose: Reject exit-only modification without an existing entry.
-    public function testSaveRejectsExitWithoutExistingEntry(): void
+// Method under test: saveModifiedAttendance()
+// Test ID: MOD-16
+// Purpose: Verify an exit-only admin edit can be saved without an existing entry.
+    public function testSaveRecordsExitWithoutExistingEntry(): void
     {
-        // Setup
+        $date = '2026-02-14';
+
         $_POST = [
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
-            'attendance_date' => '2026-02-14',
-            'entry_time' => '',
-            'exit_time' => '18:00'
+            'attendance_date' => $date,
+            'A_E_entry_time' => '',
+            'A_E_exit_time' => '18:00'
         ];
 
-        // Call
         $this->controller->saveModifiedAttendance();
 
-        // Assertion
-        $this->assertSame(
-            'No existing entry record was found for this employee and date.',
-            $_SESSION['modify_attendance_error']
-        );
+        $stmt = $this->pdo->prepare("
+        SELECT A_E_entry_time, A_E_exit_time, A_E_exit_status
+        FROM attendance
+        WHERE employee_id = ?
+          AND attendance_date = ?
+    ");
+
+        $stmt->execute([$this->testEmployeeId, $date]);
+        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($record);
+        $this->assertNull($record['A_E_entry_time']);
+        $this->assertSame('18:00:00', substr($record['A_E_exit_time'], 11));
+        $this->assertSame('Exit - In Time', $record['A_E_exit_status']);
+        $this->assertArrayHasKey('modify_attendance_success', $_SESSION);
     }
 
 
 
     // Class under test: AttendanceController
-    // Method under test: saveModifiedAttendance()
-    // Test ID: MOD-17
-    // Purpose: Reject an exit-only modification when an exit already exists.
-    public function testSaveRejectsDuplicateExit(): void
+// Method under test: saveModifiedAttendance()
+// Test ID: MOD-17
+// Purpose: Verify an existing admin-edited exit time can be updated.
+    public function testSaveUpdatesExistingAdminEditedExit(): void
     {
-        // Setup
         $date = '2026-02-15';
 
         $stmt = $this->pdo->prepare("
-            INSERT INTO attendance
-                (employee_id, attendance_date, entry_time, entry_status,
-                 exit_time, exit_status, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
+        INSERT INTO attendance
+            (employee_id, attendance_date, entry_time, entry_status,
+             exit_time, exit_status, status,
+             A_E_entry_time, A_E_exit_time)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
 
         $stmt->execute([
             $this->testEmployeeId,
@@ -762,66 +816,75 @@ class ModifyAttendanceTest extends TestCase
             'Entry - In Time',
             $date . ' 18:00:00',
             'Exit - In Time',
-            'present'
+            'present',
+            $date . ' 09:00:00',
+            $date . ' 18:00:00'
         ]);
 
         $_POST = [
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $date,
-            'entry_time' => '',
-            'exit_time' => '19:00'
+            'A_E_entry_time' => '',
+            'A_E_exit_time' => '19:00'
         ];
 
-        // Call
         $this->controller->saveModifiedAttendance();
 
-        // Assertion
-        $this->assertSame(
-            'An exit time has already been recorded for this employee and date.',
-            $_SESSION['modify_attendance_error']
-        );
+        $stmt = $this->pdo->prepare("
+        SELECT A_E_exit_time, A_E_exit_status
+        FROM attendance
+        WHERE employee_id = ?
+          AND attendance_date = ?
+    ");
+
+        $stmt->execute([$this->testEmployeeId, $date]);
+        $record = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $this->assertIsArray($record);
+        $this->assertSame('19:00:00', substr($record['A_E_exit_time'], 11));
+        $this->assertSame('Exit - In Time', $record['A_E_exit_status']);
+        $this->assertArrayHasKey('modify_attendance_success', $_SESSION);
     }
 
 
 
     // Class under test: AttendanceController
-    // Method under test: saveModifiedAttendance()
-    // Test ID: MOD-18
-    // Purpose: Reject an exit time earlier than the existing entry time.
-    public function testSaveRejectsExitEarlierThanExistingEntry(): void
+// Method under test: saveModifiedAttendance()
+// Test ID: MOD-18
+// Purpose: Reject an admin-edited exit earlier than the existing admin-edited entry.
+    public function testSaveRejectsExitEarlierThanExistingAdminEditedEntry(): void
     {
-        // Setup
         $date = '2026-02-16';
 
         $stmt = $this->pdo->prepare("
-            INSERT INTO attendance
-                (employee_id, attendance_date, entry_time, entry_status, status)
-            VALUES (?, ?, ?, ?, ?)
-        ");
+        INSERT INTO attendance
+            (employee_id, attendance_date, entry_time, entry_status, status,
+             A_E_entry_time)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ");
 
         $stmt->execute([
             $this->testEmployeeId,
             $date,
-            $date . ' 17:00:00',
-            'Entry - Late',
-            'late'
+            $date . ' 09:00:00',
+            'Entry - In Time',
+            'present',
+            $date . ' 17:00:00'
         ]);
 
         $_POST = [
             'csrf_token' => 'test-csrf-token',
             'employee_id' => (string) $this->testEmployeeId,
             'attendance_date' => $date,
-            'entry_time' => '',
-            'exit_time' => '09:00'
+            'A_E_entry_time' => '',
+            'A_E_exit_time' => '09:00'
         ];
 
-        // Call
         $this->controller->saveModifiedAttendance();
 
-        // Assertion
         $this->assertSame(
-            'Exit time must be later than the recorded entry time.',
+            'Admin-edited exit time must be later than admin-edited entry time.',
             $_SESSION['modify_attendance_error']
         );
     }

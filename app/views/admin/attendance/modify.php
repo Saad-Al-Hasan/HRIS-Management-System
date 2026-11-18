@@ -30,7 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div>
                     <h1>Modify Attendance</h1>
                     <p>
-                        Manually record an employee's entry and exit times.
+                        Edit an employee's attendance times without changing original RFID records.
                     </p>
                 </div>
 
@@ -73,30 +73,34 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         'UTF-8'
                     ) ?>">
 
-                    <!-- Employee -->
+                    <!-- Employee Code Input with Dropdown Suggestions -->
+
                     <div class="attendance-filter-field">
-                        <label for="employee_id">
+                        <label for="employee_code_input">
                             Select Employee
                         </label>
 
-                        <select id="employee_id" name="employee_id" required>
-                            <option value="">Select Employee</option>
+                        <input type="text" id="employee_code_input" list="employee_code_options"
+                            placeholder="Type or select an employee code" autocomplete="off" required>
 
+                        <small class="field-hint">
+                            Enter an employee code (e.g., EMP-0001) or select an employee from the list.
+                        </small>
+
+                        <!-- Employee suggestions -->
+                        <datalist id="employee_code_options">
                             <?php foreach ($employees as $employee): ?>
-
-                                <option value="<?= (int) $employee['employee_id'] ?>">
-                                    <?= htmlspecialchars(
-                                        (string) $employee['employee_code']
-                                        . '_'
-                                        . (string) $employee['username'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>
-                                </option>
-
+                                <option value="<?= htmlspecialchars(
+                                    (string) $employee['employee_code'] . ' - ' . (string) $employee['username'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?>" data-employee-id="<?= (int) $employee['employee_id'] ?>"></option>
                             <?php endforeach; ?>
+                        </datalist>
 
-                        </select>
+                        <!-- Preserve the numeric employee ID expected by the controller -->
+                        <input type="hidden" id="employee_id" name="employee_id" value="">
+
                     </div>
 
                     <!-- Attendance Date -->
@@ -110,29 +114,40 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             ENT_QUOTES,
                             'UTF-8'
                         ) ?>">
+
+                        <small class="field-hint">
+                            Select the date for which you want to record or modify attendance.
+                        </small>
                     </div>
 
-                    <!-- Entry Time -->
+                    <!-- Admin Edited Entry Time -->
                     <div class="attendance-filter-field">
-                        <label for="entry_time">
-                            Entry Time
+
+                        <label for="A_E_entry_time">
+                            Admin Edited Entry Time
                         </label>
 
-                        <input type="time" id="entry_time" name="entry_time" step="1">
-                        <small>Leave blank to record only the exit time for an existing attendance record.</small>
-                    </div>
-
-                    <!-- Exit Time -->
-                    <div class="attendance-filter-field">
-                        <label for="exit_time">
-                            Exit Time
-                        </label>
-
-                        <input type="time" id="exit_time" name="exit_time" step="1">
+                        <input type="time" id="A_E_entry_time" name="A_E_entry_time" step="1">
 
                         <small>
-                            Leave blank if the employee has no recorded exit.
+                            Leave blank to preserve the previously saved admin-edited entry time.
                         </small>
+
+                    </div>
+
+                    <!-- Admin Edited Exit Time -->
+                    <div class="attendance-filter-field">
+
+                        <label for="A_E_exit_time">
+                            Admin Edited Exit Time
+                        </label>
+
+                        <input type="time" id="A_E_exit_time" name="A_E_exit_time" step="1">
+
+                        <small>
+                            Leave blank to preserve the previously saved admin-edited exit time.
+                        </small>
+
                     </div>
 
                     <!-- Submit -->
@@ -150,9 +165,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 </form>
 
                 <p class="attendance-filter-help">
-                    Select an employee, date, and entry time. An exit time
-                    is optional. The system will evaluate attendance against
-                    the employee's assigned work schedule.
+                    Select an employee and attendance date. Enter the admin-edited
+                    entry time, exit time, or both. Empty fields preserve previously
+                    saved admin-edited values. Attendance statuses are calculated
+                    automatically according to the employee's assigned work schedule.
                 </p>
 
             </section>
@@ -160,6 +176,68 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
 
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const employeeCodeInput = document.getElementById('employee_code_input');
+            const employeeIdInput = document.getElementById('employee_id');
+            const employeeOptions = document.querySelectorAll(
+                '#employee_code_options option'
+            );
+
+            const attendanceForm = employeeCodeInput.closest('form');
+
+            function resolveEmployee() {
+                const enteredCode = employeeCodeInput.value
+                    .trim()
+                    .split(' - ')[0]
+                    .trim()
+                    .toUpperCase();
+
+                employeeIdInput.value = '';
+
+                if (enteredCode === '') {
+                    return false;
+                }
+
+                for (const option of employeeOptions) {
+                    const optionEmployeeCode = option.value
+                        .trim()
+                        .split(' - ')[0]
+                        .trim()
+                        .toUpperCase();
+
+                    if (optionEmployeeCode === enteredCode) {
+                        employeeIdInput.value = option.dataset.employeeId;
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            employeeCodeInput.addEventListener('input', resolveEmployee);
+            employeeCodeInput.addEventListener('change', resolveEmployee);
+
+            attendanceForm.addEventListener('submit', function (event) {
+                if (!resolveEmployee()) {
+                    event.preventDefault();
+
+                    employeeCodeInput.setCustomValidity(
+                        'Please enter a valid employee code or select an employee from the suggestions.'
+                    );
+
+                    employeeCodeInput.reportValidity();
+                } else {
+                    employeeCodeInput.setCustomValidity('');
+                }
+            });
+
+            employeeCodeInput.addEventListener('input', function () {
+                employeeCodeInput.setCustomValidity('');
+            });
+        });
+    </script>
 
     <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
 

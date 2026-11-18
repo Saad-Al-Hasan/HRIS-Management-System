@@ -4,14 +4,23 @@ require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../core/Middleware.php';
 require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__ . '/../models/LeaveRequest.php';
+require_once __DIR__ . '/../models/Employee.php';
+require_once __DIR__ . '/../models/Salary.php';
 
 class AdminController extends Controller
 {
     private Admin $adminModel;
+    private LeaveRequest $leaveRequestModel;
+    private Employee $employeeModel;
+    private Salary $salaryModel;
 
     public function __construct()
     {
         $this->adminModel = new Admin();
+        $this->leaveRequestModel = new LeaveRequest();
+        $this->employeeModel = new Employee();
+        $this->salaryModel = new Salary();
     }
 
 
@@ -781,6 +790,409 @@ class AdminController extends Controller
 
         $this->redirect(
             '/HRIS-Management-System/public/index.php?action=profile&success=updated'
+        );
+    }
+
+
+    /*
+|--------------------------------------------------------------------------
+| Salary Management (US-09)
+|--------------------------------------------------------------------------
+*/
+
+    /**
+     * Display and automatically refresh monthly salary records.
+     */
+    public function salaryManagement(): void
+    {
+        Middleware::requireAdmin();
+
+        // Default to the current month when no month filter is selected.
+        $month = trim($_GET['month'] ?? date('Y-m'));
+
+        $employeeId = null;
+        $error = $_SESSION['error_message'] ?? null;
+        $autoCalculationWarnings = [];
+
+        if (isset($_GET['employee_id']) && $_GET['employee_id'] !== '') {
+            $validatedEmployeeId = filter_var(
+                $_GET['employee_id'],
+                FILTER_VALIDATE_INT
+            );
+
+            if ($validatedEmployeeId === false || $validatedEmployeeId <= 0) {
+                $error = 'Invalid employee selection.';
+            } else {
+                $employeeId = (int) $validatedEmployeeId;
+            }
+        }
+
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)) {
+            $error = 'Please select a valid salary month.';
+            $month = date('Y-m');
+        }
+
+        /*
+         * Automatic calculation runs when the Salary Management
+         * page is opened normally.
+         *
+         * A manual calculation redirect skips this once so that
+         * other employees' calculation timestamps remain unchanged.
+         */
+        $skipAutomaticCalculation =
+            !empty($_SESSION['skip_salary_auto_refresh_once']);
+
+        unset($_SESSION['skip_salary_auto_refresh_once']);
+
+        if (!$skipAutomaticCalculation && $error === null) {
+
+            $currentMonth = date('Y-m');
+
+            try {
+                $employees = $this->employeeModel->getAll();
+
+                foreach ($employees as $employee) {
+
+                    $currentEmployeeId = (int) $employee['employee_id'];
+
+                    try {
+                        $salaryInfo = $this->salaryModel->getEmployeeSalaryInfo(
+                            $currentEmployeeId
+                        );
+
+                        if (!$salaryInfo) {
+                            $autoCalculationWarnings[] =
+                                ($employee['employee_code'] ?? 'Unknown employee')
+                                . ': Employee information not found.';
+
+                            continue;
+                        }
+
+                        if (
+                            empty($salaryInfo['monthly_salary']) ||
+                            (float) $salaryInfo['monthly_salary'] <= 0
+                        ) {
+                            $autoCalculationWarnings[] =
+                                $salaryInfo['employee_code']
+                                . ' - ' . $salaryInfo['full_name']
+                                . ': Monthly salary is not configured.';
+
+                            continue;
+                        }
+
+                        if (empty($salaryInfo['joining_date'])) {
+                            $autoCalculationWarnings[] =
+                                $salaryInfo['employee_code']
+                                . ' - ' . $salaryInfo['full_name']
+                                . ': Joining date is missing.';
+
+                            continue;
+                        }
+
+                        // Calculate the current month's salary.
+                        $breakdown = $this->salaryModel->calculateMonthlySalary(
+                            $currentEmployeeId,
+                            $currentMonth
+                        );
+
+                        // Create or update the employee's monthly record.
+                        $saved = $this->salaryModel->saveMonthlySalary(
+                            $breakdown
+                        );
+
+                        if (!$saved) {
+                            $autoCalculationWarnings[] =
+                                $salaryInfo['employee_code']
+                                . ' - ' . $salaryInfo['full_name']
+                                . ': Salary record could not be saved.';
+                        }
+
+                    } catch (Throwable $e) {
+
+                        error_log(
+                            'Automatic salary calculation failed for employee '
+                            . $currentEmployeeId . ': ' . $e->getMessage()
+                        );
+
+                        $autoCalculationWarnings[] =
+                            ($employee['employee_code'] ?? 'Unknown employee')
+                            . ' - '
+                            . ($employee['full_name'] ?? 'Unknown name')
+                            . ': Calculation failed. Please check employee configuration.';
+                    }
+                }
+
+            } catch (Throwable $e) {
+
+                error_log(
+                    'Automatic salary processing error: ' . $e->getMessage()
+                );
+
+                $error = 'Unable to automatically calculate employee salaries.';
+            }
+        }
+
+        // Load salary records using the selected filters.
+        $salaryRecords = [];
+
+        if ($error === null) {
+            try {
+                $salaryRecords = $this->salaryModel->getSalaryHistory(
+                    $month,
+                    $employeeId
+                );
+
+            } catch (Throwable $e) {
+
+                error_log('Salary history error: ' . $e->getMessage());
+
+                $error = 'Unable to load salary records. Please try again.';
+            }
+        }
+
+        $this->view('admin/salary/index', [
+            'pageTitle' => 'Salary Management',
+            'employees' => $this->employeeModel->getAll(),
+            'salaryRecords' => $salaryRecords,
+            'selectedMonth' => $month,
+            'selectedEmployeeId' => $employeeId,
+            'autoCalculationWarnings' => $autoCalculationWarnings,
+            'success' => $_SESSION['success_message'] ?? null,
+            'error' => $error,
+            'csrfToken' => Auth::csrfToken()
+        ]);
+
+        unset(
+            $_SESSION['success_message'],
+            $_SESSION['error_message']
+        );
+    }
+
+
+
+
+    /**
+     * Calculate and save an employee's monthly salary.
+     */
+    public function calculateSalary(): void
+    {
+        Middleware::requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            return;
+        }
+
+        if (
+            !Auth::verifyCsrfToken(
+                (string) ($_POST['csrf_token'] ?? '')
+            )
+        ) {
+            $_SESSION['error_message'] =
+                'Invalid security token. Please refresh and try again.';
+
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=salary-management'
+            );
+        }
+
+        $employeeId = filter_var(
+            $_POST['employee_id'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        $month = trim((string) ($_POST['month'] ?? ''));
+
+        if (
+            !$employeeId ||
+            $employeeId <= 0 ||
+            !preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month)
+        ) {
+            $_SESSION['error_message'] =
+                'Please select a valid employee and salary month.';
+
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=salary-management'
+            );
+        }
+
+        try {
+            $breakdown = $this->salaryModel->calculateMonthlySalary(
+                (int) $employeeId,
+                $month
+            );
+
+            $saved = $this->salaryModel->saveMonthlySalary($breakdown);
+
+            if ($saved) {
+                $_SESSION['success_message'] =
+                    'Monthly salary calculated and saved successfully.';
+                $_SESSION['skip_salary_auto_refresh_once'] = true;
+            } else {
+                $_SESSION['error_message'] =
+                    'Unable to save the salary calculation.';
+            }
+
+        } catch (Throwable $e) {
+            error_log('Salary calculation error: ' . $e->getMessage());
+
+            $_SESSION['error_message'] =
+                'Salary calculation failed. Please check the employee salary information and try again.';
+        }
+
+        $this->redirect(
+            '/HRIS-Management-System/public/index.php?action=salary-management'
+            . '&month=' . urlencode($month)
+            . '&employee_id=' . (int) $employeeId
+        );
+    }
+
+
+    /**
+     * Display the detailed breakdown of a saved salary record.
+     */
+    public function salaryDetails(): void
+    {
+        Middleware::requireAdmin();
+
+        $salaryId = filter_var(
+            $_GET['id'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        if (!$salaryId || $salaryId <= 0) {
+            http_response_code(404);
+            die('Salary record not found.');
+        }
+
+        try {
+            $salaryRecord = $this->salaryModel->getSalaryDetails(
+                (int) $salaryId
+            );
+
+            if (!$salaryRecord) {
+                http_response_code(404);
+                die('Salary record not found.');
+            }
+
+            $this->view('admin/salary/details', [
+                'pageTitle' => 'Salary Details',
+                'salaryRecord' => $salaryRecord
+            ]);
+
+        } catch (Throwable $e) {
+            error_log('Salary details error: ' . $e->getMessage());
+
+            http_response_code(500);
+            die('Unable to load salary details. Please try again.');
+        }
+    }
+
+
+    /*
+|--------------------------------------------------------------------------
+| Leave Management (US-10)
+|--------------------------------------------------------------------------
+*/
+
+    /**
+     * Display all employee leave requests.
+     * Optionally filter by employee code.
+     */
+    public function leaveManagement(): void
+    {
+        Middleware::requireAdmin();
+
+        $employeeCode = strtoupper(
+            trim((string) ($_GET['employee_code'] ?? ''))
+        );
+
+        $this->view('admin/leaves/index', [
+            'pageTitle' => 'Leave Management',
+            'leaveRequests' => $this->leaveRequestModel->getAllForAdmin(
+                $employeeCode !== '' ? $employeeCode : null
+            ),
+            'employeeCode' => $employeeCode,
+            'success' => $_SESSION['success_message'] ?? null,
+            'error' => $_SESSION['error_message'] ?? null,
+            'csrfToken' => Auth::csrfToken()
+        ]);
+
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
+    }
+
+
+    /**
+     * Approve or reject a pending leave request.
+     */
+    public function reviewLeaveRequest(): void
+    {
+        Middleware::requireAdmin();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            return;
+        }
+
+        if (
+            !Auth::verifyCsrfToken(
+                (string) ($_POST['csrf_token'] ?? '')
+            )
+        ) {
+            http_response_code(403);
+            exit('Invalid security token. Please refresh and try again.');
+        }
+
+        $requestId = filter_var(
+            $_POST['request_id'] ?? null,
+            FILTER_VALIDATE_INT
+        );
+
+        $status = trim((string) ($_POST['status'] ?? ''));
+
+        if (
+            !$requestId ||
+            $requestId <= 0 ||
+            !in_array($status, ['approved', 'rejected'], true)
+        ) {
+            $_SESSION['error_message'] = 'Invalid leave review request.';
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=leave-management'
+            );
+        }
+
+        $adminId = Auth::userId();
+
+        if (!$adminId) {
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=login'
+            );
+        }
+
+        try {
+            $updated = $this->leaveRequestModel->updateStatus(
+                (int) $requestId,
+                $status,
+                (int) $adminId
+            );
+
+            if ($updated) {
+                $_SESSION['success_message'] =
+                    $status === 'approved'
+                    ? 'Leave request accepted successfully.'
+                    : 'Leave request rejected successfully.';
+            } else {
+                $_SESSION['error_message'] =
+                    'This request may already have been reviewed.';
+            }
+
+        } catch (PDOException $e) {
+            $_SESSION['error_message'] =
+                'Unable to review the leave request. Please try again.';
+        }
+
+        $this->redirect(
+            '/HRIS-Management-System/public/index.php?action=leave-management'
         );
     }
 }

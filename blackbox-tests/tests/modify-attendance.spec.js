@@ -21,29 +21,29 @@ MOD-08: Verify invalid exit time is rejected.
 MOD-09: Verify exit time earlier than entry time is rejected.
 MOD-10: Verify entry and exit can be created together.
 MOD-11: Verify entry can be created without an exit.
-MOD-12: Verify duplicate attendance for the same employee/date is rejected.
+MOD-12: Verify an existing attendance record can be updated.
 MOD-13: Verify nonexistent employee is rejected.
 MOD-14: Verify employee without an effective work schedule is rejected.
         Intentionally skipped until a safe employee is identified.
 MOD-15: Verify an exit can be added to an existing open attendance record.
-MOD-16: Verify exit-only submission is rejected when no entry exists.
-MOD-17: Verify a second exit is rejected when an exit already exists.
-MOD-18: Verify exit earlier than the existing entry is rejected.
+MOD-16: Verify an exit-only admin edit can be saved without an existing entry.
+MOD-17: Verify an existing admin-edited exit time can be updated.
+MOD-18: Verify exit earlier than the existing admin-edited entry is rejected.
 MOD-19: Verify complete attendance can be created successfully.
-MOD-20: Verify duplicate creation is rejected.
+MOD-20: Verify a repeated submission updates an existing attendance record.
 MOD-21: Verify exit can be added after an entry-only record.
-MOD-22: Verify exit-only submission without an existing entry is rejected.
+MOD-22: Verify exit-only submission succeeds for a date without an existing attendance record.
 
 IMPORTANT:
-- Uses the current form and controller fields: employee_id, attendance_date,
-  entry_time, exit_time and csrf_token.
+- Uses the current controller POST fields: employee_id, attendance_date,
+  A_E_entry_time, A_E_exit_time and csrf_token.
 - Uses the existing production database connection.
 - Selects dates only after checking the attendance-management results.
 - Uses a different unused date for each independent creation test.
 - Never deletes attendance or scan-history records.
 - Does not modify employee work schedules.
 - MOD-14 is intentionally skipped.
-- No A_E_ fields are used.
+- Uses admin-edited A_E_ attendance fields; original RFID fields are not submitted.
 ===============================================================================
 */
 
@@ -271,8 +271,8 @@ async function submitAttendance(page, values = {}) {
         csrf_token: values.csrf_token ?? csrfToken,
         employee_id: String(values.employee_id ?? ''),
         attendance_date: values.attendance_date ?? '',
-        entry_time: values.entry_time ?? '',
-        exit_time: values.exit_time ?? ''
+        A_E_entry_time: values.A_E_entry_time ?? '',
+        A_E_exit_time: values.A_E_exit_time ?? ''
     };
 
     const response = await page.context().request.post(SAVE_URL, {
@@ -307,7 +307,7 @@ async function submitForSamia(page, values = {}) {
     // Resolve Samia's employee ID using the actual form.
     const employeeId = await getSamiaEmployeeId(page);
 
-    // Submit using the original application field names.
+    // Submit using the current admin-edited attendance field names.
     return submitAttendance(page, {
         ...values,
         employee_id: employeeId
@@ -336,7 +336,7 @@ async function expectError(page, expectedMessage) {
 
 async function expectSuccess(
     page,
-    expectedMessage = 'Attendance was recorded successfully'
+    expectedMessage = 'Admin-edited attendance saved successfully'
 ) {
     const success = page.locator('.attendance-success-message');
 
@@ -369,8 +369,8 @@ test('MOD-01 - Load Modify Attendance page and current form fields', async ({ pa
     await expect(page.locator('#employee_code_input')).toBeVisible();
     await expect(page.locator('#employee_id')).toBeAttached();
     await expect(page.locator('#attendance_date')).toBeVisible();
-    await expect(page.locator('#entry_time')).toBeVisible();
-    await expect(page.locator('#exit_time')).toBeVisible();
+    await expect(page.locator('#A_E_entry_time')).toBeVisible();
+    await expect(page.locator('#A_E_exit_time')).toBeVisible();
 
     await expect(
         page.getByRole('button', { name: 'Save Attendance' })
@@ -396,7 +396,7 @@ test('MOD-03 - Reject invalid CSRF token', async ({ page }) => {
     await submitForSamia(page, {
         csrf_token: 'invalid-test-token',
         attendance_date: '2027-01-05',
-        entry_time: '09:00:00'
+        A_E_entry_time: '09:00:00'
     });
 
     await expectError(
@@ -413,7 +413,7 @@ test('MOD-04 - Reject invalid employee ID', async ({ page }) => {
     await submitAttendance(page, {
         employee_id: 0,
         attendance_date: '2027-01-05',
-        entry_time: '09:00:00'
+        A_E_entry_time: '09:00:00'
     });
 
     await expectError(page, 'Please select a valid employee.');
@@ -426,7 +426,7 @@ test('MOD-05 - Reject invalid calendar date', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: '2026-02-30',
-        entry_time: '09:00:00'
+        A_E_entry_time: '09:00:00'
     });
 
     await expectError(page, 'Please select a valid attendance date.');
@@ -439,11 +439,11 @@ test('MOD-06 - Reject empty entry and exit times', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: '2027-01-05',
-        entry_time: '',
-        exit_time: ''
+        A_E_entry_time: '',
+        A_E_exit_time: ''
     });
 
-    await expectError(page, 'Enter an entry time, an exit time, or both.');
+    await expectError(page, 'Enter an admin-edited entry time, an exit time, or both.');
 });
 
 // MOD-07: Invalid entry time
@@ -453,10 +453,10 @@ test('MOD-07 - Reject invalid entry time', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: '2027-01-05',
-        entry_time: '25:70'
+        A_E_entry_time: '25:70'
     });
 
-    await expectError(page, 'Please enter a valid entry time.');
+    await expectError(page, 'Please enter a valid admin-edited entry time.');
 });
 
 // MOD-08: Invalid exit time
@@ -466,11 +466,11 @@ test('MOD-08 - Reject invalid exit time', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: '2027-01-05',
-        entry_time: '09:00:00',
-        exit_time: '27:90'
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: '27:90'
     });
 
-    await expectError(page, 'Please enter a valid exit time.');
+    await expectError(page, 'Please enter a valid admin-edited exit time.');
 });
 
 // MOD-09: Exit earlier than entry
@@ -480,11 +480,11 @@ test('MOD-09 - Reject exit time earlier than entry time', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: '2027-01-05',
-        entry_time: '17:00:00',
-        exit_time: '09:00:00'
+        A_E_entry_time: '17:00:00',
+        A_E_exit_time: '09:00:00'
     });
 
-    await expectError(page, 'Exit time must be later than entry time.');
+    await expectError(page, 'Admin-edited exit time must be later than admin-edited entry time.');
 });
 
 // MOD-10: Create entry and exit together
@@ -496,8 +496,8 @@ test('MOD-10 - Create attendance with entry and exit together', async ({ page })
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: '18:00:00'
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: '18:00:00'
     });
 
     await expectSuccess(page);
@@ -512,35 +512,32 @@ test('MOD-11 - Create attendance with entry only', async ({ page }) => {
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: ''
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
 
     await expectSuccess(page);
 });
 
-// MOD-12: Duplicate attendance
+// MOD-12: Update an existing attendance record
 
-test('MOD-12 - Reject duplicate attendance for the same employee and date', async ({ page }) => {
+test('MOD-12 - Update an existing admin-edited attendance entry', async ({ page }) => {
     await loginAsAdmin(page);
-
     const attendanceDate = await findUnusedAttendanceDate(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00'
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:15:00'
+        A_E_entry_time: '09:15:00',
+        A_E_exit_time: ''
     });
-
-    await expectError(
-        page,
-        'Attendance already exists for this employee on the selected date.'
-    );
+    await expectSuccess(page);
 });
 
 // MOD-13: Nonexistent employee
@@ -551,7 +548,7 @@ test('MOD-13 - Reject nonexistent employee', async ({ page }) => {
     await submitAttendance(page, {
         employee_id: 99999999,
         attendance_date: '2027-01-05',
-        entry_time: '09:00:00'
+        A_E_entry_time: '09:00:00'
     });
 
     await expectError(page, 'The selected employee could not be found.');
@@ -577,62 +574,52 @@ test('MOD-15 - Add exit after creating an entry-only attendance record', async (
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: ''
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '18:00:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '18:00:00'
     });
-    await expectSuccess(page, 'Exit time recorded successfully');
+    await expectSuccess(page, 'Admin-edited attendance saved successfully');
 });
 
-// MOD-16: Exit-only submission without an existing entry
+// MOD-16: Exit-only admin edit
 
-test('MOD-16 - Reject exit-only submission when no existing entry exists', async ({ page }) => {
+test('MOD-16 - Save an exit-only admin edit without an existing entry', async ({ page }) => {
     await loginAsAdmin(page);
-
     const attendanceDate = await findUnusedAttendanceDate(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '18:00:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '18:00:00'
     });
-
-    await expectError(
-        page,
-        'No existing entry record was found for this employee and date.'
-    );
+    await expectSuccess(page);
 });
 
-// MOD-17: Reject second exit
+// MOD-17: Update an existing admin-edited exit
 
-test('MOD-17 - Reject exit when an exit has already been recorded', async ({ page }) => {
+test('MOD-17 - Update an exit time that was already recorded', async ({ page }) => {
     await loginAsAdmin(page);
-
     const attendanceDate = await findUnusedAttendanceDate(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: '18:00:00'
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: '18:00:00'
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '18:30:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '18:30:00'
     });
-
-    await expectError(
-        page,
-        'An exit time has already been recorded for this employee and date.'
-    );
+    await expectSuccess(page);
 });
 
 // MOD-18: Exit earlier than an existing entry
@@ -644,20 +631,20 @@ test('MOD-18 - Reject exit earlier than the recorded entry time', async ({ page 
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: ''
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '08:00:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '08:00:00'
     });
 
     await expectError(
         page,
-        'Exit time must be later than the recorded entry time.'
+        'Admin-edited exit time must be later than admin-edited entry time.'
     );
 });
 
@@ -670,37 +657,32 @@ test('MOD-19 - Verify complete attendance creation succeeds', async ({ page }) =
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: '18:00:00'
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: '18:00:00'
     });
 
     await expectSuccess(page);
 });
 
-// MOD-20: Repeated creation is rejected, not updated
+// MOD-20: Repeated submission updates the existing record
 
-test('MOD-20 - Verify repeated creation is rejected as a duplicate', async ({ page }) => {
+test('MOD-20 - Update an existing entry-only record with entry and exit times', async ({ page }) => {
     await loginAsAdmin(page);
-
     const attendanceDate = await findUnusedAttendanceDate(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: ''
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:10:00',
-        exit_time: '18:00:00'
+        A_E_entry_time: '09:10:00',
+        A_E_exit_time: '18:00:00'
     });
-
-    await expectError(
-        page,
-        'Attendance already exists for this employee on the selected date.'
-    );
+    await expectSuccess(page);
 });
 
 // MOD-21: Add exit after entry-only record
@@ -712,35 +694,30 @@ test('MOD-21 - Verify exit can be added after an entry-only record', async ({ pa
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '09:00:00',
-        exit_time: ''
+        A_E_entry_time: '09:00:00',
+        A_E_exit_time: ''
     });
     await expectSuccess(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '18:00:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '18:00:00'
     });
 
-    await expectSuccess(page, 'Exit time recorded successfully');
+    await expectSuccess(page, 'Admin-edited attendance saved successfully');
 });
 
-// MOD-22: Exit-only submission with no existing entry is rejected
+// MOD-22: Exit-only submission on a new date
 
-test('MOD-22 - Verify exit-only submission requires an existing entry record', async ({ page }) => {
+test('MOD-22 - Save an exit-only admin-edited attendance record on a new date', async ({ page }) => {
     await loginAsAdmin(page);
-
     const attendanceDate = await findUnusedAttendanceDate(page);
 
     await submitForSamia(page, {
         attendance_date: attendanceDate,
-        entry_time: '',
-        exit_time: '18:00:00'
+        A_E_entry_time: '',
+        A_E_exit_time: '17:45:00'
     });
-
-    await expectError(
-        page,
-        'No existing entry record was found for this employee and date.'
-    );
+    await expectSuccess(page);
 });

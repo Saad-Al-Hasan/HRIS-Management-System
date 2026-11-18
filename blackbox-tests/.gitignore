@@ -1,0 +1,6 @@
+# Generated test credentials (contains passwords)
+.holiday-test-accounts.json
+
+# Playwright outputs
+playwright-report/
+test-results/

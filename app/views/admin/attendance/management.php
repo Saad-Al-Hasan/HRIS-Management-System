@@ -41,9 +41,18 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     </p>
                 </div>
 
-                <div class="attendance-record-count">
-                    <?= count($attendanceRecords) ?>
-                    <?= count($attendanceRecords) === 1 ? 'Record' : 'Records' ?>
+                <div class="attendance-heading-actions">
+
+                    <div class="attendance-record-count">
+                        <?= count($attendanceRecords) ?>
+                        <?= count($attendanceRecords) === 1 ? 'Record' : 'Records' ?>
+                    </div>
+
+                    <a href="/HRIS-Management-System/public/index.php?action=modify-attendance"
+                        class="modify-attendance-button">
+                        Modify Attendance
+                    </a>
+
                 </div>
 
             </section>
@@ -103,7 +112,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             Select Employee
                         </label>
 
-                        <select id="employee" name="employee" <?= $selectedDepartment === '' ? 'disabled' : '' ?> required
+                        <select id="employee" name="employee" <?= $selectedDepartment === '' ? 'disabled' : '' ?>
                             onchange="this.form.submit()">
 
                             <option value="">
@@ -145,7 +154,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             $fromDate,
                             ENT_QUOTES,
                             'UTF-8'
-                        ) ?>" <?= $selectedEmployee === '' ? 'disabled' : '' ?>>
+                        ) ?>" <?= $selectedDepartment === '' ? 'disabled' : '' ?>>
 
                     </div>
 
@@ -161,7 +170,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             $toDate,
                             ENT_QUOTES,
                             'UTF-8'
-                        ) ?>" <?= $selectedEmployee === '' ? 'disabled' : '' ?>>
+                        ) ?>" <?= $selectedDepartment === '' ? 'disabled' : '' ?>>
 
                     </div>
 
@@ -170,7 +179,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <div class="attendance-filter-actions">
 
                         <button type="submit" name="view_attendance" value="1" class="attendance-filter-button"
-                            <?= $selectedEmployee === '' ? 'disabled' : '' ?>>
+                            <?= $selectedDepartment === '' ? 'disabled' : '' ?>>
                             View Attendance
                         </button>
 
@@ -186,8 +195,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                 <p class="attendance-filter-help">
 
-                    Select a department and employee, then choose a date range
-                    to view the employee's attendance records.
+                    Select a department and date range to view all employees' attendance records,
+                    or optionally select an employee to view their individual records.
 
                 </p>
 
@@ -244,7 +253,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <tbody>
 
                             <?php if (
-                                $selectedEmployee === '' ||
+                                !$viewAttendance ||
                                 empty($attendanceRecords)
                             ): ?>
 
@@ -253,9 +262,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <td colspan="9" class="attendance-empty-state">
 
                                         <strong>
-                                            <?php if ($selectedEmployee === ''): ?>
+                                            <?php if (!$viewAttendance): ?>
 
-                                                Select an employee to view attendance.
+                                                Select a department and date range to view attendance.
 
                                             <?php else: ?>
 
@@ -265,15 +274,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         </strong>
 
                                         <span>
-                                            <?php if ($selectedEmployee === ''): ?>
+                                            <?php if (!$viewAttendance): ?>
 
-                                                Choose a department and employee,
-                                                then select a date range.
+                                                Choose a department, optionally select an employee,
+                                                and select a date range.
 
                                             <?php else: ?>
 
-                                                Try another date range or select
-                                                a different employee.
+                                                Try another date range or select a different employee.
 
                                             <?php endif; ?>
                                         </span>
@@ -288,34 +296,46 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                     <?php
 
+                                    // Admin-edited values take priority over original RFID values.
+                                    $entryTime = !empty($record['A_E_entry_time'])
+                                        ? $record['A_E_entry_time']
+                                        : ($record['entry_time'] ?? null);
+
+                                    $entryStatus = !empty($record['A_E_entry_status'])
+                                        ? trim((string) $record['A_E_entry_status'])
+                                        : trim((string) ($record['entry_status'] ?? ''));
+
+                                    $exitTime = !empty($record['A_E_exit_time'])
+                                        ? $record['A_E_exit_time']
+                                        : ($record['exit_time'] ?? null);
+
+                                    $exitStatus = !empty($record['A_E_exit_status'])
+                                        ? trim((string) $record['A_E_exit_status'])
+                                        : trim((string) ($record['exit_status'] ?? ''));
+
+                                    // Identify the source of each attendance field independently.
+                                    $entryTimeIsAdminEdited = !empty($record['A_E_entry_time']);
+                                    $entryStatusIsAdminEdited = !empty($record['A_E_entry_status']);
+
+                                    $exitTimeIsAdminEdited = !empty($record['A_E_exit_time']);
+                                    $exitStatusIsAdminEdited = !empty($record['A_E_exit_status']);
+
+                                    // Normalize the effective statuses.
+                                    $entryStatusNormalized = strtolower($entryStatus);
+                                    $exitStatusNormalized = strtolower($exitStatus);
+
+                                    // Determine overall attendance status.
                                     $attendanceStatus = strtolower(
-                                        trim(
-                                            (string) (
-                                                $record['attendance_status']
-                                                ?? 'unknown'
-                                            )
-                                        )
+                                        trim((string) ($record['attendance_status'] ?? 'unknown'))
                                     );
 
-                                    $entryStatus = trim(
-                                        (string) (
-                                            $record['entry_status'] ?? ''
-                                        )
-                                    );
-
-                                    $exitStatus = trim(
-                                        (string) (
-                                            $record['exit_status'] ?? ''
-                                        )
-                                    );
-
-                                    $entryStatusNormalized = strtolower(
-                                        $entryStatus
-                                    );
-
-                                    $exitStatusNormalized = strtolower(
-                                        $exitStatus
-                                    );
+                                    // An admin-edited entry status overrides the original attendance status.
+                                    if (!empty($record['A_E_entry_status'])) {
+                                        $attendanceStatus = str_contains(
+                                            strtolower(trim((string) $record['A_E_entry_status'])),
+                                            'late'
+                                        ) ? 'late' : 'present';
+                                    }
 
                                     $statusClass = match ($attendanceStatus) {
                                         'present' => 'status-present',
@@ -326,30 +346,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         default => 'status-unknown',
                                     };
 
-                                    $entryStatusClass =
-                                        str_contains(
-                                            $entryStatusNormalized,
-                                            'late'
-                                        )
-                                        ? 'status-late'
-                                        : 'status-present';
+                                    $entryStatusClass = str_contains(
+                                        $entryStatusNormalized,
+                                        'late'
+                                    ) ? 'status-late' : 'status-present';
 
-                                    $exitStatusClass =
-                                        str_contains(
-                                            $exitStatusNormalized,
-                                            'before'
-                                        )
-                                        ? 'status-late'
-                                        : 'status-present';
+                                    $exitStatusClass = str_contains(
+                                        $exitStatusNormalized,
+                                        'before'
+                                    ) ? 'status-late' : 'status-present';
 
-                                    $attendanceDate =
-                                        $record['attendance_date'] ?? '';
-
-                                    $entryTime =
-                                        $record['entry_time'] ?? null;
-
-                                    $exitTime =
-                                        $record['exit_time'] ?? null;
+                                    $attendanceDate = $record['attendance_date'] ?? '';
 
                                     ?>
 
@@ -435,22 +442,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                             <?php if (!empty($entryTime)): ?>
 
-                                                <?= htmlspecialchars(
-                                                    date(
-                                                        'h:i:s A',
-                                                        strtotime(
-                                                            (string) $entryTime
-                                                        )
-                                                    ),
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>
+                                                <div class="attendance-value-source">
+                                                    <span>
+                                                        <?= htmlspecialchars(
+                                                            date('h:i:s A', strtotime((string) $entryTime)),
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </span>
+
+                                                    <small
+                                                        class="attendance-source-badge <?= $entryTimeIsAdminEdited ? 'source-admin-edited' : 'source-rfid' ?>">
+                                                        <?= $entryTimeIsAdminEdited ? 'Admin Edited' : 'RFID Recorded' ?>
+                                                    </small>
+                                                </div>
 
                                             <?php else: ?>
 
-                                                <span class="attendance-not-recorded">
-                                                    Not recorded
-                                                </span>
+                                                <span class="attendance-not-recorded">Not recorded</span>
 
                                             <?php endif; ?>
 
@@ -462,21 +471,25 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                             <?php if ($entryStatus !== ''): ?>
 
-                                                <span class="attendance-status-badge <?= $entryStatusClass ?>">
+                                                <div class="attendance-value-source">
+                                                    <span
+                                                        class="attendance-status-badge <?= strtolower($entryStatus) === 'entry - late' ? 'status-late' : 'status-present' ?>">
+                                                        <?= htmlspecialchars(
+                                                            $entryStatus,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </span>
 
-                                                    <?= htmlspecialchars(
-                                                        $entryStatus,
-                                                        ENT_QUOTES,
-                                                        'UTF-8'
-                                                    ) ?>
-
-                                                </span>
+                                                    <small
+                                                        class="attendance-source-badge <?= $entryStatusIsAdminEdited ? 'source-admin-edited' : 'source-rfid' ?>">
+                                                        <?= $entryStatusIsAdminEdited ? 'Admin Edited' : 'RFID Recorded' ?>
+                                                    </small>
+                                                </div>
 
                                             <?php else: ?>
 
-                                                <span class="attendance-not-recorded">
-                                                    —
-                                                </span>
+                                                <span class="attendance-not-recorded">—</span>
 
                                             <?php endif; ?>
 
@@ -488,22 +501,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                             <?php if (!empty($exitTime)): ?>
 
-                                                <?= htmlspecialchars(
-                                                    date(
-                                                        'h:i:s A',
-                                                        strtotime(
-                                                            (string) $exitTime
-                                                        )
-                                                    ),
-                                                    ENT_QUOTES,
-                                                    'UTF-8'
-                                                ) ?>
+                                                <div class="attendance-value-source">
+                                                    <span>
+                                                        <?= htmlspecialchars(
+                                                            date('h:i:s A', strtotime((string) $exitTime)),
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </span>
+
+                                                    <small
+                                                        class="attendance-source-badge <?= $exitTimeIsAdminEdited ? 'source-admin-edited' : 'source-rfid' ?>">
+                                                        <?= $exitTimeIsAdminEdited ? 'Admin Edited' : 'RFID Recorded' ?>
+                                                    </small>
+                                                </div>
 
                                             <?php else: ?>
 
-                                                <span class="attendance-not-recorded">
-                                                    Not recorded
-                                                </span>
+                                                <span class="attendance-not-recorded">Not recorded</span>
 
                                             <?php endif; ?>
 
@@ -515,21 +530,25 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                             <?php if ($exitStatus !== ''): ?>
 
-                                                <span class="attendance-status-badge <?= $exitStatusClass ?>">
+                                                <div class="attendance-value-source">
+                                                    <span
+                                                        class="attendance-status-badge <?= strtolower($exitStatus) === 'exit - before' ? 'status-late' : 'status-present' ?>">
+                                                        <?= htmlspecialchars(
+                                                            $exitStatus,
+                                                            ENT_QUOTES,
+                                                            'UTF-8'
+                                                        ) ?>
+                                                    </span>
 
-                                                    <?= htmlspecialchars(
-                                                        $exitStatus,
-                                                        ENT_QUOTES,
-                                                        'UTF-8'
-                                                    ) ?>
-
-                                                </span>
+                                                    <small
+                                                        class="attendance-source-badge <?= $exitStatusIsAdminEdited ? 'source-admin-edited' : 'source-rfid' ?>">
+                                                        <?= $exitStatusIsAdminEdited ? 'Admin Edited' : 'RFID Recorded' ?>
+                                                    </small>
+                                                </div>
 
                                             <?php else: ?>
 
-                                                <span class="attendance-not-recorded">
-                                                    —
-                                                </span>
+                                                <span class="attendance-not-recorded">—</span>
 
                                             <?php endif; ?>
 
@@ -643,7 +662,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                                         <div class="attendance-log-employee-details">
 
-                                                            <h3>RFID Scan History</h3>
+                                                            <h3>Attendance Activity History</h3>
 
                                                             <p>
                                                                 <?= htmlspecialchars(
@@ -669,12 +688,36 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
                                                     </div>
 
-                                                    <span class="attendance-log-count">
-                                                        <?= count($record['scan_history'] ?? []) ?>
-                                                        <?= count($record['scan_history'] ?? []) === 1
-                                                            ? 'Scan'
-                                                            : 'Scans' ?>
-                                                    </span>
+                                                    <?php
+                                                    $scanHistory = $record['scan_history'] ?? [];
+
+                                                    $adminEditedCount = count(array_filter(
+                                                        $scanHistory,
+                                                        fn($scan) => ($scan['source'] ?? '') === 'A_E_modify'
+                                                    ));
+
+                                                    $rfidCount = count(array_filter(
+                                                        $scanHistory,
+                                                        fn($scan) => ($scan['source'] ?? '') === 'RFID'
+                                                    ));
+                                                    ?>
+
+                                                    <div class="attendance-log-counts">
+
+                                                        <?php if ($adminEditedCount > 0): ?>
+                                                            <span class="attendance-source-badge source-admin-edited">
+                                                                <?= $adminEditedCount ?>
+                                                                <?= $adminEditedCount === 1 ? 'Admin Edited' : 'Admin Edited' ?>
+                                                            </span>
+                                                        <?php endif; ?>
+
+                                                        <?php if ($rfidCount > 0): ?>
+                                                            <span class="attendance-source-badge source-rfid">
+                                                                <?= $rfidCount ?> RFID Recorded
+                                                            </span>
+                                                        <?php endif; ?>
+
+                                                    </div>
 
                                                 </div>
 
@@ -700,6 +743,20 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                             $scanStatus = trim(
                                                                 (string) ($scan['scan_status'] ?? '')
                                                             );
+
+                                                            $scanSource = strtolower(
+                                                                trim((string) ($scan['source'] ?? ''))
+                                                            );
+
+                                                            $isAdminEdited = $scanSource === 'a_e_modify';
+
+                                                            $sourceLabel = $isAdminEdited
+                                                                ? 'Admin Edited'
+                                                                : 'RFID Recorded';
+
+                                                            $sourceClass = $isAdminEdited
+                                                                ? 'source-admin-edited'
+                                                                : 'source-rfid';
                                                             ?>
 
                                                             <div class="attendance-log-scan">
@@ -716,9 +773,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                                     <?= htmlspecialchars(
                                                                         date(
                                                                             'h:i:s A',
-                                                                            strtotime(
-                                                                                (string) $scan['scan_time']
-                                                                            )
+                                                                            strtotime((string) $scan['scan_time'])
                                                                         ),
                                                                         ENT_QUOTES,
                                                                         'UTF-8'
@@ -729,11 +784,19 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                                     <?= htmlspecialchars(
                                                                         $scanStatus !== ''
                                                                         ? $scanStatus
-                                                                        : 'Scan recorded',
+                                                                        : 'Activity recorded',
                                                                         ENT_QUOTES,
                                                                         'UTF-8'
                                                                     ) ?>
                                                                 </span>
+
+                                                                <small class="attendance-source-badge <?= $sourceClass ?>">
+                                                                    <?= htmlspecialchars(
+                                                                        $sourceLabel,
+                                                                        ENT_QUOTES,
+                                                                        'UTF-8'
+                                                                    ) ?>
+                                                                </small>
 
                                                             </div>
 
@@ -744,7 +807,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                 <?php else: ?>
 
                                                     <div class="attendance-log-empty">
-                                                        No RFID scans were found for this employee on this date.
+                                                        No attendance activities were found for this employee on this date.
                                                     </div>
 
                                                 <?php endif; ?>
@@ -776,7 +839,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     Entry and exit statuses are displayed using the recorded
                     attendance data. Attendance evaluation follows each
                     employee's assigned work schedule, including the established
-                    30-minute entry grace period and 60-minute exit threshold.
+                    30-minute entry grace period and No exit grace period.
                 </p>
 
             </section>

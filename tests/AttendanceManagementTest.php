@@ -12,8 +12,10 @@ class AttendanceManagementTest extends TestCase
     private array $createdUserIds = [];
     private string $prefix;
 
-    // Test data for getEmployeeAttendanceByDateRange().
+    // Test data for attendance date-range methods.
     private int $testEmployeeId;
+    private int $secondTestEmployeeId;
+    private int $otherDepartmentEmployeeId;
     private string $testAttendanceDate = '2026-01-15';
 
     protected function setUp(): void
@@ -72,11 +74,49 @@ class AttendanceManagementTest extends TestCase
                 $username,
                 $department
             ]);
-            // Save the IT employee ID for attendance tests.
+            // Save employee IDs for attendance tests.
+            if ($index === 0) {
+                $this->otherDepartmentEmployeeId = (int) $this->pdo->lastInsertId();
+            }
+
             if ($index === 1) {
                 $this->testEmployeeId = (int) $this->pdo->lastInsertId();
             }
         }
+
+
+        // Create a second employee in the same IT department.
+        $secondUsername = $this->prefix . '_IT_SECOND';
+
+        $stmt = $this->pdo->prepare("
+    INSERT INTO users
+        (role_id, username, email, password, full_name)
+    VALUES
+        (2, ?, ?, 'test_hash', 'Second IT Test Employee')
+");
+
+        $stmt->execute([
+            $secondUsername,
+            $secondUsername . '@test.local'
+        ]);
+
+        $secondUserId = (int) $this->pdo->lastInsertId();
+        $this->createdUserIds[] = $secondUserId;
+
+        $stmt = $this->pdo->prepare("
+    INSERT INTO employees
+        (user_id, employee_code, department)
+    VALUES
+        (?, ?, ?)
+");
+
+        $stmt->execute([
+            $secondUserId,
+            $secondUsername,
+            $this->prefix . '_IT'
+        ]);
+
+        $this->secondTestEmployeeId = (int) $this->pdo->lastInsertId();
 
 
         // Class under test: Attendance
@@ -93,6 +133,23 @@ class AttendanceManagementTest extends TestCase
             $this->testEmployeeId,
             $this->testAttendanceDate,
             $this->testAttendanceDate . ' 09:00:00',
+            'present'
+        ]);
+
+
+        // Create attendance for the second IT employee.
+        $stmt->execute([
+            $this->secondTestEmployeeId,
+            $this->testAttendanceDate,
+            $this->testAttendanceDate . ' 09:15:00',
+            'present'
+        ]);
+
+        // Create attendance for an employee in another department.
+        $stmt->execute([
+            $this->otherDepartmentEmployeeId,
+            $this->testAttendanceDate,
+            $this->testAttendanceDate . ' 09:30:00',
             'present'
         ]);
 
@@ -140,6 +197,9 @@ class AttendanceManagementTest extends TestCase
             );
             $stmt->execute([$userId]);
         }
+
+        unset($this->attendance);
+        unset($this->pdo);
     }
 
     // ADM-01: Normal input - retrieve distinct departments.
@@ -344,6 +404,114 @@ class AttendanceManagementTest extends TestCase
         $result = $this->attendance->getEmployeeScanHistoryForDate(
             $this->testEmployeeId,
             ''
+        );
+
+        // Assertion
+        $this->assertSame([], $result);
+    }
+
+
+    // Class under test: Attendance
+// Method under test: getDepartmentAttendanceByDateRange()
+// Test ID: ADM-12
+// Purpose: Verify attendance is returned for all employees in a department.
+    public function testGetDepartmentAttendanceByDateRangeReturnsAllMatchingEmployees(): void
+    {
+        // Call
+        $department = $this->prefix . '_IT';
+
+        $result = $this->attendance->getDepartmentAttendanceByDateRange(
+            $department,
+            '2026-01-01',
+            '2026-01-31'
+        );
+
+        // Assertions
+        $this->assertCount(2, $result);
+
+        $employeeIds = array_map(
+            'intval',
+            array_column($result, 'employee_id')
+        );
+
+        $this->assertContains($this->testEmployeeId, $employeeIds);
+        $this->assertContains($this->secondTestEmployeeId, $employeeIds);
+
+        foreach ($result as $record) {
+            $this->assertSame($department, $record['department']);
+        }
+    }
+
+    // Class under test: Attendance
+// Method under test: getDepartmentAttendanceByDateRange()
+// Test ID: ADM-13
+// Purpose: Verify attendance from other departments is excluded.
+    public function testGetDepartmentAttendanceByDateRangeExcludesOtherDepartments(): void
+    {
+        // Call
+        $result = $this->attendance->getDepartmentAttendanceByDateRange(
+            $this->prefix . '_IT',
+            '2026-01-01',
+            '2026-01-31'
+        );
+
+        // Assertions
+        $employeeIds = array_map(
+            'intval',
+            array_column($result, 'employee_id')
+        );
+
+        $this->assertNotContains(
+            $this->otherDepartmentEmployeeId,
+            $employeeIds
+        );
+    }
+
+    // Class under test: Attendance
+// Method under test: getDepartmentAttendanceByDateRange()
+// Test ID: ADM-14
+// Purpose: Verify an empty department returns an empty array.
+    public function testGetDepartmentAttendanceByDateRangeRejectsEmptyDepartment(): void
+    {
+        // Call
+        $result = $this->attendance->getDepartmentAttendanceByDateRange(
+            '',
+            '2026-01-01',
+            '2026-01-31'
+        );
+
+        // Assertion
+        $this->assertSame([], $result);
+    }
+
+    // Class under test: Attendance
+// Method under test: getDepartmentAttendanceByDateRange()
+// Test ID: ADM-15
+// Purpose: Verify empty dates return an empty array.
+    public function testGetDepartmentAttendanceByDateRangeRejectsEmptyDates(): void
+    {
+        // Call
+        $result = $this->attendance->getDepartmentAttendanceByDateRange(
+            $this->prefix . '_IT',
+            '',
+            '2026-01-31'
+        );
+
+        // Assertion
+        $this->assertSame([], $result);
+    }
+
+    // Class under test: Attendance
+// Method under test: getDepartmentAttendanceByDateRange()
+// Test ID: ADM-16
+// Purpose: Verify reversed dates return an empty array.
+    public function testGetDepartmentAttendanceByDateRangeRejectsReversedDates(): void
+    {
+        // Call
+        $result = $this->attendance->getDepartmentAttendanceByDateRange(
+            $this->prefix . '_IT',
+            '2026-01-31',
+            '2026-01-01'
         );
 
         // Assertion

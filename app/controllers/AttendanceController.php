@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/WorkSchedule.php';
 require_once __DIR__ . '/../models/Attendance.php';
 require_once __DIR__ . '/../models/RfidCard.php';
 require_once __DIR__ . '/../services/AttendanceService.php';
+require_once __DIR__ . '/../models/Employee.php';
 
 class AttendanceController extends Controller
 {
@@ -36,10 +37,29 @@ class AttendanceController extends Controller
     {
         Middleware::requireAdmin();
 
+        $isAjax = (
+            str_contains(
+                (string) ($_SERVER['HTTP_ACCEPT'] ?? ''),
+                'application/json'
+            ) ||
+            strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest'
+        );
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            if ($isAjax) {
+                http_response_code(405);
+                header('Content-Type: application/json; charset=utf-8');
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Method not allowed.'
+                ]);
+                exit;
+            }
+
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=attendance-station'
             );
+            return;
         }
 
         $identifier = trim((string) ($_POST['rfid_identifier'] ?? ''));
@@ -49,15 +69,41 @@ class AttendanceController extends Controller
             !isset($_POST['csrf_token']) ||
             !hash_equals($_SESSION['csrf_token'], (string) $_POST['csrf_token'])
         ) {
-            $_SESSION['attendance_error'] = 'Invalid or expired form token. Refresh the page and try again.';
+            $message = 'Invalid or expired form token. Refresh the page and try again.';
+
+            if ($isAjax) {
+                http_response_code(403);
+                header('Content-Type: application/json; charset=utf-8');
+                header('Cache-Control: no-store, no-cache, must-revalidate');
+                echo json_encode([
+                    'success' => false,
+                    'message' => $message
+                ]);
+                exit;
+            }
+
+            $_SESSION['attendance_error'] = $message;
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=attendance-station'
             );
+            return;
         }
 
         $service = new AttendanceService();
         $result = $service->processScan($identifier);
 
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+
+            echo json_encode(
+                $result,
+                JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+            );
+            exit;
+        }
+
+        // Preserve the existing redirect-with-session behavior for non-AJAX requests.
         if ($result['success']) {
             $_SESSION['attendance_success'] = $result['message'];
             $_SESSION['attendance_employee'] = $result['employee'] ?? null;
@@ -78,7 +124,6 @@ class AttendanceController extends Controller
             '/HRIS-Management-System/public/index.php?action=attendance-station'
         );
     }
-
 
     /**
      * Display administrative attendance management.
@@ -156,8 +201,6 @@ class AttendanceController extends Controller
         if ($viewAttendance) {
             if ($selectedDepartment === '') {
                 $error = 'Please select a department.';
-            } elseif ($selectedEmployee === '') {
-                $error = 'Please select an employee.';
             } elseif ($fromDate === '' || $toDate === '') {
                 $error = 'Please select both From Date and To Date.';
             } else {
@@ -180,12 +223,23 @@ class AttendanceController extends Controller
                 } elseif ($fromDate > $toDate) {
                     $error = 'From Date cannot be later than To Date.';
                 } else {
-                    $attendanceRecords =
-                        $attendanceModel->getEmployeeAttendanceByDateRange(
-                            (int) $selectedEmployee,
-                            $fromDate,
-                            $toDate
-                        );
+                    // If an employee is selected, retrieve only that employee's records.
+                    if ($selectedEmployee !== '') {
+                        $attendanceRecords =
+                            $attendanceModel->getEmployeeAttendanceByDateRange(
+                                (int) $selectedEmployee,
+                                $fromDate,
+                                $toDate
+                            );
+                    } else {
+                        // Otherwise, retrieve all attendance records for the selected department.
+                        $attendanceRecords =
+                            $attendanceModel->getDepartmentAttendanceByDateRange(
+                                $selectedDepartment,
+                                $fromDate,
+                                $toDate
+                            );
+                    }
 
                     // Attach the complete RFID scan history to each attendance row.
                     foreach ($attendanceRecords as &$record) {
@@ -215,6 +269,7 @@ class AttendanceController extends Controller
         ]);
     }
 
+
     /**
      * Display the manual attendance modification form.
      */
@@ -240,7 +295,7 @@ class AttendanceController extends Controller
 
 
     /**
-     * Save manually entered attendance.
+     * Save administrator-edited attendance.
      */
     public function saveModifiedAttendance(): void
     {
@@ -280,14 +335,14 @@ class AttendanceController extends Controller
         );
 
         $entryTimeInput = trim(
-            (string) ($_POST['entry_time'] ?? '')
+            (string) ($_POST['A_E_entry_time'] ?? '')
         );
 
         $exitTimeInput = trim(
-            (string) ($_POST['exit_time'] ?? '')
+            (string) ($_POST['A_E_exit_time'] ?? '')
         );
 
-        // Validate employee ID.
+        // Validate employee.
         if (!$employeeId || $employeeId < 1) {
             $_SESSION['modify_attendance_error'] =
                 'Please select a valid employee.';
@@ -296,7 +351,7 @@ class AttendanceController extends Controller
             return;
         }
 
-        // Validate the attendance date.
+        // Validate attendance date.
         $parsedDate = DateTimeImmutable::createFromFormat(
             '!Y-m-d',
             $attendanceDate
@@ -313,7 +368,16 @@ class AttendanceController extends Controller
             return;
         }
 
-        // Validate time inputs.
+        // At least one time must be supplied.
+        if ($entryTimeInput === '' && $exitTimeInput === '') {
+            $_SESSION['modify_attendance_error'] =
+                'Enter an admin-edited entry time, an exit time, or both.';
+
+            $this->redirect($redirectUrl);
+            return;
+        }
+
+        // Validate time format.
         $validTime = static function (string $time): bool {
             return preg_match(
                 '/^(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d)?$/',
@@ -321,66 +385,30 @@ class AttendanceController extends Controller
             ) === 1;
         };
 
-        if ($entryTimeInput === '' && $exitTimeInput === '') {
+        if (
+            $entryTimeInput !== '' &&
+            !$validTime($entryTimeInput)
+        ) {
             $_SESSION['modify_attendance_error'] =
-                'Enter an entry time, an exit time, or both.';
+                'Please enter a valid admin-edited entry time.';
 
             $this->redirect($redirectUrl);
             return;
-        }
-
-        if ($entryTimeInput !== '' && !$validTime($entryTimeInput)) {
-            $_SESSION['modify_attendance_error'] =
-                'Please enter a valid entry time.';
-
-            $this->redirect($redirectUrl);
-            return;
-        }
-
-        if ($exitTimeInput !== '' && !$validTime($exitTimeInput)) {
-            $_SESSION['modify_attendance_error'] =
-                'Please enter a valid exit time.';
-
-            $this->redirect($redirectUrl);
-            return;
-        }
-
-        // Convert supplied times to the database datetime format.
-        $entryDateTime = null;
-        $entryTime = null;
-        $exitDateTime = null;
-        $exitTime = null;
-
-        if ($entryTimeInput !== '') {
-            $entryDateTime = new DateTimeImmutable(
-                $attendanceDate . ' ' . $entryTimeInput
-            );
-
-            $entryTime = $entryDateTime->format('Y-m-d H:i:s');
-        }
-
-        if ($exitTimeInput !== '') {
-            $exitDateTime = new DateTimeImmutable(
-                $attendanceDate . ' ' . $exitTimeInput
-            );
-
-            $exitTime = $exitDateTime->format('Y-m-d H:i:s');
         }
 
         if (
-            $entryDateTime !== null &&
-            $exitDateTime !== null &&
-            $exitDateTime <= $entryDateTime
+            $exitTimeInput !== '' &&
+            !$validTime($exitTimeInput)
         ) {
             $_SESSION['modify_attendance_error'] =
-                'Exit time must be later than entry time.';
+                'Please enter a valid admin-edited exit time.';
 
             $this->redirect($redirectUrl);
             return;
         }
 
         try {
-            // Verify that the selected employee exists.
+            // Verify employee.
             $employeeModel = new Employee();
 
             $employee = $employeeModel->findByEmployeeId(
@@ -388,14 +416,12 @@ class AttendanceController extends Controller
             );
 
             if ($employee === null) {
-                $_SESSION['modify_attendance_error'] =
-                    'The selected employee could not be found.';
-
-                $this->redirect($redirectUrl);
-                return;
+                throw new InvalidArgumentException(
+                    'The selected employee could not be found.'
+                );
             }
 
-            // Retrieve the employee's effective work schedule.
+            // Retrieve assigned work schedule.
             $workSchedule = new WorkSchedule();
 
             $schedule = $workSchedule->findEffectiveScheduleForEmployee(
@@ -403,157 +429,142 @@ class AttendanceController extends Controller
             );
 
             if ($schedule === null) {
-                $_SESSION['modify_attendance_error'] =
-                    'No work schedule is available for this employee.';
-
-                $this->redirect($redirectUrl);
-                return;
+                throw new InvalidArgumentException(
+                    'No work schedule is available for this employee.'
+                );
             }
 
-
-            // Exit-only modification: update an existing open attendance record.
-            if ($entryDateTime === null && $exitDateTime !== null) {
-                $attendanceModel = new Attendance();
-
-                $existingRecord = $attendanceModel->findByEmployeeAndDate(
-                    (int) $employeeId,
-                    $attendanceDate
-                );
-
-                if (
-                    $existingRecord === null ||
-                    empty($existingRecord['entry_time'])
-                ) {
-                    $_SESSION['modify_attendance_error'] =
-                        'No existing entry record was found for this employee and date.';
-
-                    $this->redirect($redirectUrl);
-                    return;
-                }
-
-                if (!empty($existingRecord['exit_time'])) {
-                    $_SESSION['modify_attendance_error'] =
-                        'An exit time has already been recorded for this employee and date.';
-
-                    $this->redirect($redirectUrl);
-                    return;
-                }
-
-                $existingEntryDateTime = new DateTimeImmutable(
-                    (string) $existingRecord['entry_time']
-                );
-
-                if ($exitDateTime <= $existingEntryDateTime) {
-                    $_SESSION['modify_attendance_error'] =
-                        'Exit time must be later than the recorded entry time.';
-
-                    $this->redirect($redirectUrl);
-                    return;
-                }
-
-                $scheduledExit = new DateTimeImmutable(
-                    $attendanceDate . ' ' . $schedule['expected_exit_time']
-                );
-
-                $exitThreshold = $scheduledExit->modify('-1 hour');
-
-                $exitStatus = ($exitDateTime >= $exitThreshold)
-                    ? 'Exit - In Time'
-                    : 'Exit - Before';
-
-                $saved = $attendanceModel->recordExitWithHistory(
-                    (int) $existingRecord['id'],
-                    (int) $employeeId,
-                    $attendanceDate,
-                    $exitTime,
-                    $exitStatus
-                );
-
-                if (!$saved) {
-                    $_SESSION['modify_attendance_error'] =
-                        'Unable to update the existing attendance record.';
-
-                    $this->redirect($redirectUrl);
-                    return;
-                }
-
-                $_SESSION['modify_attendance_success'] =
-                    'Exit time recorded successfully for '
-                    . $employee['employee_code']
-                    . '. Exit status: '
-                    . $exitStatus;
-
-                unset($_SESSION['modify_attendance_error']);
-
-                $this->redirect($redirectUrl);
-                return;
-            }
-
-
-            // The remaining path creates a new attendance record,
-            // so an entry time must be supplied.
-            if ($entryDateTime === null) {
-                $_SESSION['modify_attendance_error'] =
-                    'An entry time is required when creating a new attendance record.';
-
-                $this->redirect($redirectUrl);
-                return;
-            }
-
-            // Apply the existing 30-minute entry grace period.
-            $scheduledEntry = new DateTimeImmutable(
-                $attendanceDate . ' ' . $schedule['expected_entry_time']
-            );
-
-            $entryThreshold = $scheduledEntry->modify('+30 minutes');
-
-            $entryStatus = ($entryDateTime > $entryThreshold)
-                ? 'Entry - Late'
-                : 'Entry - In Time';
-
-            // Preserve the existing legacy attendance status.
-            $legacyStatus = ($entryStatus === 'Entry - Late')
-                ? 'late'
-                : 'present';
-
-            // Apply the existing one-hour exit threshold.
-            $exitStatus = null;
-
-            if ($exitTime !== null) {
-                $scheduledExit = new DateTimeImmutable(
-                    $attendanceDate . ' ' . $schedule['expected_exit_time']
-                );
-
-                $exitThreshold = $scheduledExit->modify('-1 hour');
-
-                $exitStatus = ($exitDateTime >= $exitThreshold)
-                    ? 'Exit - In Time'
-                    : 'Exit - Before';
-            }
-
-            // Save attendance and scan history together.
             $attendanceModel = new Attendance();
 
-            $attendanceModel->createManualAttendanceWithHistory(
+            // Retrieve any existing attendance record and A_E values.
+            $existingRecord = $attendanceModel->findByEmployeeAndDate(
+                (int) $employeeId,
+                $attendanceDate
+            );
+
+            /*
+             * Empty input preserves the previous A_E value.
+             * This also allows validation against the other existing
+             * admin-edited time when only one side is being changed.
+             */
+            $effectiveEntryTime = $entryTimeInput !== ''
+                ? $attendanceDate . ' ' . (
+                    strlen($entryTimeInput) === 5
+                    ? $entryTimeInput . ':00'
+                    : $entryTimeInput
+                )
+                : ($existingRecord['A_E_entry_time'] ?? null);
+
+            $effectiveExitTime = $exitTimeInput !== ''
+                ? $attendanceDate . ' ' . (
+                    strlen($exitTimeInput) === 5
+                    ? $exitTimeInput . ':00'
+                    : $exitTimeInput
+                )
+                : ($existingRecord['A_E_exit_time'] ?? null);
+
+            // Validate that the resulting admin-edited exit is after entry.
+            if (
+                $effectiveEntryTime !== null &&
+                $effectiveExitTime !== null
+            ) {
+                $effectiveEntryDateTime = new DateTimeImmutable(
+                    $effectiveEntryTime
+                );
+
+                $effectiveExitDateTime = new DateTimeImmutable(
+                    $effectiveExitTime
+                );
+
+                if ($effectiveExitDateTime <= $effectiveEntryDateTime) {
+                    throw new InvalidArgumentException(
+                        'Admin-edited exit time must be later than admin-edited entry time.'
+                    );
+                }
+            }
+
+            // Calculate statuses for newly supplied admin-edited times.
+            $entryStatus = null;
+            $exitStatus = null;
+            $overallStatus = null;
+
+            if ($entryTimeInput !== '') {
+                $entryDateTime = new DateTimeImmutable(
+                    $attendanceDate . ' ' . $entryTimeInput
+                );
+
+                $scheduledEntry = new DateTimeImmutable(
+                    $attendanceDate . ' '
+                    . $schedule['expected_entry_time']
+                );
+
+                // Inclusive 30-minute entry grace period.
+                $entryThreshold = $scheduledEntry->modify('+30 minutes');
+
+                $entryStatus = ($entryDateTime > $entryThreshold)
+                    ? 'Entry - Late'
+                    : 'Entry - In Time';
+
+                // Calculate the overall admin-edited attendance status.
+                $overallStatus = ($entryStatus === 'Entry - Late')
+                    ? 'late'
+                    : 'present';
+            }
+
+            if ($exitTimeInput !== '') {
+                $exitDateTime = new DateTimeImmutable(
+                    $attendanceDate . ' ' . $exitTimeInput
+                );
+
+                $scheduledExit = new DateTimeImmutable(
+                    $attendanceDate . ' '
+                    . $schedule['expected_exit_time']
+                );
+
+                // No exit grace period.
+                $exitStatus = ($exitDateTime >= $scheduledExit)
+                    ? 'Exit - In Time'
+                    : 'Exit - Before';
+            }
+
+            // Store complete date and time in MySQL DATETIME columns.
+            $entryTime = $entryTimeInput !== ''
+                ? $attendanceDate . ' ' . (
+                    strlen($entryTimeInput) === 5
+                    ? $entryTimeInput . ':00'
+                    : $entryTimeInput
+                )
+                : null;
+
+            $exitTime = $exitTimeInput !== ''
+                ? $attendanceDate . ' ' . (
+                    strlen($exitTimeInput) === 5
+                    ? $exitTimeInput . ':00'
+                    : $exitTimeInput
+                )
+                : null;
+
+            // Save ONLY the A_E columns.
+            $attendanceModel->saveAdminEditedAttendance(
                 (int) $employeeId,
                 $attendanceDate,
                 $entryTime,
                 $entryStatus,
-                $legacyStatus,
                 $exitTime,
-                $exitStatus
+                $exitStatus,
+                $overallStatus
             );
 
             $_SESSION['modify_attendance_success'] =
-                'Attendance was recorded successfully for '
+                'Admin-edited attendance saved successfully for '
                 . $employee['employee_code']
-                . '. Entry status: '
-                . $entryStatus
-                . (
-                    $exitStatus !== null
-                    ? '. Exit status: ' . $exitStatus
-                    : '. No exit time was recorded.'
-                );
+                . '.'
+                . ($entryStatus !== null
+                    ? ' Entry status: ' . $entryStatus . '.'
+                    : '')
+                . ($exitStatus !== null
+                    ? ' Exit status: ' . $exitStatus . '.'
+                    : '');
 
             unset($_SESSION['modify_attendance_error']);
 
@@ -563,12 +574,12 @@ class AttendanceController extends Controller
 
         } catch (Throwable $exception) {
             error_log(
-                '[HRIS MANUAL ATTENDANCE ERROR] '
+                '[HRIS ADMIN EDITED ATTENDANCE ERROR] '
                 . $exception->getMessage()
             );
 
             $_SESSION['modify_attendance_error'] =
-                'Unable to save attendance. Please check the details and try again.';
+                'Unable to save admin-edited attendance. Please check the details and try again.';
         }
 
         $this->redirect($redirectUrl);

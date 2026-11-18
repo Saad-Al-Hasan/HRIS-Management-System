@@ -1,12 +1,8 @@
-
 <aside class="admin-sidebar" id="mainSidebar">
 
     <div class="sidebar-brand">
 
-        <img
-            src="/HRIS-Management-System/public/assets/images/myol-logo.jpg"
-            alt="MYOL Logo"
-        >
+        <img src="/HRIS-Management-System/public/assets/images/myol-logo.jpg" alt="MYOL Logo">
 
         <div class="sidebar-brand-text">
             <div class="sidebar-brand-title">MYOL HRIS</div>
@@ -21,10 +17,8 @@
 
             <div class="sidebar-section-title">MAIN</div>
 
-            <a
-                href="/HRIS-Management-System/public/index.php?action=employee-dashboard"
-                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employee-dashboard' ? 'active' : '' ?>"
-            >
+            <a href="/HRIS-Management-System/public/index.php?action=employee-dashboard"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employee-dashboard' ? 'active' : '' ?>">
                 <span class="sidebar-link-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -37,10 +31,8 @@
                 <span class="sidebar-link-text">Dashboard</span>
             </a>
 
-            <a
-                href="/HRIS-Management-System/public/index.php?action=employee-profile"
-                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employee-profile' ? 'active' : '' ?>"
-            >
+            <a href="/HRIS-Management-System/public/index.php?action=employee-profile"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employee-profile' ? 'active' : '' ?>">
                 <span class="sidebar-link-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <circle cx="12" cy="8" r="3" />
@@ -51,16 +43,51 @@
                 <span class="sidebar-link-text">My Profile</span>
             </a>
 
+
+            <!-- Leave Application -->
+
+            <a href="/HRIS-Management-System/public/index.php?action=leave-application" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
+                'leave-application',
+                'leave-application-store'
+            ], true) ? 'active' : '' ?>" title="Leave Application">
+                <span class="sidebar-link-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2" />
+                        <path d="M7 3v4" />
+                        <path d="M17 3v4" />
+                        <path d="M3 10h18" />
+                        <path d="M8 14h3" />
+                        <path d="M8 17h6" />
+                    </svg>
+                </span>
+
+                <span class="sidebar-link-text">Leave Application</span>
+            </a>
+
+            <!-- Salary Details -->
+
+            <a href="/HRIS-Management-System/public/index.php?action=employee-salary-details"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'employee-salary-details' ? 'active' : '' ?>"
+                title="Salary Details">
+                <span class="sidebar-link-icon">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <rect x="2" y="5" width="20" height="14" rx="2" />
+                        <path d="M2 10h20" />
+                        <path d="M7 15h3" />
+                        <path d="M16 15h2" />
+                    </svg>
+                </span>
+
+                <span class="sidebar-link-text">Salary Details</span>
+            </a>
+
         </div>
 
         <div class="sidebar-section">
 
             <div class="sidebar-section-title">ACCOUNT</div>
 
-            <a
-                href="/HRIS-Management-System/public/index.php?action=logout"
-                class="sidebar-link"
-            >
+            <a href="/HRIS-Management-System/public/index.php?action=logout" class="sidebar-link">
                 <span class="sidebar-link-icon">
                     <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M10 4H5v16h5" />
@@ -77,11 +104,7 @@
     </nav>
 
     <div class="sidebar-footer">
-        <a
-            href="https://www.myolbd.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-        >
+        <a href="https://www.myolbd.com/" target="_blank" rel="noopener noreferrer">
             MY Outsourcing Limited
         </a>
     </div>

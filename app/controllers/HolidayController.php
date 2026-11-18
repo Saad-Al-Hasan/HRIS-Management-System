@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
@@ -7,20 +8,46 @@ require_once __DIR__ . '/../models/Holiday.php';
 
 class HolidayController extends Controller
 {
-    private Holiday $holidayModel;
+    private Holiday $holiday;
 
     public function __construct()
     {
-        $this->holidayModel = new Holiday();
+        $this->holiday = new Holiday();
     }
 
+    /**
+     * Display all organizational holidays or filter by date.
+     */
     public function index(): void
     {
         Middleware::requireAdmin();
 
+        $filterDate = trim((string) ($_GET['holiday_date'] ?? ''));
+
+        // Validate the selected date.
+        if ($filterDate !== '') {
+            $dateObject = DateTime::createFromFormat(
+                '!Y-m-d',
+                $filterDate
+            );
+
+            if (
+                !$dateObject ||
+                $dateObject->format('Y-m-d') !== $filterDate
+            ) {
+                $filterDate = '';
+
+                $_SESSION['error_message'] =
+                    'Please select a valid holiday date.';
+            }
+        }
+
         $this->view('admin/holidays/index', [
             'pageTitle' => 'Holiday Management',
-            'holidays' => $this->holidayModel->getAll(),
+            'holidays' => $this->holiday->getAll(
+                $filterDate !== '' ? $filterDate : null
+            ),
+            'filterDate' => $filterDate,
             'success' => $_SESSION['success_message'] ?? null,
             'error' => $_SESSION['error_message'] ?? null,
             'csrfToken' => Auth::csrfToken(),
@@ -32,6 +59,9 @@ class HolidayController extends Controller
         );
     }
 
+    /**
+     * Store a new holiday.
+     */
     public function store(): void
     {
         Middleware::requireAdmin();
@@ -41,60 +71,101 @@ class HolidayController extends Controller
             return;
         }
 
-        if (!Auth::verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        if (
+            !Auth::verifyCsrfToken(
+                (string) ($_POST['csrf_token'] ?? '')
+            )
+        ) {
             http_response_code(403);
             exit('Invalid security token. Please refresh and try again.');
         }
 
-        $name = trim($_POST['holiday_name'] ?? '');
-        $date = trim($_POST['holiday_date'] ?? '');
-        $type = trim($_POST['holiday_type'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        $holidayName = trim((string) ($_POST['holiday_name'] ?? ''));
+        $holidayDate = trim((string) ($_POST['holiday_date'] ?? ''));
+        $holidayType = trim((string) ($_POST['holiday_type'] ?? ''));
+        $description = trim((string) ($_POST['description'] ?? ''));
 
-        $validTypes = ['Organizational', 'Governmental'];
-
+        // Validate holiday name.
         if (
-            $name === '' ||
-            !in_array($type, $validTypes, true)
+            $holidayName === '' ||
+            mb_strlen($holidayName) > 100
         ) {
             $_SESSION['error_message'] =
-                'Please enter a holiday name and select a valid holiday type.';
+                'Holiday name is required and must not exceed 100 characters.';
 
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=holidays'
             );
-            return;
         }
 
-        $dateObject = DateTime::createFromFormat('!Y-m-d', $date);
+        // Validate date format.
+        $dateObject = DateTime::createFromFormat('!Y-m-d', $holidayDate);
 
         if (
             !$dateObject ||
-            $dateObject->format('Y-m-d') !== $date
+            $dateObject->format('Y-m-d') !== $holidayDate
         ) {
-            $_SESSION['error_message'] = 'Please enter a valid holiday date.';
+            $_SESSION['error_message'] = 'Please select a valid holiday date.';
 
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=holidays'
             );
-            return;
+        }
+
+        // Validate holiday type.
+        $allowedTypes = [
+            'Government',
+            'Organizational'
+        ];
+
+        if (!in_array($holidayType, $allowedTypes, true)) {
+            $_SESSION['error_message'] = 'Please select a valid holiday type.';
+
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=holidays'
+            );
+        }
+
+        // Validate description length.
+        if (mb_strlen($description) > 65535) {
+            $_SESSION['error_message'] = 'The description is too long.';
+
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=holidays'
+            );
+        }
+
+        // Prevent duplicate holiday dates.
+        if ($this->holiday->existsOnDate($holidayDate)) {
+            $_SESSION['error_message'] =
+                'A holiday already exists for the selected date.';
+
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php?action=holidays'
+            );
         }
 
         try {
-            $this->holidayModel->create(
-                $name,
-                $date,
-                $type,
+            $this->holiday->create(
+                $holidayName,
+                $holidayDate,
+                $holidayType,
                 $description !== '' ? $description : null
             );
 
-            $_SESSION['success_message'] = 'Holiday added successfully.';
+            $_SESSION['success_message'] =
+                'Holiday added successfully.';
 
         } catch (PDOException $e) {
-            error_log('Holiday creation failed: ' . $e->getMessage());
 
-            $_SESSION['error_message'] =
-                'Holiday already exists. Try with a different date.';
+            // Also handles a duplicate date inserted concurrently.
+            if ($e->getCode() === '23000') {
+                $_SESSION['error_message'] =
+                    'A holiday already exists for the selected date.';
+            } else {
+                $_SESSION['error_message'] =
+                    'Unable to add the holiday. Please try again.';
+            }
         }
 
         $this->redirect(
@@ -102,6 +173,9 @@ class HolidayController extends Controller
         );
     }
 
+    /**
+     * Delete an existing holiday.
+     */
     public function delete(): void
     {
         Middleware::requireAdmin();
@@ -111,31 +185,39 @@ class HolidayController extends Controller
             return;
         }
 
-        if (!Auth::verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        if (
+            !Auth::verifyCsrfToken(
+                (string) ($_POST['csrf_token'] ?? '')
+            )
+        ) {
             http_response_code(403);
             exit('Invalid security token. Please refresh and try again.');
         }
 
-        $id = filter_input(
-            INPUT_POST,
-            'holiday_id',
+        $holidayId = filter_var(
+            $_POST['id'] ?? null,
             FILTER_VALIDATE_INT
         );
 
-        if (!$id || $id < 1) {
+        if (!$holidayId || $holidayId <= 0) {
             $_SESSION['error_message'] = 'Invalid holiday selected.';
 
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=holidays'
             );
-            return;
         }
 
-        if ($this->holidayModel->delete((int) $id)) {
-            $_SESSION['success_message'] = 'Holiday deleted successfully.';
-        } else {
+        try {
+            $deleted = $this->holiday->delete((int) $holidayId);
+
+            $_SESSION[$deleted ? 'success_message' : 'error_message'] =
+                $deleted
+                ? 'Holiday deleted successfully.'
+                : 'Unable to delete the selected holiday.';
+
+        } catch (PDOException $e) {
             $_SESSION['error_message'] =
-                'Holiday not found or could not be deleted.';
+                'Unable to delete the holiday. Please try again.';
         }
 
         $this->redirect(

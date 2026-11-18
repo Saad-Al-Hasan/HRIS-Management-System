@@ -7,6 +7,8 @@ require_once __DIR__ . '/../models/Employee.php';
 require_once __DIR__ . '/../models/RfidCard.php';
 require_once __DIR__ . '/../models/WorkSchedule.php';
 require_once __DIR__ . '/../models/Attendance.php';
+require_once __DIR__ . '/../models/LeaveRequest.php';
+require_once __DIR__ . '/../models/Salary.php';
 
 class EmployeeController extends Controller
 {
@@ -14,6 +16,8 @@ class EmployeeController extends Controller
     private RfidCard $rfidCardModel;
     private WorkSchedule $workScheduleModel;
     private Attendance $attendanceModel;
+    private LeaveRequest $leaveRequestModel;
+    private Salary $salaryModel;
 
     public function __construct()
     {
@@ -21,6 +25,8 @@ class EmployeeController extends Controller
         $this->rfidCardModel = new RfidCard();
         $this->workScheduleModel = new WorkSchedule();
         $this->attendanceModel = new Attendance();
+        $this->leaveRequestModel = new LeaveRequest();
+        $this->salaryModel = new Salary();
     }
 
     public function dashboard(): void
@@ -332,5 +338,241 @@ class EmployeeController extends Controller
         $this->redirect(
             '/HRIS-Management-System/public/index.php?action=employee-profile'
         );
+    }
+
+
+
+    /**
+     * Display the authenticated employee's current monthly salary details.
+     *
+     * Automatically recalculates and updates the current month's
+     * salary record whenever the employee opens this page.
+     *
+     * Employees can only access their own salary information.
+     */
+    public function salaryDetails(): void
+    {
+        Middleware::requireEmployee();
+
+        $userId = Auth::userId();
+
+        if ($userId === null) {
+            $this->redirect(
+                '/HRIS-Management-System/public/index.php'
+            );
+            return;
+        }
+
+        // Retrieve the employee associated with the authenticated user.
+        $employee = $this->employeeModel->findByUserId($userId);
+
+        if (
+            !$employee ||
+            empty($employee['employee_id'])
+        ) {
+            http_response_code(404);
+
+            $this->view('employee/salary-details', [
+                'pageTitle' => 'Salary Details',
+                'employee' => $employee,
+                'salaryRecord' => null,
+                'breakdown' => null,
+                'error' => 'Your employee record could not be found.'
+            ]);
+
+            return;
+        }
+
+        $employeeId = (int) $employee['employee_id'];
+
+        try {
+
+            // Determine the current calendar month automatically.
+            $currentMonth = (new DateTimeImmutable('today'))
+                ->format('Y-m');
+
+            // Calculate salary using the existing approved business rules.
+            $breakdown = $this->salaryModel->calculateMonthlySalary(
+                $employeeId,
+                $currentMonth
+            );
+
+            // Save or update the employee's monthly salary record.
+            $saved = $this->salaryModel->saveMonthlySalary($breakdown);
+
+            if (!$saved) {
+                throw new RuntimeException(
+                    'Unable to update the current salary record.'
+                );
+            }
+
+            // Retrieve the saved record belonging to this employee.
+            $salaryHistory = $this->salaryModel->getSalaryHistory(
+                $currentMonth,
+                $employeeId
+            );
+
+            if (empty($salaryHistory)) {
+                throw new RuntimeException(
+                    'The current salary record could not be retrieved.'
+                );
+            }
+
+            // Retrieve the complete stored salary statement.
+            $salaryRecord = $this->salaryModel->getSalaryDetails(
+                (int) $salaryHistory[0]['id']
+            );
+
+            if (!$salaryRecord) {
+                throw new RuntimeException(
+                    'The salary statement could not be loaded.'
+                );
+            }
+
+            // Use the saved calculation breakdown for the view.
+            $breakdown = $salaryRecord['calculation_details'];
+
+            $this->view('employee/salary-details', [
+                'pageTitle' => 'Salary Details',
+                'employee' => $employee,
+                'salaryRecord' => $salaryRecord,
+                'breakdown' => $breakdown,
+                'error' => null
+            ]);
+
+        } catch (Throwable $e) {
+
+            error_log(
+                'Employee Salary Details Error: ' . $e->getMessage()
+            );
+
+            $this->view('employee/salary-details', [
+                'pageTitle' => 'Salary Details',
+                'employee' => $employee,
+                'salaryRecord' => null,
+                'breakdown' => null,
+                'error' => 'Unable to load your salary details. Please try again later.'
+            ]);
+        }
+    }
+
+
+
+
+    /**
+     * Display the employee's leave application page.
+     */
+    public function leaveApplication(): void
+    {
+        Middleware::requireEmployee();
+
+        $userId = Auth::userId();
+        $employee = $this->employeeModel->findByUserId($userId);
+
+        if (!$employee || empty($employee['employee_id'])) {
+            http_response_code(404);
+            exit('Employee record not found.');
+        }
+
+        $employeeId = (int) $employee['employee_id'];
+
+        $this->view('employee/leave-application', [
+            'pageTitle' => 'Leave Application',
+            'employee' => $employee,
+            'leaveRequests' => $this->leaveRequestModel->getByEmployeeId($employeeId),
+            'success' => $_SESSION['success_message'] ?? null,
+            'error' => $_SESSION['error_message'] ?? null,
+            'csrfToken' => Auth::csrfToken()
+        ]);
+
+        unset($_SESSION['success_message'], $_SESSION['error_message']);
+    }
+
+    /**
+     * Store a leave application submitted by the authenticated employee.
+     */
+    public function storeLeaveApplication(): void
+    {
+        Middleware::requireEmployee();
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            return;
+        }
+
+        if (
+            !Auth::verifyCsrfToken(
+                (string) ($_POST['csrf_token'] ?? '')
+            )
+        ) {
+            http_response_code(403);
+            exit('Invalid security token. Please refresh and try again.');
+        }
+
+        $userId = Auth::userId();
+        $employee = $this->employeeModel->findByUserId($userId);
+
+        if (!$employee || empty($employee['employee_id'])) {
+            http_response_code(404);
+            exit('Employee record not found.');
+        }
+
+        $employeeId = (int) $employee['employee_id'];
+
+        $leaveType = trim((string) ($_POST['leave_type'] ?? ''));
+        $leaveDate = trim((string) ($_POST['leave_date'] ?? ''));
+        $halfDayPeriod = trim((string) ($_POST['half_day_period'] ?? ''));
+        $reason = trim((string) ($_POST['reason'] ?? ''));
+
+        // Validate leave type.
+        if (!in_array($leaveType, ['Full Day', 'Half Day'], true)) {
+            $_SESSION['error_message'] = 'Please select a valid leave type.';
+            $this->redirect('/HRIS-Management-System/public/index.php?action=leave-application');
+        }
+
+        // Validate date.
+        $dateObject = DateTime::createFromFormat('!Y-m-d', $leaveDate);
+
+        if (!$dateObject || $dateObject->format('Y-m-d') !== $leaveDate) {
+            $_SESSION['error_message'] = 'Please select a valid leave date.';
+            $this->redirect('/HRIS-Management-System/public/index.php?action=leave-application');
+        }
+
+        // Validate half-day period.
+        if (
+            $leaveType === 'Half Day' &&
+            !in_array($halfDayPeriod, ['first_half', 'second_half'], true)
+        ) {
+            $_SESSION['error_message'] = 'Please select the half-day period.';
+            $this->redirect('/HRIS-Management-System/public/index.php?action=leave-application');
+        }
+
+        if ($leaveType === 'Full Day') {
+            $halfDayPeriod = '';
+        }
+
+        // Validate reason.
+        if ($reason === '') {
+            $_SESSION['error_message'] = 'Please provide a reason for your leave.';
+            $this->redirect('/HRIS-Management-System/public/index.php?action=leave-application');
+        }
+
+        try {
+            $this->leaveRequestModel->create(
+                $employeeId,
+                $leaveType,
+                $halfDayPeriod !== '' ? $halfDayPeriod : null,
+                $leaveDate,
+                $leaveDate,
+                $reason
+            );
+
+            $_SESSION['success_message'] = 'Leave application submitted successfully.';
+
+        } catch (PDOException $e) {
+            $_SESSION['error_message'] = 'Unable to submit your leave application. Please try again.';
+        }
+
+        $this->redirect('/HRIS-Management-System/public/index.php?action=leave-application');
     }
 }

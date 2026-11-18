@@ -188,6 +188,12 @@ class EmployeeAttendanceHistoryTest extends TestCase
 
         $_GET = [];
         $_SESSION = [];
+
+        // Release controller and database references.
+        unset($this->controller);
+        unset($this->pdo);
+
+        http_response_code(200);
     }
 
     // Class under test: EmployeeController

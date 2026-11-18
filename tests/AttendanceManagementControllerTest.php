@@ -93,6 +93,11 @@ class AttendanceManagementControllerTest extends TestCase
 
         $_GET = [];
         $_SESSION = [];
+
+        // Release controller and database references.
+        unset($this->controller);
+        unset($this->pdo);
+        http_response_code(200);
     }
 
     // Class under test: AttendanceController
@@ -179,24 +184,32 @@ class AttendanceManagementControllerTest extends TestCase
     }
 
     // Class under test: AttendanceController
-    // Method under test: management()
-    // Test ID: ADM-C04
-    // Purpose: Verify submitting without an employee shows an error.
-    public function testManagementRejectsMissingEmployee(): void
+// Method under test: management()
+// Test ID: ADM-C04
+// Purpose: Verify attendance can be searched without selecting an employee.
+    public function testManagementAllowsMissingEmployee(): void
     {
         // Setup
         $_GET = [
             'department' => $this->testDepartment,
+            'from_date' => '2026-01-01',
+            'to_date' => '2026-01-31',
             'view_attendance' => '1'
         ];
 
         // Call
         $this->controller->management();
 
-        // Assertion
+        // Assertions
+        $this->assertNull($this->controller->capturedData['error']);
+
         $this->assertSame(
-            'Please select an employee.',
-            $this->controller->capturedData['error']
+            '',
+            $this->controller->capturedData['selectedEmployee']
+        );
+
+        $this->assertIsArray(
+            $this->controller->capturedData['attendanceRecords']
         );
     }
 
@@ -276,15 +289,15 @@ class AttendanceManagementControllerTest extends TestCase
     }
 
     // Class under test: AttendanceController
-    // Method under test: management()
-    // Test ID: ADM-C08
-    // Purpose: Verify employees outside the selected department are rejected.
-    public function testManagementRejectsEmployeeOutsideDepartment(): void
+// Method under test: management()
+// Test ID: ADM-C08
+// Purpose: Verify department-wide attendance can be searched without selecting an employee.
+    public function testManagementAllowsDepartmentSearchWithoutEmployee(): void
     {
         // Setup
         $_GET = [
             'department' => $this->testDepartment,
-            'employee' => '999999',
+            'employee' => '',
             'from_date' => '2026-01-01',
             'to_date' => '2026-01-31',
             'view_attendance' => '1'
@@ -299,11 +312,14 @@ class AttendanceManagementControllerTest extends TestCase
             $this->controller->capturedData['selectedEmployee']
         );
 
-        $this->assertSame(
-            'Please select an employee.',
-            $this->controller->capturedData['error']
+        $this->assertNull($this->controller->capturedData['error']);
+
+        $this->assertIsArray(
+            $this->controller->capturedData['attendanceRecords']
         );
     }
+
+
 
     // Class under test: AttendanceController
     // Method under test: management()
@@ -337,6 +353,85 @@ class AttendanceManagementControllerTest extends TestCase
         );
         $this->assertIsArray(
             $this->controller->capturedData['attendanceRecords']
+        );
+    }
+
+
+    // Class under test: AttendanceController
+// Method under test: management()
+// Test ID: ADM-C10
+// Purpose: Verify department-wide attendance is returned with RFID scan history.
+    public function testManagementReturnsDepartmentAttendanceAndScanHistory(): void
+    {
+        // Setup: create attendance for the temporary employee.
+        $attendanceDate = '2026-01-15';
+
+        $stmt = $this->pdo->prepare("
+        INSERT INTO attendance
+            (employee_id, attendance_date, entry_time, entry_status, status)
+        VALUES
+            (?, ?, ?, ?, ?)
+    ");
+
+        $stmt->execute([
+            $this->testEmployeeId,
+            $attendanceDate,
+            $attendanceDate . ' 09:00:00',
+            'Entry - In Time',
+            'present'
+        ]);
+
+        // Setup: create an RFID scan for the employee.
+        $stmt = $this->pdo->prepare("
+        INSERT INTO attendance_scan_history
+            (employee_id, attendance_date, scan_time, scan_type, scan_status)
+        VALUES
+            (?, ?, ?, ?, ?)
+    ");
+
+        $stmt->execute([
+            $this->testEmployeeId,
+            $attendanceDate,
+            $attendanceDate . ' 09:00:00',
+            'entry',
+            'Entry - In Time'
+        ]);
+
+        // Search without selecting an employee.
+        $_GET = [
+            'department' => $this->testDepartment,
+            'from_date' => $attendanceDate,
+            'to_date' => $attendanceDate,
+            'view_attendance' => '1'
+        ];
+
+        // Call
+        $this->controller->management();
+
+        // Assertions
+        $this->assertNull($this->controller->capturedData['error']);
+
+        $this->assertSame(
+            '',
+            $this->controller->capturedData['selectedEmployee']
+        );
+
+        $records = $this->controller->capturedData['attendanceRecords'];
+
+        $this->assertCount(1, $records);
+
+        $this->assertSame(
+            $this->testEmployeeId,
+            (int) $records[0]['employee_id']
+        );
+
+        $this->assertArrayHasKey('scan_history', $records[0]);
+
+        $this->assertCount(1, $records[0]['scan_history']);
+
+        $this->assertSame(
+            'entry',
+            $records[0]['scan_history'][0]['scan_type']
         );
     }
 

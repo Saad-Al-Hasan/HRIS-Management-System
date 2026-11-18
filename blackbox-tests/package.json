@@ -1,10 +1,12 @@
 {
   "name": "blackbox-tests",
   "version": "1.0.0",
-  "description": "",
+  "description": "HRIS Management System automated black-box tests",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "playwright test",
+    "test:holiday": "playwright test tests/holiday-management.spec.js",
+    "report": "playwright show-report"
   },
   "keywords": [],
   "author": "",

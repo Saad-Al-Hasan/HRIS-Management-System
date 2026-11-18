@@ -133,10 +133,9 @@ class AttendanceService
             . $schedule['expected_exit_time']
         );
 
-        // One-hour exit grace period.
-        $exitGraceThreshold = $scheduledExit->modify('-1 hour');
-
-        $exitStatus = ($now >= $exitGraceThreshold)
+        // No exit grace period.
+        // Scans before scheduled exit time are marked Exit - Before.
+        $exitStatus = ($now >= $scheduledExit)
             ? 'Exit - In Time'
             : 'Exit - Before';
 

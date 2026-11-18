@@ -23,3 +23,11 @@ Thumbs.db
 
 # Laragon / local files
 *.local
+
+# Generated test credentials (contains passwords)
+.holiday-test-accounts.json
+.salary-details-test-data.json
+
+# Playwright outputs
+playwright-report/
+test-results/
