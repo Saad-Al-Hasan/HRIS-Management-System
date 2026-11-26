@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class WorkSchedule extends Model
 {
@@ -125,7 +127,10 @@ class WorkSchedule extends Model
     ): int {
         $this->validateScheduleTimes($entryTime, $exitTime);
 
-        $sql = '
+        try {
+            $this->db->beginTransaction();
+
+            $sql = '
             INSERT INTO work_schedules (
                 name,
                 expected_entry_time,
@@ -144,16 +149,35 @@ class WorkSchedule extends Model
             )
         ';
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':name' => $name,
-            ':entry_time' => $entryTime,
-            ':exit_time' => $exitTime,
-            ':exit_time_calc' => $exitTime,
-            ':entry_time_calc' => $entryTime,
-        ]);
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':name' => $name,
+                ':entry_time' => $entryTime,
+                ':exit_time' => $exitTime,
+                ':exit_time_calc' => $exitTime,
+                ':entry_time_calc' => $entryTime,
+            ]);
 
-        return (int) $this->db->lastInsertId();
+            $scheduleId = (int) $this->db->lastInsertId();
+
+            // Record successful schedule creation.
+            $auditLog = new AuditLog($this->db);
+            $auditLog->create(
+                'Work schedule ' . $name . ' created',
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return $scheduleId;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     public function update(
@@ -164,7 +188,10 @@ class WorkSchedule extends Model
     ): bool {
         $this->validateScheduleTimes($entryTime, $exitTime);
 
-        $sql = '
+        try {
+            $this->db->beginTransaction();
+
+            $sql = '
             UPDATE work_schedules
             SET
                 name = :name,
@@ -179,16 +206,43 @@ class WorkSchedule extends Model
             WHERE id = :schedule_id
         ';
 
-        $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
-            ':name' => $name,
-            ':entry_time' => $entryTime,
-            ':exit_time' => $exitTime,
-            ':exit_time_calc' => $exitTime,
-            ':entry_time_calc' => $entryTime,
-            ':schedule_id' => $scheduleId,
-        ]);
+            $success = $stmt->execute([
+                ':name' => $name,
+                ':entry_time' => $entryTime,
+                ':exit_time' => $exitTime,
+                ':exit_time_calc' => $exitTime,
+                ':entry_time_calc' => $entryTime,
+                ':schedule_id' => $scheduleId,
+            ]);
+
+            if (!$success) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record only when the schedule was actually modified.
+            if ($stmt->rowCount() > 0) {
+                $auditLog = new AuditLog($this->db);
+
+                $auditLog->create(
+                    'Work schedule ' . $name . ' updated',
+                    Auth::userId()
+                );
+            }
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     public function getEmployeesWithSchedules(): array
@@ -229,52 +283,86 @@ class WorkSchedule extends Model
         $this->db->beginTransaction();
 
         try {
+            // Retrieve employee information.
             $employeeSql = '
-                SELECT e.id
-                FROM employees e
-                INNER JOIN users u
-                    ON u.id = e.user_id
-                WHERE e.id = :employee_id
-                  AND u.role_id = 2
-                LIMIT 1
-            ';
+            SELECT e.id, e.employee_code
+            FROM employees e
+            INNER JOIN users u ON u.id = e.user_id
+            WHERE e.id = :employee_id
+              AND u.role_id = 2
+            LIMIT 1
+        ';
 
             $employeeStmt = $this->db->prepare($employeeSql);
             $employeeStmt->execute([
                 ':employee_id' => $employeeId,
             ]);
 
-            if (!$employeeStmt->fetch()) {
+            $employee = $employeeStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$employee) {
                 $this->db->rollBack();
                 return false;
             }
 
-            if ($this->findById($scheduleId) === null) {
+            // Retrieve selected schedule.
+            $schedule = $this->findById($scheduleId);
+
+            if ($schedule === null) {
                 $this->db->rollBack();
                 return false;
             }
 
+            // Check the employee's previous assignment.
+            $previousSchedule = $this->findAssignedToEmployee($employeeId);
+
+            if (
+                $previousSchedule !== null &&
+                (int) $previousSchedule['id'] === $scheduleId
+            ) {
+                $this->db->commit();
+                return true;
+            }
+
+            // Save the new assignment.
             $assignmentSql = '
-                INSERT INTO employee_schedules (
-                    employee_id,
-                    schedule_id
-                ) VALUES (
-                    :employee_id,
-                    :schedule_id
-                )
-                ON DUPLICATE KEY UPDATE
-                    schedule_id = VALUES(schedule_id)
-            ';
+            INSERT INTO employee_schedules (
+                employee_id,
+                schedule_id
+            ) VALUES (
+                :employee_id,
+                :schedule_id
+            )
+            ON DUPLICATE KEY UPDATE
+                schedule_id = VALUES(schedule_id)
+        ';
 
             $assignmentStmt = $this->db->prepare($assignmentSql);
+
             $assignmentStmt->execute([
                 ':employee_id' => $employeeId,
                 ':schedule_id' => $scheduleId,
             ]);
 
+            // Record assignment or schedule change.
+            $auditLog = new AuditLog($this->db);
+
+            if ($previousSchedule === null) {
+                $activity = 'Work schedule ' . $schedule['name']
+                    . ' assigned to employee ' . $employee['employee_code'];
+            } else {
+                $activity = 'Employee ' . $employee['employee_code']
+                    . ' work schedule changed from '
+                    . $previousSchedule['name']
+                    . ' to ' . $schedule['name'];
+            }
+
+            $auditLog->create($activity, Auth::userId());
+
             $this->db->commit();
 
             return true;
+
         } catch (Throwable $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
@@ -285,22 +373,24 @@ class WorkSchedule extends Model
     }
 
 
-
     public function assignAllEmployeesToSchedule(int $scheduleId): int
     {
-        if ($scheduleId < 1 || $this->findById($scheduleId) === null) {
-            throw new InvalidArgumentException('Please select a valid work schedule.');
+        $schedule = $this->findById($scheduleId);
+
+        if ($scheduleId < 1 || $schedule === null) {
+            throw new InvalidArgumentException(
+                'Please select a valid work schedule.'
+            );
         }
 
         $this->db->beginTransaction();
 
         try {
-            // Get every employee account, including employees without an assignment.
+            // Retrieve all employee accounts.
             $employeeSql = '
             SELECT e.id
             FROM employees e
-            INNER JOIN users u
-                ON u.id = e.user_id
+            INNER JOIN users u ON u.id = e.user_id
             WHERE u.role_id = 2
             ORDER BY e.id
             FOR UPDATE
@@ -308,13 +398,21 @@ class WorkSchedule extends Model
 
             $employeeStmt = $this->db->prepare($employeeSql);
             $employeeStmt->execute();
+
             $employeeIds = $employeeStmt->fetchAll(PDO::FETCH_COLUMN);
 
-            // Update existing assignments or insert missing ones.
+            // Assign the selected schedule to every employee.
             $assignmentSql = '
-            INSERT INTO employee_schedules (employee_id, schedule_id)
-            VALUES (:employee_id, :schedule_id)
-            ON DUPLICATE KEY UPDATE schedule_id = VALUES(schedule_id)
+            INSERT INTO employee_schedules (
+                employee_id,
+                schedule_id
+            )
+            VALUES (
+                :employee_id,
+                :schedule_id
+            )
+            ON DUPLICATE KEY UPDATE
+                schedule_id = VALUES(schedule_id)
         ';
 
             $assignmentStmt = $this->db->prepare($assignmentSql);
@@ -326,9 +424,24 @@ class WorkSchedule extends Model
                 ]);
             }
 
+            $employeeCount = count($employeeIds);
+
+            // Record one summary entry for the bulk operation.
+            if ($employeeCount > 0) {
+                $auditLog = new AuditLog($this->db);
+
+                $auditLog->create(
+                    'Work schedule ' . $schedule['name']
+                    . ' assigned to all employees ('
+                    . $employeeCount . ' employees)',
+                    Auth::userId()
+                );
+            }
+
             $this->db->commit();
 
-            return count($employeeIds);
+            return $employeeCount;
+
         } catch (Throwable $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
@@ -339,54 +452,82 @@ class WorkSchedule extends Model
     }
 
 
-
-
     public function delete(int $scheduleId): bool
     {
-        // Protect the default 9 AM - 6 PM schedule.
+        // Protect the default schedule.
         if ($scheduleId === 1) {
             throw new InvalidArgumentException(
                 'The default 9 AM - 6 PM schedule cannot be deleted.'
             );
         }
 
-        // Verify that the schedule exists.
-        if ($this->findById($scheduleId) === null) {
-            return false;
-        }
+        $this->db->beginTransaction();
 
-        // Do not delete a schedule assigned to any employee.
-        $assignmentSql = '
-        SELECT COUNT(*)
-        FROM employee_schedules
-        WHERE schedule_id = :schedule_id
-    ';
+        try {
+            // Retrieve schedule details before deletion.
+            $schedule = $this->findById($scheduleId);
 
-        $assignmentStmt = $this->db->prepare($assignmentSql);
-        $assignmentStmt->execute([
-            ':schedule_id' => $scheduleId,
-        ]);
+            if ($schedule === null) {
+                $this->db->rollBack();
+                return false;
+            }
 
-        if ((int) $assignmentStmt->fetchColumn() > 0) {
-            throw new InvalidArgumentException(
-                'This shift contains assigned employees. Change their shifts first.'
+            // Prevent deletion of an assigned schedule.
+            $assignmentSql = '
+            SELECT COUNT(*)
+            FROM employee_schedules
+            WHERE schedule_id = :schedule_id
+        ';
+
+            $assignmentStmt = $this->db->prepare($assignmentSql);
+
+            $assignmentStmt->execute([
+                ':schedule_id' => $scheduleId,
+            ]);
+
+            if ((int) $assignmentStmt->fetchColumn() > 0) {
+                throw new InvalidArgumentException(
+                    'This shift contains assigned employees. Change their shifts first.'
+                );
+            }
+
+            // Delete the selected schedule.
+            $deleteSql = '
+            DELETE FROM work_schedules
+            WHERE id = :schedule_id
+        ';
+
+            $deleteStmt = $this->db->prepare($deleteSql);
+
+            $deleteStmt->execute([
+                ':schedule_id' => $scheduleId,
+            ]);
+
+            if ($deleteStmt->rowCount() !== 1) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record successful deletion.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Work schedule ' . $schedule['name'] . ' deleted',
+                Auth::userId()
             );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
         }
-
-        // Delete only the selected schedule.
-        $deleteSql = '
-        DELETE FROM work_schedules
-        WHERE id = :schedule_id
-    ';
-
-        $deleteStmt = $this->db->prepare($deleteSql);
-        $deleteStmt->execute([
-            ':schedule_id' => $scheduleId,
-        ]);
-
-        return $deleteStmt->rowCount() === 1;
     }
-
 
 
     private function validateScheduleTimes(

@@ -27,7 +27,16 @@ Thumbs.db
 # Generated test credentials (contains passwords)
 .holiday-test-accounts.json
 .salary-details-test-data.json
+.holiday-test-accounts.json
+.audit-log-test-data.json
 
 # Playwright outputs
 playwright-report/
 test-results/
+# Local dependencies and generated test data
+node_modules/
+.phpunit.cache/
+.salary-management-test-data.json
+salary-test-output.txt
+public/rfid-reader-status.json
+public/uploads/profile_pictures/

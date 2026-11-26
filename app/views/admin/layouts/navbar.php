@@ -111,12 +111,6 @@ $avatarPath = $profilePictureUrl ?? (
                         <span>My Profile</span>
                     </a>
 
-                    <?php if (!$isEmployee): ?>
-                        <a href="#" class="navbar-dropdown-link disabled" aria-disabled="true">
-                            <span>Account Settings</span>
-                        </a>
-                    <?php endif; ?>
-
                     <div class="navbar-dropdown-divider"></div>
 
                     <a href="/HRIS-Management-System/public/index.php?action=logout"

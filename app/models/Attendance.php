@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class Attendance extends Model
 {
@@ -415,6 +417,17 @@ SELECT
                 $entryStatus
             );
 
+            // Record the successful RFID entry in the audit log.
+            $employeeDetails = $this->getEmployeeAuditDetails($employeeId);
+
+            $auditLog = new AuditLog($this->db);
+            $auditLog->create(
+                'Employee RFID entry recorded for '
+                . $employeeDetails['employee_code']
+                . ' on ' . $attendanceDate,
+                $employeeDetails['user_id']
+            );
+
             $this->db->commit();
 
             return $attendanceId;
@@ -454,6 +467,17 @@ SELECT
                 $exitTime,
                 'exit',
                 $exitStatus
+            );
+
+            // Record the successful RFID exit in the audit log.
+            $employeeDetails = $this->getEmployeeAuditDetails($employeeId);
+
+            $auditLog = new AuditLog($this->db);
+            $auditLog->create(
+                'Employee RFID exit recorded for '
+                . $employeeDetails['employee_code']
+                . ' on ' . $attendanceDate,
+                $employeeDetails['user_id']
             );
 
             $this->db->commit();
@@ -1003,6 +1027,17 @@ ORDER BY scan_time ASC, id ASC
                 );
             }
 
+            // Record the successful administrator attendance modification.
+            $employeeDetails = $this->getEmployeeAuditDetails($employeeId);
+
+            $auditLog = new AuditLog($this->db);
+            $auditLog->create(
+                'Administrator modified attendance for employee '
+                . $employeeDetails['employee_code']
+                . ' on ' . $attendanceDate,
+                Auth::userId()
+            );
+
             $this->db->commit();
 
 
@@ -1015,6 +1050,32 @@ ORDER BY scan_time ASC, id ASC
 
             throw $exception;
         }
+    }
+
+
+    private function getEmployeeAuditDetails(int $employeeId): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT user_id, employee_code
+         FROM employees
+         WHERE id = :employee_id
+         LIMIT 1'
+        );
+
+        $stmt->execute([':employee_id' => $employeeId]);
+
+        $employee = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$employee) {
+            throw new RuntimeException(
+                'Unable to identify employee for attendance audit.'
+            );
+        }
+
+        return [
+            'user_id' => (int) $employee['user_id'],
+            'employee_code' => $employee['employee_code']
+        ];
     }
 
 

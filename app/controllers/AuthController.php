@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../core/Controller.php';
 require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../services/AuditLogger.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Employee.php';
 
@@ -66,13 +67,31 @@ class AuthController extends Controller
         Auth::login($user);
 
         if ((int) $user['role_id'] === 1) {
+
+            // Record successful administrator login.
+            try {
+                AuditLogger::log('Administrator logged in');
+            } catch (Throwable $e) {
+                error_log('Audit logging failed during administrator login: ' . $e->getMessage());
+            }
+
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=dashboard'
             );
+
         } elseif ((int) $user['role_id'] === 2) {
+
+            // Record successful employee login.
+            try {
+                AuditLogger::log('Employee logged in');
+            } catch (Throwable $e) {
+                error_log('Audit logging failed during employee login: ' . $e->getMessage());
+            }
+
             $this->redirect(
                 '/HRIS-Management-System/public/index.php?action=employee-dashboard'
             );
+
         } else {
             Auth::logout();
 
@@ -83,6 +102,22 @@ class AuthController extends Controller
 
     public function logout(): void
     {
+        // Capture the user's role before destroying the session.
+        $roleId = Auth::roleId();
+
+        $activity = match ($roleId) {
+            1 => 'Administrator logged out',
+            2 => 'Employee logged out',
+            default => 'User logged out',
+        };
+
+        // Record logout before destroying the session.
+        try {
+            AuditLogger::log($activity);
+        } catch (Throwable $e) {
+            error_log('Audit logging failed during logout: ' . $e->getMessage());
+        }
+
         Auth::logout();
 
         $this->redirect('/HRIS-Management-System/public/index.php');

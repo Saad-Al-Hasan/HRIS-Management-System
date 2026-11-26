@@ -181,13 +181,16 @@ class WorkScheduleController extends Controller
         }
 
         try {
-            $this->workSchedule->update(
+            $updated = $this->workSchedule->update(
                 (int) $scheduleId,
                 $name,
                 $entryTime,
                 $exitTime
             );
-            $_SESSION['success_message'] = 'Work schedule updated successfully.';
+
+            $_SESSION[$updated ? 'success_message' : 'error_message'] = $updated
+                ? 'Work schedule updated successfully.'
+                : 'Unable to update the schedule.';
         } catch (InvalidArgumentException $e) {
             $this->view('admin/work-schedules/form', [
                 'pageTitle' => 'Edit Work Schedule',

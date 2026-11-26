@@ -1,0 +1,1690 @@
+/* ============================================================
+   MYOL HRIS — AUDIT TRAIL
+   Visual language aligned with Salary Details:
+   charcoal / slate / navy surfaces + restrained status accents.
+   Page-specific only. Does not modify shared admin styles.
+   ============================================================ */
+
+.audit-console {
+    --audit-bg: #111315;
+    --audit-panel: #1d232b;
+    --audit-panel-2: #202730;
+    --audit-panel-3: #252c35;
+    --audit-border: rgba(157, 174, 194, .16);
+    --audit-border-strong: rgba(157, 174, 194, .25);
+    --audit-red: #d94b59;
+    --audit-red-soft: rgba(217, 75, 89, .13);
+    --audit-blue: #4d9de0;
+    --audit-cyan: #29c2d1;
+    --audit-green: #32b878;
+    --audit-purple: #9b7be5;
+    --audit-amber: #d6a34c;
+    --audit-text: #edf1f5;
+    --audit-muted: #a3adb9;
+    --audit-dim: #778391;
+    width: 100%;
+    min-width: 0;
+    color: var(--audit-text);
+    font-family: inherit;
+    box-sizing: border-box;
+}
+
+.audit-console *,
+.audit-console *::before,
+.audit-console *::after {
+    box-sizing: border-box;
+}
+
+.audit-console h1,
+.audit-console h2,
+.audit-console p {
+    margin-top: 0;
+}
+
+/* PAGE INTRO — dark slate, restrained crimson edge */
+.audit-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(330px, 430px);
+    align-items: center;
+    gap: 26px;
+    padding: 22px 25px;
+    margin: 0 0 18px;
+    border: 1px solid rgba(217, 75, 89, .24);
+    border-left: 3px solid var(--audit-red);
+    border-radius: 9px;
+    background:
+        radial-gradient(ellipse at 90% 0%, rgba(77, 157, 224, .09), transparent 36%),
+        linear-gradient(120deg, #202832, #1b2027 68%, #1c2229);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .17), inset 0 1px 0 rgba(255, 255, 255, .035);
+    position: relative;
+    overflow: hidden;
+}
+
+.audit-intro::after {
+    content: "";
+    position: absolute;
+    width: 270px;
+    height: 270px;
+    right: 25%;
+    top: -220px;
+    border: 1px solid rgba(107, 157, 202, .12);
+    border-radius: 50%;
+    box-shadow: 0 0 0 22px rgba(107, 157, 202, .025), 0 0 0 48px rgba(107, 157, 202, .018);
+    pointer-events: none;
+}
+
+.audit-intro-main {
+    position: relative;
+    z-index: 1;
+    min-width: 0;
+}
+
+.audit-kicker {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin-bottom: 9px;
+    color: #e17a83;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 1.35px;
+}
+
+.audit-kicker-mark {
+    width: 7px;
+    height: 7px;
+    border: 1px solid #e17a83;
+    background: rgba(217, 75, 89, .24);
+    transform: rotate(45deg);
+}
+
+.audit-kicker-divider {
+    color: #687482;
+}
+
+.audit-intro h1 {
+    margin: 0 0 6px;
+    color: #f4f6f8;
+    font-size: clamp(26px, 2.4vw, 34px);
+    font-weight: 760;
+    letter-spacing: -.8px;
+    line-height: 1.1;
+}
+
+.audit-intro-main p {
+    max-width: 650px;
+    margin: 0;
+    color: #aeb8c3;
+    font-size: 11px;
+    line-height: 1.65;
+}
+
+/* MATCHING EVENTS — blue/cyan data highlight */
+.audit-overview {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 43px minmax(0, 1fr) 1px auto;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    padding: 14px 15px;
+    border: 1px solid rgba(77, 157, 224, .30);
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(77, 157, 224, .15), rgba(41, 194, 209, .055)), #202832;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+}
+
+.audit-overview-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border: 1px solid rgba(77, 157, 224, .48);
+    border-radius: 8px;
+    background: rgba(77, 157, 224, .13);
+    color: #82c5ff;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.audit-overview-copy {
+    min-width: 0;
+}
+
+.audit-overview-label,
+.audit-overview-copy small {
+    display: block;
+    color: #aab8c7;
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.audit-overview-copy strong {
+    display: block;
+    margin: 2px 0;
+    color: #f5fbff;
+    font-size: 30px;
+    font-weight: 820;
+    letter-spacing: -1px;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+}
+
+.audit-overview-copy small {
+    color: #8293a4;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.audit-overview-divider {
+    width: 1px;
+    height: 38px;
+    background: rgba(77, 157, 224, .28);
+}
+
+.audit-overview-meta {
+    display: grid;
+    gap: 7px;
+}
+
+.audit-overview-meta span {
+    color: #8fc8f5;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .75px;
+    white-space: nowrap;
+}
+
+/* FILTER CONSOLE — slate parent section, neutral inputs */
+.audit-filter-console {
+    position: relative;
+    padding: 19px 21px 20px;
+    margin: 0 0 21px;
+    border: 1px solid rgba(217, 75, 89, .22);
+    border-radius: 9px;
+    background: linear-gradient(115deg, rgba(77, 157, 224, .045), transparent 48%), #1d232b;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .15), inset 0 1px 0 rgba(255, 255, 255, .025);
+}
+
+.audit-filter-console::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    width: 76px;
+    height: 2px;
+    background: linear-gradient(90deg, var(--audit-red), transparent);
+}
+
+.audit-section-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.audit-heading-symbol {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    width: 38px;
+    height: 38px;
+    border: 1px solid rgba(77, 157, 224, .34);
+    border-radius: 8px;
+    background: rgba(77, 157, 224, .10);
+    color: #78baf0;
+    font-size: 21px;
+    line-height: 1;
+}
+
+.audit-section-heading>div:nth-child(2) {
+    min-width: 0;
+}
+
+.audit-overline {
+    display: block;
+    margin-bottom: 4px;
+    color: #d77b83;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1.15px;
+    text-transform: uppercase;
+}
+
+.audit-section-heading h2 {
+    margin: 0 0 4px;
+    color: #eef2f6;
+    font-size: 20px;
+    font-weight: 750;
+    letter-spacing: -.2px;
+}
+
+.audit-section-heading p {
+    margin: 0;
+    color: #9ca8b4;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.audit-secure-tag,
+.audit-section-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-left: auto;
+    padding: 7px 10px;
+    border: 1px solid rgba(50, 184, 120, .28);
+    border-radius: 5px;
+    background: rgba(50, 184, 120, .075);
+    color: #8bd6b2;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .55px;
+    white-space: nowrap;
+}
+
+.audit-secure-tag span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #45c98d;
+    box-shadow: 0 0 7px rgba(69, 201, 141, .55);
+}
+
+.audit-filter-form {
+    display: grid;
+    grid-template-columns: minmax(135px, .85fr) minmax(135px, .85fr) minmax(170px, 1fr) minmax(210px, 1.5fr) auto;
+    align-items: end;
+    gap: 12px;
+    padding-top: 17px;
+    margin-top: 16px;
+    border-top: 1px solid rgba(169, 184, 200, .12);
+}
+
+.audit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    min-width: 0;
+}
+
+.audit-field label {
+    color: #c3ccd5;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.audit-field input,
+.audit-field select {
+    width: 100%;
+    min-width: 0;
+    min-height: 39px;
+    padding: 8px 10px;
+    border: 1px solid rgba(157, 174, 194, .22);
+    border-radius: 6px;
+    outline: none;
+    background: #151a20;
+    color: #e7edf3;
+    color-scheme: dark;
+    font-family: inherit;
+    font-size: 10px;
+    transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+}
+
+.audit-field input::placeholder {
+    color: #778391;
+}
+
+.audit-field input:hover,
+.audit-field select:hover {
+    border-color: rgba(77, 157, 224, .48);
+}
+
+.audit-field input:focus,
+.audit-field select:focus {
+    border-color: #4d9de0;
+    background: #19212a;
+    box-shadow: 0 0 0 3px rgba(77, 157, 224, .12);
+}
+
+.audit-field select option {
+    background: #1d232b;
+    color: #edf1f5;
+}
+
+.audit-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.audit-btn-primary,
+.audit-btn-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 39px;
+    padding: 0 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.audit-btn-primary {
+    border: 1px solid #C58AAE;
+    background: linear-gradient(135deg, #D9A6C2, #BD82A5);
+    color: #241923;
+    box-shadow: 0 4px 11px rgba(197, 138, 174, .17);
+}
+
+.audit-btn-primary:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, #E8BDD4, #D49AB9);
+    border-color: #E8BDD4;
+    color: #241923;
+    box-shadow: 0 6px 14px rgba(197, 138, 174, .24);
+}
+
+.audit-btn-reset {
+    border: 1px solid rgba(157, 174, 194, .22);
+    background: #cad3df;
+    color: #1b222a;
+
+}
+
+.audit-btn-reset:hover {
+    border-color: rgba(217, 75, 89, .48);
+    background: #d8d6d7;
+    color: #1b222a;
+}
+
+/* ERROR */
+.audit-error {
+    display: grid;
+    gap: 4px;
+    padding: 12px 15px;
+    margin: 0 0 17px;
+    border: 1px solid rgba(217, 75, 89, .32);
+    border-left: 3px solid var(--audit-red);
+    border-radius: 7px;
+    background: rgba(217, 75, 89, .09);
+    color: #e6b4ba;
+    font-size: 11px;
+}
+
+.audit-error strong {
+    color: #f0c6cb;
+    font-size: 12px;
+}
+
+/* MODULE ACTIVITY — two-column, compact slate KPI rows */
+.audit-modules {
+    margin: 0 0 21px;
+}
+
+.audit-modules-heading {
+    margin: 0 0 13px;
+}
+
+.audit-heading-symbol-gold {
+    border-color: rgba(41, 194, 209, .30);
+    background: rgba(41, 194, 209, .09);
+    color: #64d2dc;
+}
+
+.audit-section-note {
+    border-color: rgba(157, 174, 194, .19);
+    background: rgba(157, 174, 194, .055);
+    color: #9eabb9;
+}
+
+.audit-module-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px 11px;
+}
+
+.audit-module-tile {
+    --tile-accent: #4d9de0;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+    min-height: 68px;
+    padding: 10px 13px;
+    border: 1px solid rgba(157, 174, 194, .17);
+    border-left: 2px solid var(--tile-accent);
+    border-radius: 7px;
+    background: linear-gradient(105deg, color-mix(in srgb, var(--tile-accent) 7%, transparent), transparent 62%), #202730;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .11), inset 0 1px 0 rgba(255, 255, 255, .025);
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+.audit-module-tile:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in srgb, var(--tile-accent) 42%, rgba(157, 174, 194, .17));
+    background: linear-gradient(105deg, color-mix(in srgb, var(--tile-accent) 12%, transparent), transparent 70%), #252e38;
+}
+
+.audit-module-symbol {
+    display: grid;
+    place-items: center;
+    width: 35px;
+    height: 35px;
+    border: 1px solid color-mix(in srgb, var(--tile-accent) 48%, transparent);
+    border-radius: 7px;
+    background: color-mix(in srgb, var(--tile-accent) 12%, #1c232b);
+    color: var(--tile-accent);
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .2px;
+}
+
+.audit-module-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.audit-module-name {
+    color: #e9eef3;
+    font-size: 12px;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.audit-module-copy small {
+    color: #91a0ae;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.audit-module-count {
+    min-width: 40px;
+    color: var(--tile-accent);
+    font-size: 23px;
+    font-weight: 820;
+    letter-spacing: -.5px;
+    line-height: 1;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--tile-accent) 18%, transparent);
+}
+
+/* Coordinated module palette — related to Salary Details status colors */
+.audit-module-authentication {
+    --tile-accent: #4d9de0;
+}
+
+.audit-module-employee_management {
+    --tile-accent: #29b8c8;
+}
+
+.audit-module-rfid_management {
+    --tile-accent: #9b7be5;
+}
+
+.audit-module-attendance_management {
+    --tile-accent: #d94b59;
+}
+
+.audit-module-work_schedules {
+    --tile-accent: #4eabc0;
+}
+
+.audit-module-salary_management {
+    --tile-accent: #d6a34c;
+}
+
+.audit-module-leave_management {
+    --tile-accent: #32b878;
+}
+
+.audit-module-holiday_management {
+    --tile-accent: #b69a55;
+}
+
+.audit-module-other {
+    --tile-accent: #8995a2;
+}
+
+/* EVENT LEDGER — blue-gray records table, red kept as a small identifier accent */
+.audit-ledger {
+    overflow: hidden;
+    margin: 0 0 17px;
+    border: 1px solid rgba(77, 157, 224, .28);
+    border-radius: 9px;
+    background: #1d232b;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, .16);
+}
+
+.audit-ledger-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 17px 19px;
+    border-bottom: 1px solid rgba(77, 157, 224, .16);
+    background: linear-gradient(100deg, rgba(77, 157, 224, .09), transparent 58%), #202832;
+}
+
+.audit-heading-symbol-ledger {
+    border-color: rgba(217, 75, 89, .30);
+    background: rgba(217, 75, 89, .09);
+    color: #e17a83;
+}
+
+.audit-ledger-count {
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
+    padding: 8px 11px;
+    border: 1px solid rgba(77, 157, 224, .30);
+    border-radius: 6px;
+    background: rgba(77, 157, 224, .10);
+    white-space: nowrap;
+}
+
+.audit-ledger-count strong {
+    color: #7fc2f4;
+    font-size: 18px;
+    font-weight: 820;
+    font-variant-numeric: tabular-nums;
+}
+
+.audit-ledger-count span {
+    color: #a9bdce;
+    font-size: 11px;
+}
+
+.audit-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #53677b #1c232b;
+}
+
+.audit-table {
+    width: 100%;
+    min-width: 900px;
+    border-collapse: collapse;
+    color: #d8e0e8;
+    font-size: 11px;
+}
+
+
+/* EVENT LEDGER — LIGHT MAGENTA HEADER ROW */
+
+.audit-table thead {
+    background: linear-gradient(105deg,
+            #493442,
+            #3c303f 55%,
+            #342d3a);
+}
+
+.audit-table th {
+    padding: 13px 14px;
+    border-bottom: 1px solid rgba(202, 143, 181, .38);
+    color: #f0cce2;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: .8px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .045);
+}
+
+/* Subtle separation between header and records */
+.audit-table thead tr {
+    border-bottom: 1px solid rgba(202, 143, 181, .22);
+}
+
+
+.audit-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(157, 174, 194, .10);
+    color: #cbd4dd;
+    font-size: 10px;
+    line-height: 1.55;
+    vertical-align: middle;
+}
+
+
+
+/* EVENT LEDGER — MINIMAL DUSTY MAGENTA ROWS */
+
+.audit-table tbody tr {
+    background: #25242B;
+    transition: background .18s ease;
+}
+
+.audit-table tbody tr:nth-child(even) {
+    background: #29262D;
+}
+
+.audit-table tbody tr:hover {
+    background: #302A33;
+}
+
+.audit-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+/* Very subtle individual row borders */
+.audit-table tbody td {
+    border-top: 1px solid rgba(190, 139, 171, .10);
+    border-bottom: 1px solid rgba(190, 139, 171, .10);
+}
+
+.audit-table tbody td:first-child {
+    border-left: 1px solid rgba(190, 139, 171, .12);
+    border-radius: 9px 0 0 9px;
+}
+
+.audit-table tbody td:last-child {
+    border-right: 1px solid rgba(190, 139, 171, .12);
+    border-radius: 0 9px 9px 0;
+}
+
+
+
+.audit-col-id {
+    width: 82px;
+}
+
+.audit-col-time {
+    width: 190px;
+}
+
+.audit-col-actor {
+    width: 195px;
+}
+
+.audit-col-module {
+    width: 175px;
+}
+
+.audit-id-cell span {
+    display: inline-block;
+    padding: 4px 7px;
+    border: 1px solid rgba(217, 75, 89, .32);
+    border-radius: 4px;
+    background: rgba(217, 75, 89, .10);
+    color: #e78b94;
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.audit-time-cell strong {
+    color: #d7e0e8;
+    font-size: 11px;
+    font-weight: 590;
+    white-space: nowrap;
+}
+
+.audit-actor-cell strong {
+    display: block;
+    color: #edf2f6;
+    font-size: 11px;
+    font-weight: 720;
+}
+
+.audit-actor-cell small {
+    display: block;
+    margin-top: 3px;
+    color: #8d9aa7;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .55px;
+}
+
+.audit-module-pill {
+    display: inline-flex;
+    align-items: center;
+    min-height: 22px;
+    padding: 4px 8px;
+    border: 1px solid rgba(77, 157, 224, .28);
+    border-radius: 4px;
+    background: rgba(77, 157, 224, .09);
+    color: #9dc9ed;
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.35;
+    white-space: nowrap;
+}
+
+/* Module tags: restrained variations, all compatible with the system palette */
+.audit-pill-authentication {
+    border-color: rgba(77, 157, 224, .32);
+    background: rgba(77, 157, 224, .10);
+    color: #9bcaf0;
+}
+
+.audit-pill-employee-management {
+    border-color: rgba(41, 184, 200, .30);
+    background: rgba(41, 184, 200, .09);
+    color: #80d4dc;
+}
+
+.audit-pill-rfid-management {
+    border-color: rgba(155, 123, 229, .30);
+    background: rgba(155, 123, 229, .09);
+    color: #c0aaf2;
+}
+
+.audit-pill-attendance-management {
+    border-color: rgba(217, 75, 89, .32);
+    background: rgba(217, 75, 89, .10);
+    color: #e9979f;
+}
+
+.audit-pill-work-schedules {
+    border-color: rgba(78, 171, 192, .30);
+    background: rgba(78, 171, 192, .09);
+    color: #91d0dc;
+}
+
+.audit-pill-salary-management {
+    border-color: rgba(214, 163, 76, .32);
+    background: rgba(214, 163, 76, .09);
+    color: #e5c17f;
+}
+
+.audit-pill-leave-management {
+    border-color: rgba(50, 184, 120, .30);
+    background: rgba(50, 184, 120, .09);
+    color: #8dd9b2;
+}
+
+.audit-pill-holiday-management {
+    border-color: rgba(182, 154, 85, .30);
+    background: rgba(182, 154, 85, .09);
+    color: #d8c18c;
+}
+
+.audit-pill-other-activities {
+    border-color: rgba(137, 149, 162, .28);
+    background: rgba(137, 149, 162, .08);
+    color: #b1bbc5;
+}
+
+.audit-description-cell {
+    min-width: 280px;
+    max-width: 620px;
+    color: #d1d9e1 !important;
+    overflow-wrap: anywhere;
+}
+
+/* EMPTY / ERROR STATES */
+.audit-empty-state {
+    padding: 52px 20px !important;
+    text-align: center;
+}
+
+.audit-empty-icon {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 11px;
+    border: 1px solid rgba(77, 157, 224, .28);
+    border-radius: 50%;
+    background: rgba(77, 157, 224, .08);
+    color: #7cb9e8;
+    font-size: 22px;
+}
+
+.audit-empty-state strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #e9eff5;
+    font-size: 13px;
+}
+
+.audit-empty-state span {
+    color: #91a0ae;
+    font-size: 10px;
+}
+
+/* PAGINATION + INTEGRITY FOOTER */
+.audit-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 13px;
+    padding: 13px 18px;
+    border-top: 1px solid rgba(157, 174, 194, .12);
+    background: #1b222a;
+}
+
+.audit-pagination>span {
+    color: #9eabb8;
+    font-size: 12px;
+}
+
+.audit-pagination>span strong {
+    color: #dceaf5;
+}
+
+.audit-pagination-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.audit-pagination-actions a,
+.audit-pagination-actions span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    padding: 0 11px;
+    border: 1px solid rgba(77, 157, 224, .25);
+    border-radius: 5px;
+    background: #252e38;
+    color: #b8d6ed;
+    font-size: 12px;
+    font-weight: 750;
+    text-decoration: none;
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.audit-pagination-actions a:hover {
+    border-color: rgba(77, 157, 224, .55);
+    background: #2d3a47;
+    color: #fff;
+}
+
+.audit-pagination-actions .is-disabled {
+    opacity: .35;
+    cursor: not-allowed;
+}
+
+.audit-footnote {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 13px 16px;
+    margin-bottom: 17px;
+    border: 1px solid rgba(157, 174, 194, .15);
+    border-radius: 7px;
+    background: #1b222a;
+}
+
+.audit-footnote-mark {
+    display: grid;
+    place-items: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid rgba(50, 184, 120, .30);
+    border-radius: 50%;
+    background: rgba(50, 184, 120, .08);
+    color: #75cda0;
+    font-size: 13px;
+}
+
+.audit-footnote>div {
+    min-width: 0;
+}
+
+.audit-footnote strong {
+    display: block;
+    margin-bottom: 3px;
+    color: #a8c7df;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.audit-footnote p {
+    margin: 0;
+    color: #8997a4;
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.audit-footnote-code {
+    margin-left: auto;
+    color: #d86965;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    white-space: nowrap;
+}
+
+/* Keyboard focus */
+.audit-console a:focus-visible,
+.audit-console button:focus-visible,
+.audit-console input:focus-visible,
+.audit-console select:focus-visible {
+    outline: 2px solid #65b6ed;
+    outline-offset: 2px;
+}
+
+/* TABLET */
+@media (max-width: 1180px) {
+    .audit-filter-form {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .audit-filter-actions {
+        grid-column: 1/-1;
+        justify-content: flex-end;
+    }
+
+    .audit-intro {
+        grid-template-columns: minmax(0, 1fr) minmax(290px, 390px);
+    }
+}
+
+/* SMALL TABLET */
+@media (max-width: 820px) {
+    .audit-intro {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .audit-overview {
+        max-width: 100%;
+    }
+
+    .audit-module-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .audit-section-note {
+        display: none;
+    }
+}
+
+/* MOBILE */
+@media (max-width: 560px) {
+    .audit-intro {
+        padding: 18px 16px;
+    }
+
+    .audit-intro h1 {
+        font-size: 27px;
+    }
+
+    .audit-intro-main p {
+        font-size: 10px;
+    }
+
+    .audit-overview {
+        grid-template-columns: 38px minmax(0, 1fr) 1px auto;
+        gap: 8px;
+        padding: 11px;
+    }
+
+    .audit-overview-icon {
+        width: 37px;
+        height: 37px;
+    }
+
+    .audit-overview-copy strong {
+        font-size: 25px;
+    }
+
+    .audit-overview-meta span {
+        font-size: 7px;
+    }
+
+    .audit-filter-console {
+        padding: 16px 14px;
+    }
+
+    .audit-section-heading {
+        align-items: flex-start;
+    }
+
+    .audit-heading-symbol {
+        flex-basis: 35px;
+        width: 35px;
+        height: 35px;
+    }
+
+    .audit-secure-tag {
+        display: none;
+    }
+
+    .audit-section-heading h2 {
+        font-size: 15px;
+    }
+
+    .audit-section-heading p {
+        font-size: 10px;
+    }
+
+    .audit-filter-form {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding-top: 14px;
+        margin-top: 13px;
+    }
+
+    .audit-filter-actions {
+        display: grid;
+        grid-template-columns: 1fr 85px;
+        grid-column: auto;
+    }
+
+    .audit-module-tile {
+        min-height: 64px;
+        padding: 9px 10px;
+    }
+
+    .audit-module-count {
+        font-size: 21px;
+    }
+
+    .audit-ledger-header {
+        align-items: flex-start;
+        padding: 14px 12px;
+    }
+
+    .audit-ledger-count {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1px;
+        padding: 7px 9px;
+    }
+
+    .audit-ledger-count strong {
+        font-size: 15px;
+    }
+
+    .audit-ledger-count span {
+        font-size: 8px;
+    }
+
+    .audit-table {
+        min-width: 820px;
+    }
+
+    .audit-table th,
+    .audit-table td {
+        padding: 10px 9px;
+    }
+
+    .audit-pagination {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 12px;
+    }
+
+    .audit-pagination-actions {
+        width: 100%;
+    }
+
+    .audit-pagination-actions a,
+    .audit-pagination-actions span {
+        flex: 1;
+    }
+
+    .audit-footnote {
+        align-items: flex-start;
+    }
+
+    .audit-footnote-code {
+        display: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .audit-console *,
+    .audit-console *::before,
+    .audit-console *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
+
+
+
+/* ============================================================
+   ACTIVITY DISTRIBUTION — PARENT CONTAINER
+   ============================================================ */
+
+.audit-modules {
+    position: relative;
+    padding: 19px 19px 20px;
+    margin: 0 0 22px;
+
+    background:
+        linear-gradient(125deg,
+            rgba(217, 75, 89, 0.075),
+            transparent 48%),
+        linear-gradient(145deg, #20252c, #1b2026);
+
+    border: 1px solid rgba(217, 75, 89, 0.32);
+    border-left: 3px solid rgba(217, 75, 89, 0.75);
+    border-radius: 9px;
+
+    box-shadow:
+        0 7px 22px rgba(0, 0, 0, 0.17),
+        inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+/* Subtle accent along the top edge */
+.audit-modules::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 20px;
+    width: 105px;
+    height: 2px;
+    background: linear-gradient(90deg,
+            #d94b59,
+            rgba(217, 75, 89, 0));
+}
+
+/* Activity Distribution heading */
+.audit-modules-heading {
+    position: relative;
+    padding-bottom: 13px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(217, 75, 89, 0.17);
+}
+
+/* Activity Distribution icon */
+.audit-modules-heading .audit-heading-symbol {
+    border-color: rgba(217, 75, 89, 0.38);
+    background: rgba(217, 75, 89, 0.12);
+    color: #ed8790;
+}
+
+/* Activity Distribution label */
+.audit-modules-heading .audit-overline {
+    color: #e58a92;
+}
+
+/* Live Filter Summary badge */
+.audit-modules .audit-section-note {
+    border-color: rgba(217, 75, 89, 0.24);
+    background: rgba(217, 75, 89, 0.075);
+    color: #dca0a5;
+}
+
+/* Keep the module tiles distinct inside the parent */
+.audit-modules .audit-module-tile {
+    background-color: rgba(30, 36, 43, 0.88);
+    box-shadow:
+        0 3px 9px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+/* Slight hover emphasis */
+.audit-modules .audit-module-tile:hover {
+    background-color: #27303a;
+}
+
+/* Mobile spacing */
+@media (max-width: 560px) {
+    .audit-modules {
+        padding: 15px 12px;
+    }
+
+    .audit-modules-heading {
+        padding-bottom: 11px;
+        margin-bottom: 12px;
+    }
+}
+
+
+
+/* ============================================================
+   EVENT LEDGER — BLUE MOTHER BOX + INDIVIDUAL MAGENTA ROWS
+   ============================================================ */
+
+/* Outer blue mother container */
+.audit-ledger {
+    overflow: hidden;
+    border: 1px solid rgba(77, 157, 224, .42);
+    border-radius: 9px;
+    background: #202832;
+    box-shadow:
+        0 8px 22px rgba(0, 0, 0, .17),
+        inset 0 1px 0 rgba(255, 255, 255, .035);
+}
+
+/* Blue space surrounding the individual record rows */
+.audit-table-wrap {
+    padding: 0 10px 10px;
+    background: #202832;
+    overflow-x: auto;
+}
+
+/* Separate the records into individual boxes */
+.audit-table {
+    width: calc(100% - 2px);
+    margin: 0 1px;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    background: transparent;
+}
+
+/* Light dusty-magenta individual rows */
+.audit-table tbody tr {
+    background: #302832;
+    outline: 1px solid rgba(190, 139, 171, .18);
+    transition: background .18s ease, outline-color .18s ease;
+}
+
+/* Alternating row shade */
+.audit-table tbody tr:nth-child(even) {
+    background: #352D38;
+}
+
+/* Hover effect */
+.audit-table tbody tr:hover {
+    background: #403442;
+    outline-color: rgba(190, 139, 171, .38);
+}
+
+/* Individual row cells */
+.audit-table tbody td {
+    background: transparent;
+    border-top: 1px solid rgba(190, 139, 171, .10);
+    border-bottom: 1px solid rgba(190, 139, 171, .10);
+}
+
+/* Rounded left edge of each row */
+.audit-table tbody td:first-child {
+    border-left: 1px solid rgba(190, 139, 171, .18);
+    border-radius: 5px 0 0 5px;
+}
+
+/* Rounded right edge of each row */
+.audit-table tbody td:last-child {
+    border-right: 1px solid rgba(190, 139, 171, .18);
+    border-radius: 0 5px 5px 0;
+}
+
+/* Keep the existing magenta column-heading style */
+.audit-table thead {
+    background: linear-gradient(105deg,
+            #493442,
+            #3c303f 55%,
+            #342D3A);
+}
+
+.audit-table th {
+    border-bottom: 1px solid rgba(202, 143, 181, .38);
+    color: #F0CCE2;
+}
+
+/* Remove the old continuous-row border behavior */
+.audit-table tbody tr:last-child td {
+    border-bottom: 1px solid rgba(190, 139, 171, .10);
+}
+
+/* Responsive spacing */
+@media (max-width: 560px) {
+    .audit-table-wrap {
+        padding: 0 6px 8px;
+    }
+
+    .audit-table {
+        border-spacing: 0 5px;
+    }
+}
+
+
+/* Rounded corners for individual audit record boxes */
+
+.audit-table tbody tr {
+    outline: none !important;
+}
+
+.audit-table tbody td {
+    border-top: 1px solid rgba(190, 139, 171, .22);
+    border-bottom: 1px solid rgba(190, 139, 171, .22);
+}
+
+.audit-table tbody td:first-child {
+    border-left: 1px solid rgba(190, 139, 171, .22);
+    border-radius: 9px 0 0 9px !important;
+}
+
+.audit-table tbody td:last-child {
+    border-right: 1px solid rgba(190, 139, 171, .22);
+    border-radius: 0 9px 9px 0 !important;
+}
+
+/* Slightly rounder row background */
+.audit-table tbody tr {
+    background-clip: padding-box;
+}
+
+.audit-table tbody tr:nth-child(even) {
+    background-clip: padding-box;
+}
+
+
+
+/* ============================================================
+   FINAL OVERRIDE — SUBTLE, DARK AUDIT ROWS
+   ============================================================ */
+
+.audit-ledger .audit-table tbody tr {
+    background: #24262D !important;
+    transition: background .18s ease;
+}
+
+.audit-ledger .audit-table tbody tr:nth-child(even) {
+    background: #272830 !important;
+}
+
+.audit-ledger .audit-table tbody tr:hover {
+    background: #2D2B33 !important;
+}
+
+/* Keep the cells transparent so the row background is visible */
+.audit-ledger .audit-table tbody td {
+    background: transparent !important;
+}
+
+/* Minimal borders around individual rows */
+.audit-ledger .audit-table tbody td {
+    border-top: 1px solid rgba(190, 139, 171, .12) !important;
+    border-bottom: 1px solid rgba(190, 139, 171, .12) !important;
+}
+
+.audit-ledger .audit-table tbody td:first-child {
+    border-left: 1px solid rgba(190, 139, 171, .12) !important;
+    border-radius: 9px 0 0 9px !important;
+}
+
+.audit-ledger .audit-table tbody td:last-child {
+    border-right: 1px solid rgba(190, 139, 171, .12) !important;
+    border-radius: 0 9px 9px 0 !important;
+}
+
+
+
+/* AUDIT LOGS — GREEN PAGINATION BUTTONS */
+
+.audit-pagination-actions a,
+.audit-pagination-actions span {
+    background: rgba(50, 184, 120, 0.12) !important;
+    border: 1px solid rgba(50, 184, 120, 0.32) !important;
+    color: #91D9B2 !important;
+    border-radius: 5px;
+    transition: background .18s ease, border-color .18s ease;
+}
+
+.audit-pagination-actions a:hover {
+    background: rgba(50, 184, 120, 0.22) !important;
+    border-color: rgba(50, 184, 120, 0.55) !important;
+    color: #C0F2D5 !important;
+}
+
+.audit-pagination-actions .is-disabled {
+    background: rgba(50, 184, 120, 0.045) !important;
+    border-color: rgba(50, 184, 120, 0.14) !important;
+    color: #719D86 !important;
+    opacity: .65;
+}
+
+/* REMOVE TOP DECORATIVE ACCENT LINES */
+
+.audit-filter-console::before,
+.audit-modules::before {
+    display: none !important;
+    content: none !important;
+}
+
+
+/* MODULE KPI — PROFESSIONAL SVG ICONS */
+
+.audit-module-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.audit-module-symbol svg {
+    display: block;
+    width: 21px;
+    height: 21px;
+    stroke: currentColor;
+    fill: none;
+    flex-shrink: 0;
+}
+
+
+
+/* LIVE FILTER SUMMARY — GREEN ACCENT */
+
+.audit-modules .audit-section-note {
+    border: 1px solid rgba(50, 184, 120, .38) !important;
+    background: rgba(50, 184, 120, .12) !important;
+    color: #91D9B2 !important;
+    box-shadow: 0 0 10px rgba(50, 184, 120, .07);
+}
+
+.audit-modules .audit-section-note:hover {
+    background: rgba(50, 184, 120, .19) !important;
+    border-color: rgba(50, 184, 120, .55) !important;
+    color: #C0F2D5 !important;
+}
+
+
+
+/* ============================================================
+   AUDIT FILTER CONTROLS — LIGHT MAGENTA BORDERS
+   ============================================================ */
+
+.audit-filter-console input[type="date"],
+.audit-filter-console input[type="text"],
+.audit-filter-console input[type="search"],
+.audit-filter-console select {
+    border: 1px solid rgba(197, 138, 174, .48) !important;
+    background-color: #1B2027;
+    color: #DDE3EA;
+    border-radius: 6px;
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+/* Focus highlight */
+.audit-filter-console input[type="date"]:focus,
+.audit-filter-console input[type="text"]:focus,
+.audit-filter-console input[type="search"]:focus,
+.audit-filter-console select:focus {
+    border-color: #D9A6C2 !important;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(197, 138, 174, .13);
+}
+
+/* Placeholder text */
+.audit-filter-console input::placeholder {
+    color: #8994A2;
+}
+
+
+
+/* EVENT LEDGER — MATCHING EVENTS BADGE */
+
+.audit-ledger-count {
+    background: rgba(41, 184, 200, .11) !important;
+    border: 1px solid rgba(41, 184, 200, .38) !important;
+    border-radius: 7px;
+    box-shadow: 0 3px 10px rgba(41, 184, 200, .06);
+}
+
+.audit-ledger-count strong {
+    color: #55C8D3 !important;
+}
+
+.audit-ledger-count span {
+    color: #B5DDE0 !important;
+}
+
+
+/* AUDIT LEDGER — IMPROVED ACTIVITY DESCRIPTION READABILITY */
+.audit-table tbody td:last-child {
+    font-size: 12px !important;
+    line-height: 1.6;
+    font-weight: 500;
+    color: #E0E5EC;
+}
+
+/* Slightly larger text on wider screens */
+@media (min-width: 768px) {
+    .audit-table tbody td:last-child {
+        font-size: 12.5px !important;
+    }
+}
+
+
+/* ============================================================
+   EVENT LEDGER — COLUMN WIDTH DISTRIBUTION
+   ============================================================ */
+
+.audit-ledger .audit-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Event ID */
+.audit-ledger .audit-table th:nth-child(1),
+.audit-ledger .audit-table td:nth-child(1) {
+    width: 8%;
+}
+
+/* Timestamp */
+.audit-ledger .audit-table th:nth-child(2),
+.audit-ledger .audit-table td:nth-child(2) {
+    width: 14%;
+}
+
+/* Actor */
+.audit-ledger .audit-table th:nth-child(3),
+.audit-ledger .audit-table td:nth-child(3) {
+    width: 13%;
+}
+
+/* Module */
+.audit-ledger .audit-table th:nth-child(4),
+.audit-ledger .audit-table td:nth-child(4) {
+    width: 12%;
+}
+
+/* Activity Details — remaining space */
+.audit-ledger .audit-table th:nth-child(5),
+.audit-ledger .audit-table td:nth-child(5) {
+    width: 53%;
+}
+
+/* FIX — REMOVE UNNECESSARY HORIZONTAL SCROLLBAR */
+.audit-ledger .audit-table-wrap {
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
+.audit-ledger .audit-table {
+    width: 100% !important;
+    max-width: 100%;
+    margin: 0 !important;
+    box-sizing: border-box;
+    table-layout: fixed;
+}
+
+
+
+
+/* USERNAME AUTOCOMPLETE */
+
+.audit-field-user {
+    position: relative;
+}
+
+.audit-user-suggestions {
+    position: absolute;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 190px;
+    overflow-y: auto;
+    padding: 5px;
+    background: #202630;
+    border: 1px solid rgba(197, 138, 174, .45);
+    border-radius: 8px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, .35);
+}
+
+.audit-user-suggestions[hidden],
+.audit-user-option[hidden] {
+    display: none !important;
+}
+
+.audit-user-option {
+    display: block;
+    width: 100%;
+    padding: 9px 11px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #E0E5EC;
+    text-align: left;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.audit-user-option:hover {
+    background: rgba(197, 138, 174, .16);
+    color: #E8BDD4;
+}
+
+
+
+
+/* ============================================================
+   CONTINUOUS GREEN BREATHING GLOW
+   ADMIN ACCESS + LIVE FILTER SUMMARY
+   ============================================================ */
+
+@keyframes auditGreenBreathing {
+
+    0%,
+    100% {
+        border-color: rgba(50, 184, 120, .45);
+        box-shadow:
+            0 0 5px rgba(50, 184, 120, .22),
+            0 0 12px rgba(50, 184, 120, .12);
+    }
+
+    50% {
+        border-color: rgba(69, 220, 145, .95);
+        box-shadow:
+            0 0 10px rgba(50, 184, 120, .55),
+            0 0 24px rgba(50, 184, 120, .38),
+            0 0 36px rgba(50, 184, 120, .16);
+    }
+}
+
+/* ADMIN ACCESS badge 
+.audit-filter-console .audit-secure-tag {
+    animation: auditGreenBreathing 3s ease-in-out infinite;
+}
+    */
+
+/* LIVE FILTER SUMMARY badge */
+.audit-modules .audit-section-note {
+    animation: auditGreenBreathing 3s ease-in-out infinite;
+}

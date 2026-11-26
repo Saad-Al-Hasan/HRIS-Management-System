@@ -2,6 +2,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class LeaveRequest extends Model
 {
@@ -47,7 +49,10 @@ class LeaveRequest extends Model
         string $endDate,
         ?string $reason
     ): bool {
-        $sql = "
+        try {
+            $this->db->beginTransaction();
+
+            $sql = "
             INSERT INTO leave_requests (
                 employee_id,
                 leave_type,
@@ -68,16 +73,63 @@ class LeaveRequest extends Model
             )
         ";
 
-        $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
-            ':employee_id' => $employeeId,
-            ':leave_type' => $leaveType,
-            ':half_day_period' => $halfDayPeriod,
-            ':start_date' => $startDate,
-            ':end_date' => $endDate,
-            ':reason' => $reason
-        ]);
+            $created = $stmt->execute([
+                ':employee_id' => $employeeId,
+                ':leave_type' => $leaveType,
+                ':half_day_period' => $halfDayPeriod,
+                ':start_date' => $startDate,
+                ':end_date' => $endDate,
+                ':reason' => $reason
+            ]);
+
+            if (!$created) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Retrieve employee details for the audit description.
+            $employeeStmt = $this->db->prepare("
+            SELECT employee_code
+            FROM employees
+            WHERE id = :employee_id
+            LIMIT 1
+        ");
+
+            $employeeStmt->execute([
+                ':employee_id' => $employeeId
+            ]);
+
+            $employeeCode = $employeeStmt->fetchColumn();
+
+            if (!$employeeCode) {
+                throw new RuntimeException(
+                    'Unable to identify employee for leave audit.'
+                );
+            }
+
+            // Record successful employee leave application.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Employee ' . $employeeCode
+                . ' submitted a ' . $leaveType
+                . ' leave application for ' . $startDate,
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
 
@@ -144,22 +196,85 @@ class LeaveRequest extends Model
         string $status,
         int $reviewedBy
     ): bool {
-        $sql = "
-        UPDATE leave_requests
-        SET
-            status = :status,
-            reviewed_by = :reviewed_by,
-            reviewed_at = NOW()
-        WHERE id = :id
-          AND status = 'pending'
-    ";
+        try {
+            $this->db->beginTransaction();
 
-        $stmt = $this->db->prepare($sql);
+            // Retrieve the pending leave request and employee details.
+            $stmt = $this->db->prepare("
+            SELECT
+                lr.employee_id,
+                lr.leave_type,
+                lr.start_date,
+                e.employee_code
+            FROM leave_requests lr
+            INNER JOIN employees e
+                ON e.id = lr.employee_id
+            WHERE lr.id = :id
+              AND lr.status = 'pending'
+            LIMIT 1
+        ");
 
-        return $stmt->execute([
-            ':status' => $status,
-            ':reviewed_by' => $reviewedBy,
-            ':id' => $requestId
-        ]);
+            $stmt->execute([
+                ':id' => $requestId
+            ]);
+
+            $leaveRequest = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$leaveRequest) {
+                $this->db->commit();
+                return false;
+            }
+
+            // Update the leave request status.
+            $sql = "
+            UPDATE leave_requests
+            SET
+                status = :status,
+                reviewed_by = :reviewed_by,
+                reviewed_at = NOW()
+            WHERE id = :id
+              AND status = 'pending'
+        ";
+
+            $stmt = $this->db->prepare($sql);
+
+            $updated = $stmt->execute([
+                ':status' => $status,
+                ':reviewed_by' => $reviewedBy,
+                ':id' => $requestId
+            ]);
+
+            if (!$updated || $stmt->rowCount() !== 1) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record successful administrator review.
+            $auditLog = new AuditLog($this->db);
+
+            $action = $status === 'approved'
+                ? 'approved'
+                : 'rejected';
+
+            $auditLog->create(
+                'Administrator ' . $action
+                . ' leave application for employee '
+                . $leaveRequest['employee_code']
+                . ' (' . $leaveRequest['leave_type']
+                . ', ' . $leaveRequest['start_date'] . ')',
+                $reviewedBy
+            );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 }

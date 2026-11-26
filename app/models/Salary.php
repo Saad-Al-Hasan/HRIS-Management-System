@@ -2,6 +2,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class Salary extends Model
 {
@@ -647,8 +648,10 @@ COALESCE(A_E_exit_time, exit_time) AS exit_time,
      *
      * One salary record is maintained per employee per month.
      */
-    public function saveMonthlySalary(array $breakdown): bool
-    {
+    public function saveMonthlySalary(
+        array $breakdown,
+        ?int $auditActorId = null
+    ): bool {
         $requiredKeys = [
             'employee',
             'salary_month',
@@ -742,14 +745,84 @@ COALESCE(A_E_exit_time, exit_time) AS exit_time,
 
         $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
+        $params = [
             ':employee_id' => $employeeId,
             ':basic_salary' => round($basicSalary, 2),
             ':deductions' => round($deductions, 2),
             ':final_salary' => round($finalSalary, 2),
             ':calculation_details' => $calculationDetails,
             ':salary_month' => $monthDate->format('Y-m-d')
-        ]);
+        ];
+
+        // Automatic calculations do not generate audit records.
+        if ($auditActorId === null) {
+            return $stmt->execute($params);
+        }
+
+        // Manual administrator calculations are audited transactionally.
+        $this->db->beginTransaction();
+
+        try {
+            // Check whether a salary record already exists for this employee/month.
+            $existingStmt = $this->db->prepare("
+        SELECT id
+        FROM salary
+        WHERE employee_id = :employee_id
+          AND salary_month = :salary_month
+        LIMIT 1
+    ");
+
+            $existingStmt->execute([
+                ':employee_id' => $employeeId,
+                ':salary_month' => $monthDate->format('Y-m-d')
+            ]);
+
+            $isRecalculation = (bool) $existingStmt->fetchColumn();
+
+            $saved = $stmt->execute($params);
+
+            if (!$saved) {
+                throw new RuntimeException(
+                    'Unable to save the monthly salary record.'
+                );
+            }
+
+            $employeeCode = (string) (
+                $breakdown['employee']['employee_code'] ?? 'Unknown'
+            );
+
+            $action = $isRecalculation
+                ? 'Monthly salary recalculated for employee '
+                : 'Monthly salary processed for employee ';
+
+            $auditLog = new AuditLog($this->db);
+
+            $logged = $auditLog->create(
+                $action
+                . $employeeCode
+                . ' ('
+                . $month
+                . ')',
+                $auditActorId
+            );
+
+            if (!$logged) {
+                throw new RuntimeException(
+                    'Unable to create the salary audit record.'
+                );
+            }
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
 

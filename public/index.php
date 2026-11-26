@@ -10,11 +10,27 @@ require_once __DIR__ . '/../app/core/Middleware.php';
 
 require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/AdminController.php';
+require_once __DIR__ . '/../app/controllers/AdminEmployeeController.php';
+require_once __DIR__ . '/../app/controllers/EmployeeController.php';
+require_once __DIR__ . '/../app/controllers/RfidController.php';
+require_once __DIR__ . '/../app/controllers/AttendanceController.php';
+require_once __DIR__ . '/../app/controllers/WorkScheduleController.php';
+require_once __DIR__ . '/../app/controllers/HolidayController.php';
+require_once __DIR__ . '/../app/controllers/ReportsController.php';
 
 
 $action = $_GET['action'] ?? 'login';
 
 $authController = new AuthController();
+$adminController = new AdminController();
+$adminEmployeeController = new AdminEmployeeController();
+$employeeController = new EmployeeController();
+$rfidController = new RfidController();
+$attendanceController = new AttendanceController();
+$workScheduleController = new WorkScheduleController();
+$holidayController = new HolidayController();
+$reportsController = new ReportsController();
 
 
 switch ($action) {
@@ -54,6 +70,368 @@ switch ($action) {
 
         break;
 
+
+
+    /*
+|--------------------------------------------------------------------------
+| Administrator Account & Profile
+|--------------------------------------------------------------------------
+*/
+
+    case 'administrators':
+
+        $adminController->index();
+
+        break;
+
+
+    case 'administrator-create':
+
+        $adminController->create();
+
+        break;
+
+
+    case 'administrator-store':
+
+        $adminController->store();
+
+        break;
+
+
+    case 'administrator-edit':
+
+        $adminController->edit();
+
+        break;
+
+
+    case 'administrator-update':
+
+        $adminController->update();
+
+        break;
+
+
+    case 'profile':
+
+        $adminController->profile();
+
+        break;
+
+
+    case 'profile-update':
+
+        $adminController->updateProfile();
+
+        break;
+
+
+    /*
+|--------------------------------------------------------------------------
+| Salary Management (US-09)
+|--------------------------------------------------------------------------
+*/
+
+    case 'salary-management':
+        $adminController->salaryManagement();
+        break;
+
+    case 'salary-calculate':
+        $adminController->calculateSalary();
+        break;
+
+    case 'salary-details':
+        $adminController->salaryDetails();
+        break;
+
+
+    /*
+|--------------------------------------------------------------------------
+| Leave Management (US-10)
+|--------------------------------------------------------------------------
+*/
+
+    case 'leave-management':
+        $adminController->leaveManagement();
+        break;
+
+    case 'leave-review':
+        $adminController->reviewLeaveRequest();
+        break;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Audit Logs (US-12)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'audit-logs':
+        $adminController->auditLogs();
+        break;
+
+
+    /*
+|--------------------------------------------------------------------------
+| Employee Management (Administrator)
+|--------------------------------------------------------------------------
+*/
+
+    case 'employees':
+
+        $adminEmployeeController->index();
+
+        break;
+
+    case 'employee-view':
+
+        $adminEmployeeController->viewDetails();
+
+        break;
+
+
+    case 'employee-edit':
+
+        $adminEmployeeController->edit();
+
+        break;
+
+
+    case 'employee-update':
+
+        $adminEmployeeController->update();
+
+        break;
+
+
+    case 'employee-create':
+
+        $adminEmployeeController->create();
+
+        break;
+
+
+    case 'employee-store':
+
+        $adminEmployeeController->store();
+
+        break;
+
+    /*
+    |--------------------------------------------------------------------------
+    | RFID Employee Identification (US-03)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'rfid':
+        $rfidController->index();
+        break;
+
+    case 'rfid-assign':
+        $rfidController->assignPage();
+        break;
+
+    case 'rfid-store':
+        $rfidController->store();
+        break;
+
+    case 'rfid-unassign':
+        $rfidController->unassign();
+        break;
+
+    /*
+|--------------------------------------------------------------------------
+| RFID Attendance Station (US-04, US-05)
+|--------------------------------------------------------------------------
+*/
+    case 'attendance-station':
+        $attendanceController->station();
+        break;
+
+    case 'attendance-management':
+        $attendanceController->management();
+        break;
+
+    case 'modify-attendance':
+        $attendanceController->modify();
+        break;
+
+    case 'save-modified-attendance':
+        $attendanceController->saveModifiedAttendance();
+        break;
+
+    case 'attendance-scan':
+        $attendanceController->scan();
+        break;
+
+    case 'attendance-activity':
+        Middleware::requireLogin();
+
+        if (Auth::roleId() !== 1) {
+            http_response_code(403);
+            exit;
+        }
+
+        require_once __DIR__ . '/../app/models/Attendance.php';
+
+        header('Content-Type: application/json; charset=utf-8');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+
+        $attendanceModel = new Attendance();
+        $today = date('Y-m-d');
+
+        $activity = $attendanceModel->getTodayActivity($today, 500);
+
+        $uploadDirectory = __DIR__ . '/uploads/profile_pictures/';
+        $uploadUrl = '/HRIS-Management-System/public/uploads/profile_pictures/';
+
+        foreach ($activity as &$scan) {
+            $userId = (int) ($scan['user_id'] ?? 0);
+            $profilePicture = null;
+
+            foreach (['png', 'jpg', 'jpeg', 'webp'] as $extension) {
+                $filename = 'userid_' . $userId . '.' . $extension;
+
+                if (is_file($uploadDirectory . $filename)) {
+                    $profilePicture = $uploadUrl . $filename;
+                    break;
+                }
+            }
+
+            $scan['profile_picture'] = $profilePicture;
+        }
+        unset($scan);
+
+        echo json_encode(
+            $activity,
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+        );
+
+        exit;
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Work Schedule Management (US-08)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'work-schedules':
+        $workScheduleController->index();
+        break;
+
+    case 'work-schedules-create':
+        $workScheduleController->create();
+        break;
+
+    case 'work-schedules-store':
+        $workScheduleController->store();
+        break;
+
+    case 'work-schedules-edit':
+        $workScheduleController->edit();
+        break;
+
+    case 'work-schedules-update':
+        $workScheduleController->update();
+        break;
+
+    case 'work-schedule-assignments':
+        $workScheduleController->assignments();
+        break;
+
+    case 'work-schedule-assign':
+        $workScheduleController->assign();
+        break;
+
+    case 'work-schedules-delete':
+        $workScheduleController->delete();
+        break;
+
+    case 'work-schedules-assign-all':
+        $workScheduleController->assignAllEmployees();
+        break;
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Holiday Management (US-10)
+    |--------------------------------------------------------------------------
+    */
+
+    case 'holidays':
+        $holidayController->index();
+        break;
+
+    case 'holiday-store':
+        $holidayController->store();
+        break;
+
+    case 'holiday-delete':
+        $holidayController->delete();
+        break;
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Reports
+    |--------------------------------------------------------------------------
+    */
+
+    case 'reports':
+        $reportsController->index();
+        break;
+
+    case 'reports-export':
+        $reportsController->export();
+        break;
+
+
+    /*
+|--------------------------------------------------------------------------
+| Employee Account & Profile
+|--------------------------------------------------------------------------
+*/
+
+    case 'employee-dashboard':
+
+        $employeeController->dashboard();
+
+        break;
+
+
+    case 'employee-profile':
+
+        $employeeController->profile();
+
+        break;
+
+    case 'employee-profile-picture-update':
+
+        $employeeController->updateProfilePicture();
+
+        break;
+
+    case 'employee-toggle-status':
+
+        $adminEmployeeController->toggleStatus();
+
+        break;
+
+    case 'leave-application':
+        $employeeController->leaveApplication();
+        break;
+
+    case 'leave-application-store':
+        $employeeController->storeLeaveApplication();
+        break;
+
+    case 'employee-salary-details':
+        $employeeController->salaryDetails();
+        break;
 
     default:
 

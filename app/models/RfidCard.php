@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class RfidCard extends Model
 {
@@ -72,22 +74,62 @@ class RfidCard extends Model
     }
 
     /**
-     * Store an RFID card assignment.
+     * Store an RFID card assignment and record the activity.
      */
     public function create(int $employeeId, string $identifier): int
     {
-        $sql = '
+        $this->db->beginTransaction();
+
+        try {
+            // Get the employee code for the audit record.
+            $employeeStmt = $this->db->prepare(
+                'SELECT employee_code FROM employees WHERE id = :employee_id'
+            );
+
+            $employeeStmt->execute([
+                ':employee_id' => $employeeId
+            ]);
+
+            $employee = $employeeStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$employee) {
+                throw new RuntimeException('Employee not found.');
+            }
+
+            // Register the RFID card.
+            $sql = '
             INSERT INTO rfid_cards (employee_id, rfid_identifier)
             VALUES (:employee_id, :identifier)
         ';
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([
-            ':employee_id' => $employeeId,
-            ':identifier' => $identifier,
-        ]);
+            $stmt = $this->db->prepare($sql);
 
-        return (int) $this->db->lastInsertId();
+            $stmt->execute([
+                ':employee_id' => $employeeId,
+                ':identifier' => $identifier,
+            ]);
+
+            $cardId = (int) $this->db->lastInsertId();
+
+            // Record the successful registration.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'RFID card assigned to employee ' . $employee['employee_code'],
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return $cardId;
+
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
 
@@ -140,16 +182,67 @@ class RfidCard extends Model
     }
 
     /**
-     * Remove an RFID assignment.
+     * Remove an RFID assignment and record the activity.
      */
     public function delete(int $id): bool
     {
-        $sql = 'DELETE FROM rfid_cards WHERE id = :id';
+        $this->db->beginTransaction();
 
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([':id' => $id]);
+        try {
+            // Retrieve the employee associated with this card.
+            $sql = '
+            SELECT
+                rc.id,
+                e.employee_code
+            FROM rfid_cards rc
+            LEFT JOIN employees e ON e.id = rc.employee_id
+            WHERE rc.id = :id
+            FOR UPDATE
+        ';
 
-        return $stmt->rowCount() > 0;
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':id' => $id]);
+
+            $card = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$card) {
+                $this->db->commit();
+                return false;
+            }
+
+            // Remove the RFID assignment.
+            $deleteStmt = $this->db->prepare(
+                'DELETE FROM rfid_cards WHERE id = :id'
+            );
+
+            $deleteStmt->execute([':id' => $id]);
+
+            if ($deleteStmt->rowCount() !== 1) {
+                $this->db->commit();
+                return false;
+            }
+
+            // Record the successful unassignment.
+            $employeeCode = $card['employee_code'] ?? 'Unknown Employee';
+
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'RFID card unassigned from employee ' . $employeeCode,
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $exception) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $exception;
+        }
     }
 
 
