@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class Holiday extends Model
 {
@@ -69,7 +71,10 @@ class Holiday extends Model
         string $holidayType,
         ?string $description = null
     ): bool {
-        $sql = "
+        try {
+            $this->db->beginTransaction();
+
+            $sql = "
             INSERT INTO holidays (
                 holiday_name,
                 holiday_date,
@@ -84,14 +89,40 @@ class Holiday extends Model
             )
         ";
 
-        $stmt = $this->db->prepare($sql);
+            $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
-            ':holiday_name' => $holidayName,
-            ':holiday_date' => $holidayDate,
-            ':holiday_type' => $holidayType,
-            ':description' => $description
-        ]);
+            $created = $stmt->execute([
+                ':holiday_name' => $holidayName,
+                ':holiday_date' => $holidayDate,
+                ':holiday_type' => $holidayType,
+                ':description' => $description
+            ]);
+
+            if (!$created) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record successful holiday creation.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Holiday ' . $holidayName
+                . ' (' . $holidayDate . ', ' . $holidayType . ') created',
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     /**
@@ -99,15 +130,63 @@ class Holiday extends Model
      */
     public function delete(int $id): bool
     {
-        $sql = "
+        try {
+            $this->db->beginTransaction();
+
+            // Retrieve holiday details before deletion.
+            $stmt = $this->db->prepare("
+            SELECT holiday_name, holiday_date, holiday_type
+            FROM holidays
+            WHERE id = :id
+            LIMIT 1
+        ");
+
+            $stmt->execute([
+                ':id' => $id
+            ]);
+
+            $holiday = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$holiday) {
+                $this->db->commit();
+                return false;
+            }
+
+            // Delete the selected holiday.
+            $stmt = $this->db->prepare("
             DELETE FROM holidays
             WHERE id = :id
-        ";
+        ");
 
-        $stmt = $this->db->prepare($sql);
+            $stmt->execute([
+                ':id' => $id
+            ]);
 
-        return $stmt->execute([
-            ':id' => $id
-        ]);
+            if ($stmt->rowCount() !== 1) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record successful holiday deletion.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Holiday ' . $holiday['holiday_name']
+                . ' (' . $holiday['holiday_date']
+                . ', ' . $holiday['holiday_type'] . ') deleted',
+                Auth::userId()
+            );
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 }

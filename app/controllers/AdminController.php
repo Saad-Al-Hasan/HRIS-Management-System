@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/Admin.php';
 require_once __DIR__ . '/../models/LeaveRequest.php';
 require_once __DIR__ . '/../models/Employee.php';
 require_once __DIR__ . '/../models/Salary.php';
+require_once __DIR__ . '/../models/AuditLog.php';
 
 class AdminController extends Controller
 {
@@ -14,6 +15,7 @@ class AdminController extends Controller
     private LeaveRequest $leaveRequestModel;
     private Employee $employeeModel;
     private Salary $salaryModel;
+    private AuditLog $auditLogModel;
 
     public function __construct()
     {
@@ -21,6 +23,7 @@ class AdminController extends Controller
         $this->leaveRequestModel = new LeaveRequest();
         $this->employeeModel = new Employee();
         $this->salaryModel = new Salary();
+        $this->auditLogModel = new AuditLog();
     }
 
 
@@ -1022,7 +1025,10 @@ class AdminController extends Controller
                 $month
             );
 
-            $saved = $this->salaryModel->saveMonthlySalary($breakdown);
+            $saved = $this->salaryModel->saveMonthlySalary(
+                $breakdown,
+                Auth::userId()
+            );
 
             if ($saved) {
                 $_SESSION['success_message'] =
@@ -1195,4 +1201,165 @@ class AdminController extends Controller
             '/HRIS-Management-System/public/index.php?action=leave-management'
         );
     }
+
+
+
+    /**
+     * Display audit logs with filtering and pagination.
+     */
+    public function auditLogs(): void
+    {
+        Middleware::requireAdmin();
+
+        // Collect filter values.
+        $fromDate = trim((string) ($_GET['from_date'] ?? ''));
+        $toDate = trim((string) ($_GET['to_date'] ?? ''));
+        $userId = trim((string) ($_GET['user_id'] ?? ''));
+        $module = trim((string) ($_GET['module'] ?? ''));
+
+        $error = null;
+
+        // Validate selected audit module.
+        $allowedModules = [
+            'authentication',
+            'employee_management',
+            'rfid_management',
+            'attendance_management',
+            'work_schedules',
+            'salary_management',
+            'leave_management',
+            'holiday_management'
+        ];
+
+        if ($module !== '' && !in_array($module, $allowedModules, true)) {
+            $error = 'Invalid module selection.';
+            $module = '';
+        }
+
+        // Validate date format.
+        foreach ([
+            'From Date' => $fromDate,
+            'To Date' => $toDate
+        ] as $label => $date) {
+
+            if ($date !== '') {
+                $parsedDate = DateTime::createFromFormat('!Y-m-d', $date);
+
+                if (
+                    !$parsedDate ||
+                    $parsedDate->format('Y-m-d') !== $date
+                ) {
+                    $error = $label . ' is invalid.';
+                    break;
+                }
+            }
+        }
+
+        // Ensure the date range is logical.
+        if (
+            $error === null &&
+            $fromDate !== '' &&
+            $toDate !== '' &&
+            $fromDate > $toDate
+        ) {
+            $error = 'From Date cannot be later than To Date.';
+        }
+
+        // Validate user ID.
+        if ($userId !== '') {
+            $validatedUserId = filter_var(
+                $userId,
+                FILTER_VALIDATE_INT
+            );
+
+            if ($validatedUserId === false || $validatedUserId <= 0) {
+                $error = 'Invalid user selection.';
+            } else {
+                $userId = (string) $validatedUserId;
+            }
+        }
+
+
+        // Build filters.
+        $filters = [
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+            'user_id' => $userId,
+            'module' => $module
+        ];
+
+        // Pagination settings.
+        $limit = 20;
+
+        $page = filter_var(
+            $_GET['page'] ?? 1,
+            FILTER_VALIDATE_INT
+        );
+
+        $page = ($page !== false && $page > 0)
+            ? $page
+            : 1;
+
+        $totalRecords = 0;
+        $totalPages = 1;
+        $auditLogs = [];
+        $categorySummary = [];
+
+        try {
+
+            if ($error === null) {
+
+                $totalRecords = $this->auditLogModel->countFiltered(
+                    $filters
+                );
+
+                $categorySummary = $this->auditLogModel->getCategorySummary(
+                    $filters
+                );
+
+                $totalPages = max(
+                    1,
+                    (int) ceil($totalRecords / $limit)
+                );
+
+                $page = min($page, $totalPages);
+
+                $offset = ($page - 1) * $limit;
+
+                $auditLogs = $this->auditLogModel->getFiltered(
+                    $filters,
+                    $limit,
+                    $offset
+                );
+            }
+
+            $users = $this->auditLogModel->getUsersForFilter();
+
+        } catch (Throwable $e) {
+
+            error_log('Audit logs loading error: ' . $e->getMessage());
+
+            $error = 'Unable to load audit logs. Please try again.';
+
+            $users = [];
+            $auditLogs = [];
+            $totalRecords = 0;
+            $totalPages = 1;
+            $page = 1;
+            $categorySummary = [];
+        }
+
+        $this->view('admin/audit-logs/index', [
+            'pageTitle' => 'Audit Logs',
+            'auditLogs' => $auditLogs,
+            'users' => $users,
+            'filters' => $filters,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalRecords' => $totalRecords,
+            'categorySummary' => $categorySummary,
+            'error' => $error
+        ]);
+    }
+
 }

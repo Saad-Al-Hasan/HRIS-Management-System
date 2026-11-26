@@ -1,6 +1,8 @@
 <?php
 
 require_once __DIR__ . '/../core/Model.php';
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/AuditLog.php';
 
 class Employee extends Model
 {
@@ -131,6 +133,24 @@ monthly_salary
                 ':schedule_id' => (int) $defaultScheduleId,
             ]);
 
+            // Record employee creation in the audit log.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Employee ' . $employeeData['employee_code'] . ' created',
+                Auth::userId()
+            );
+
+            // Record initial salary configuration.
+            $auditLog->create(
+                'Salary information configured for employee '
+                . $employeeData['employee_code']
+                . ' (Monthly Salary: BDT '
+                . number_format((float) $employeeData['monthly_salary'], 2, '.', '')
+                . ')',
+                Auth::userId()
+            );
+
             $this->db->commit();
 
             return true;
@@ -203,6 +223,26 @@ monthly_salary
         try {
             $this->db->beginTransaction();
 
+            // Retrieve the employee's existing salary before updating.
+            $previousSalaryStmt = $this->db->prepare("
+    SELECT employee_code, monthly_salary
+    FROM employees
+    WHERE user_id = :user_id
+    LIMIT 1
+");
+
+            $previousSalaryStmt->execute([
+                ':user_id' => $userId
+            ]);
+
+            $previousSalaryInfo = $previousSalaryStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$previousSalaryInfo) {
+                throw new RuntimeException('Employee record not found.');
+            }
+
+            $previousSalary = (float) $previousSalaryInfo['monthly_salary'];
+
             $sql = "
             UPDATE users
             SET
@@ -264,6 +304,30 @@ monthly_salary = :monthly_salary
                 ]);
             }
 
+            // Record employee profile update in the audit log.
+            $auditLog = new AuditLog($this->db);
+
+            $auditLog->create(
+                'Employee ' . $employeeData['employee_code'] . ' profile updated',
+                Auth::userId()
+            );
+
+            // Record salary changes only when the monthly salary has changed.
+            $newSalary = (float) $employeeData['monthly_salary'];
+
+            if (round($previousSalary, 2) !== round($newSalary, 2)) {
+                $auditLog->create(
+                    'Salary information updated for employee '
+                    . $employeeData['employee_code']
+                    . ' (Previous: BDT '
+                    . number_format($previousSalary, 2, '.', '')
+                    . ', New: BDT '
+                    . number_format($newSalary, 2, '.', '')
+                    . ')',
+                    Auth::userId()
+                );
+            }
+
             $this->db->commit();
 
             return true;
@@ -282,23 +346,72 @@ monthly_salary = :monthly_salary
             return false;
         }
 
-        $sql = "
-        UPDATE users
-        SET status = :status
-        WHERE id = (
-            SELECT user_id
+        try {
+            $this->db->beginTransaction();
+
+            // Retrieve employee code for the audit description.
+            $employeeStmt = $this->db->prepare("
+            SELECT employee_code
             FROM employees
             WHERE id = :employee_id
-        )
-        AND role_id = 2
-    ";
+            LIMIT 1
+        ");
 
-        $stmt = $this->db->prepare($sql);
+            $employeeStmt->execute([
+                ':employee_id' => $employeeId
+            ]);
 
-        return $stmt->execute([
-            ':status' => $status,
-            ':employee_id' => $employeeId,
-        ]);
+            $employeeCode = $employeeStmt->fetchColumn();
+
+            if ($employeeCode === false) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Update employee status.
+            $sql = "
+            UPDATE users
+            SET status = :status
+            WHERE id = (
+                SELECT user_id
+                FROM employees
+                WHERE id = :employee_id
+            )
+            AND role_id = 2
+        ";
+
+            $stmt = $this->db->prepare($sql);
+
+            $success = $stmt->execute([
+                ':status' => $status,
+                ':employee_id' => $employeeId,
+            ]);
+
+            if (!$success || $stmt->rowCount() !== 1) {
+                $this->db->rollBack();
+                return false;
+            }
+
+            // Record employee activation/deactivation.
+            $auditLog = new AuditLog($this->db);
+
+            $activity = $status === 'active'
+                ? 'Employee ' . $employeeCode . ' activated'
+                : 'Employee ' . $employeeCode . ' deactivated';
+
+            $auditLog->create($activity, Auth::userId());
+
+            $this->db->commit();
+
+            return true;
+
+        } catch (Throwable $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+
+            throw $e;
+        }
     }
 
     public function getNextEmployeeCode(): string

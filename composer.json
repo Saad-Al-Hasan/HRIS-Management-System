@@ -2,6 +2,9 @@
     "name": "myol/hris-management-system",
     "type": "project",
     "require-dev": {
-        "phpunit/phpunit": "10.5"
+        "phpunit/phpunit": "10.5.62"
+    },
+    "require": {
+        "phpoffice/phpspreadsheet": "^5.11"
     }
 }

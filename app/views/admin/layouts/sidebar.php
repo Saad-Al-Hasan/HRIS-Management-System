@@ -185,7 +185,6 @@
 
 
 
-
             <!-- Salary Processing -->
 
             <a href="/HRIS-Management-System/public/index.php?action=salary-management" class="sidebar-link <?= in_array($_GET['action'] ?? '', [
@@ -211,7 +210,7 @@
 
         </div>
 
-        
+
         <!-- =================================================
              MANAGEMENT
              ================================================= -->
@@ -270,28 +269,7 @@
             </a>
 
 
-            <!-- Reports -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
-
-                <span class="sidebar-link-icon">
-
-                    <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M4 19V5" />
-                        <path d="M4 19h17" />
-                        <path d="M7 16v-5" />
-                        <path d="M11 16V8" />
-                        <path d="M15 16v-3" />
-                        <path d="M19 16V6" />
-                    </svg>
-
-                </span>
-
-                <span class="sidebar-link-text">
-                    Reports
-                </span>
-
-            </a>
 
         </div>
 
@@ -331,9 +309,36 @@
             </a>
 
 
+            <!-- Reports -->
+
+            <a href="/HRIS-Management-System/public/index.php?action=reports"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'reports' ? 'active' : '' ?>" title="Reports">
+
+                <span class="sidebar-link-icon">
+
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M4 19V5" />
+                        <path d="M4 19h17" />
+                        <path d="M7 16v-5" />
+                        <path d="M11 16V8" />
+                        <path d="M15 16v-3" />
+                        <path d="M19 16V6" />
+                    </svg>
+
+                </span>
+
+                <span class="sidebar-link-text">
+                    Reports & Excel Export
+                </span>
+
+            </a>
+
+
+
             <!-- Audit Logs -->
 
-            <a href="#" class="sidebar-link disabled" title="Coming Soon">
+            <a href="/HRIS-Management-System/public/index.php?action=audit-logs"
+                class="sidebar-link <?= ($_GET['action'] ?? '') === 'audit-logs' ? 'active' : '' ?>" title="Audit Logs">
 
                 <span class="sidebar-link-icon">
 
@@ -351,6 +356,20 @@
                 </span>
 
             </a>
+
+
+        </div>
+
+
+        <!-- =================================================
+             ACCOUNT
+             ================================================= -->
+
+        <div class="sidebar-section">
+
+            <div class="sidebar-section-title">
+                ACCOUNT
+            </div>
 
 
             <!-- My Profile -->
@@ -371,19 +390,6 @@
                 </span>
 
             </a>
-
-        </div>
-
-
-        <!-- =================================================
-             ACCOUNT
-             ================================================= -->
-
-        <div class="sidebar-section">
-
-            <div class="sidebar-section-title">
-                ACCOUNT
-            </div>
 
 
             <a href="/HRIS-Management-System/public/index.php?action=logout" class="sidebar-link">
